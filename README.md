@@ -1,6 +1,8 @@
-# 京东夺宝搜索增强
+# JD Auction Search Enhancement
 
-> 为京东夺宝页面 (`1paipai.jd.com/auction-list/`) 增加商品关键词搜索和分类过滤功能的浏览器插件。
+> Browser extension for JD Paipai page (`1paipai.jd.com/auction-list/`) adding product keyword search and category filtering.
+
+[**中文文档**](README_CN.md)
 
 ## 功能特性
 

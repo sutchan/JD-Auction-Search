@@ -1,8 +1,43 @@
-// JD-Auction-Search/src/content.js v1.1.0
+// src/content.js v1.1.1
 // 内容脚本：拦截API、渲染搜索UI、过滤商品
 
 (function() {
   'use strict';
+
+  const translations = {
+    'zh-CN': {
+      logo: '夺宝搜索',
+      placeholder: '输入商品关键词搜索...',
+      tabAll: '全部',
+      tabOngoing: '正在夺宝',
+      tabUpcoming: '即将开始',
+      resultCount: '共 {count} 件商品',
+      enabled: '已启用',
+      disabled: '已禁用',
+      loading: '加载中',
+      enabledLocal: '已启用(本地)',
+      apiError: 'API异常',
+      apiFailed: 'API加载失败，将依赖页面内容',
+      emptyTitle: '未找到匹配商品',
+      emptyDesc: '试试其他关键词，或清除筛选条件',
+    },
+    'en': {
+      logo: 'Auction Search',
+      placeholder: 'Search products...',
+      tabAll: 'All',
+      tabOngoing: 'Ongoing',
+      tabUpcoming: 'Upcoming',
+      resultCount: '{count} products found',
+      enabled: 'Enabled',
+      disabled: 'Disabled',
+      loading: 'Loading',
+      enabledLocal: 'Enabled (Local)',
+      apiError: 'API Error',
+      apiFailed: 'API failed, using page content',
+      emptyTitle: 'No matching products',
+      emptyDesc: 'Try different keywords or clear filters',
+    }
+  };
 
   const AuctionSearchEnhancer = {
     state: {
@@ -17,6 +52,15 @@
 
     apiBaseUrl: 'https://1paipai.jd.com',
 
+    t(key, params = {}) {
+      const lang = translations[navigator.language] || translations['en'];
+      let text = lang[key] || translations['en'][key] || key;
+      Object.keys(params).forEach(k => {
+        text = text.replace(`{${k}}`, params[k]);
+      });
+      return text;
+    },
+
     init() {
       this.injectStyles();
       this.interceptApi();
@@ -29,7 +73,7 @@
     injectStyles() {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = chrome.runtime.getURL('styles.css');
+      link.href = chrome.runtime.getURL('src/styles.css');
       (document.head || document.documentElement).appendChild(link);
     },
 
@@ -150,11 +194,11 @@
           case 'TOGGLE_ENABLED':
             this.state.isEnabled = request.enabled;
             if (!this.state.isEnabled) {
-              this.shadowRoot.querySelector('.jds-toggle-btn')?.classList.add('disabled');
-              this.showToast(request.enabled ? '插件已启用' : '插件已禁用');
+              this.shadowRoot?.querySelector('.jds-toggle-btn')?.classList.add('disabled');
+              this.showToast(request.enabled ? this.t('enabled') : this.t('disabled'));
             } else {
-              this.shadowRoot.querySelector('.jds-toggle-btn')?.classList.remove('disabled');
-              this.showToast(request.enabled ? '插件已启用' : '插件已禁用');
+              this.shadowRoot?.querySelector('.jds-toggle-btn')?.classList.remove('disabled');
+              this.showToast(request.enabled ? this.t('enabled') : this.t('disabled'));
             }
             break;
           case 'PRODUCTS_UPDATE':
@@ -181,22 +225,22 @@
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
-          <span>夺宝搜索</span>
+          <span>${this.t('logo')}</span>
         </div>
         <div class="jds-search-box">
-          <input type="text" class="jds-search-input" placeholder="输入商品关键词搜索..." />
+          <input type="text" class="jds-search-input" placeholder="${this.t('placeholder')}" />
           <button class="jds-clear-btn">×</button>
-          <button class="jds-search-btn">搜索</button>
+          <button class="jds-search-btn">${this.t('tabAll')}</button>
         </div>
         <div class="jds-tabs">
-          <button class="jds-tab active" data-tab="all">全部</button>
-          <button class="jds-tab" data-tab="ongoing">正在夺宝</button>
-          <button class="jds-tab" data-tab="upcoming">即将开始</button>
+          <button class="jds-tab active" data-tab="all">${this.t('tabAll')}</button>
+          <button class="jds-tab" data-tab="ongoing">${this.t('tabOngoing')}</button>
+          <button class="jds-tab" data-tab="upcoming">${this.t('tabUpcoming')}</button>
         </div>
         <div class="jds-result-count">
-          共 <strong class="jds-count">0</strong> 件商品
+          ${this.t('resultCount', { count: '<strong class="jds-count">0</strong>' })}
         </div>
-        <button class="jds-toggle-btn disabled">加载中</button>
+        <button class="jds-toggle-btn disabled">${this.t('loading')}</button>
       `;
 
       const style = document.createElement('style');
@@ -264,9 +308,9 @@
 
       toggleBtn.addEventListener('click', () => {
         this.state.isEnabled = !this.state.isEnabled;
-        toggleBtn.textContent = this.state.isEnabled ? '已启用' : '已禁用';
+        toggleBtn.textContent = this.state.isEnabled ? this.t('enabled') : this.t('disabled');
         toggleBtn.classList.toggle('disabled', !this.state.isEnabled);
-        this.showToast(this.state.isEnabled ? '插件已启用' : '插件已禁用');
+        this.showToast(this.state.isEnabled ? this.t('enabled') : this.t('disabled'));
       });
     },
 
@@ -296,9 +340,9 @@
     },
 
     updateResultCount() {
-      const countEl = this.shadowRoot?.querySelector('.jds-count');
-      if (countEl) {
-        countEl.textContent = this.state.filteredProducts.length;
+      const container = this.shadowRoot?.querySelector('.jds-result-count');
+      if (container) {
+        container.innerHTML = this.t('resultCount', { count: `<strong class="jds-count">${this.state.filteredProducts.length}</strong>` });
       }
     },
 
@@ -337,32 +381,22 @@
       if (!empty) {
         empty = document.createElement('div');
         empty.className = 'jds-empty-overlay';
-        empty.style.cssText = `
-          position: fixed;
-          top: 70px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #fff;
-          border: 1px solid #e8e8e8;
-          border-radius: 12px;
-          padding: 60px 80px;
-          text-align: center;
-          z-index: 999998;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        `;
         empty.innerHTML = `
-          <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-          <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">未找到匹配商品</div>
-          <div style="font-size: 14px; color: #999;">试试其他关键词，或清除筛选条件</div>
+          <div class="jds-empty-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+          </div>
+          <div class="jds-empty-title">${this.t('emptyTitle')}</div>
+          <div class="jds-empty-desc">${this.t('emptyDesc')}</div>
         `;
-        document.body.appendChild(empty);
+        this.shadowRoot?.appendChild(empty);
       }
       empty.style.display = '';
     },
 
     hideEmptyState() {
       this.shadowRoot?.querySelector('.jds-empty-overlay')?.style.setProperty('display', 'none');
-      document.querySelector('.jds-empty-overlay')?.style.setProperty('display', 'none');
     },
 
     async autoLoadProducts() {
@@ -381,16 +415,16 @@
         if (resp.ok) {
           const data = await resp.json();
           this.handleApiResponse(data, 'auto-load');
-          toggleBtn.textContent = '已启用';
+          toggleBtn.textContent = this.t('enabled');
           toggleBtn.classList.remove('disabled');
           this.state.isEnabled = true;
         } else {
-          toggleBtn.textContent = 'API异常';
+          toggleBtn.textContent = this.t('apiError');
           this.state.isEnabled = false;
         }
       } catch (e) {
         console.warn('[JD-Auction-Search] API加载失败，将依赖页面内容', e);
-        toggleBtn.textContent = '已启用(本地)';
+        toggleBtn.textContent = this.t('enabledLocal');
         toggleBtn.classList.remove('disabled');
         this.extractProductsFromDOM();
       }
@@ -427,7 +461,7 @@
       if (!toast) {
         toast = document.createElement('div');
         toast.className = 'jds-toast';
-        document.body.appendChild(toast);
+        this.shadowRoot?.appendChild(toast);
       }
       toast.textContent = message;
       toast.classList.add('show');
@@ -437,7 +471,6 @@
     destroy() {
       this.state.observer?.disconnect();
       document.getElementById('jds-search-wrapper')?.remove();
-      document.querySelector('.jds-empty-overlay')?.remove();
     }
   };
 

@@ -2,6 +2,8 @@
 
 > 为京东夺宝页面 (`1paipai.jd.com/auction-list/`) 增加商品关键词搜索和分类过滤功能的浏览器插件。
 
+[**English Documentation**](README.md)
+
 ## 功能特性
 
 | 功能 | 说明 |
