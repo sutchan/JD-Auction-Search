@@ -5,7 +5,15 @@ const state = {
   isEnabled: true,
   cache: new Map(),
   lastUpdate: null,
+  MAX_CACHE_SIZE: 1000,
 };
+
+function pruneCache() {
+  if (state.cache.size > state.MAX_CACHE_SIZE) {
+    const entries = [...state.cache.entries()];
+    state.cache = new Map(entries.slice(-Math.floor(state.MAX_CACHE_SIZE * 0.7)));
+  }
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.type) {
@@ -15,6 +23,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'UPDATE_CACHE':
       state.cache.set(request.key, request.data);
       state.lastUpdate = Date.now();
+      pruneCache();
       sendResponse({ success: true });
       break;
     case 'GET_CACHE':
