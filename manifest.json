@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "京东夺宝搜索增强",
+  "version": "1.0.0",
+  "description": "为京东夺宝页面增加商品关键词搜索和过滤功能",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://1paipai.jd.com/*",
+    "*://*.jd.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://1paipai.jd.com/*"],
+      "js": ["src/content.js"],
+      "css": [],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/styles.css"],
+      "matches": ["*://1paipai.jd.com/*"]
+    }
+  ]
+}
