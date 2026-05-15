@@ -29,10 +29,11 @@
 ## 文档检查
 
 - [x] README.md 内容完整
-- [x] README_CN.md 内容完整
+- [x] README_EN.md 内容完整
 - [x] CHANGELOG.md 存在且最新
 - [x] metadata.json 存在且版本正确
 - [x] 规范文档完整
+- [x] 构建脚本可用
 
 ## 国际化检查
 
@@ -40,3 +41,10 @@
 - [x] 中文翻译完整
 - [x] 多语言切换正常
 - [x] 无硬编码文本
+
+## 构建和发布检查
+
+- [x] package.json 配置完整
+- [x] build.js 构建脚本可用
+- [x] 打包流程正常
+- [x] 发布包内容完整

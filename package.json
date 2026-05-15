@@ -1,0 +1,20 @@
+{
+  "name": "jd-auction-search",
+  "version": "1.2.1",
+  "description": "京东夺宝搜索增强插件 - 为京东夺宝页面增加商品关键词搜索和分类过滤功能",
+  "main": "background.js",
+  "scripts": {
+    "build": "node build.js",
+    "clean": "rm -f jd-auction-search-v*.zip"
+  },
+  "keywords": ["jd", "auction", "search", "extension", "browser"],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "archiver": "^6.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
