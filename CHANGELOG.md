@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.1
+
+### Improvements
+- 统一国际化支持：使用 chrome.i18n API 和 _locales 目录
+- 移除重复代码：getMessage 函数统一在 utils.js 中
+- 优化代码结构：消除硬编码字符串，使用翻译键
+- 修复 content.js 中重复的选择器定义
+- 更新 manifest.json 配置 default_locale
+- 重命名 locales 目录为 _locales（符合 Chrome 扩展标准）
+
 ## v1.2.0
 
 ### Features

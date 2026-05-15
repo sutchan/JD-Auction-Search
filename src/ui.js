@@ -1,60 +1,11 @@
-// JD-Auction-Search/src/ui.js v1.2.0
+// JD-Auction-Search/src/ui.js v1.2.1
 // UI渲染和事件绑定模块
 
 (function(global) {
   'use strict';
 
-  /**
-   * 获取翻译文本
-   * @param {string} key - 翻译键
-   * @param {Object} [placeholders] - 占位符
-   * @returns {string}
-   */
-  function getMessage(key, placeholders) {
-    const translations = {
-      'zh-CN': {
-        'logoText': '夺宝搜索',
-        'searchPlaceholder': '输入商品关键词搜索...',
-        'searchButton': '搜索',
-        'tabAll': '全部',
-        'tabOngoing': '正在夺宝',
-        'tabUpcoming': '即将开始',
-        'resultCount': '共 {count} 件商品',
-        'loading': '加载中',
-        'enabled': '已启用',
-        'disabled': '已禁用',
-        'enabledLocal': '已启用(本地)',
-        'emptyTitle': '未找到匹配商品',
-        'emptyDesc': '试试其他关键词，或清除筛选条件'
-      },
-      'en': {
-        'logoText': 'Auction Search',
-        'searchPlaceholder': 'Enter product keyword to search...',
-        'searchButton': 'Search',
-        'tabAll': 'All',
-        'tabOngoing': 'Ongoing',
-        'tabUpcoming': 'Upcoming',
-        'resultCount': '{count} items total',
-        'loading': 'Loading...',
-        'enabled': 'Enabled',
-        'disabled': 'Disabled',
-        'enabledLocal': 'Enabled (Local)',
-        'emptyTitle': 'No matching products found',
-        'emptyDesc': 'Try other keywords, or clear filters'
-      }
-    };
-
-    const lang = navigator.language || navigator.userLanguage || 'zh-CN';
-    const langKey = Object.keys(translations).find(k => lang.startsWith(k)) || 'zh-CN';
-    let text = translations[langKey][key] || translations['zh-CN'][key] || key;
-    
-    if (placeholders) {
-      Object.keys(placeholders).forEach(k => {
-        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), placeholders[k]);
-      });
-    }
-    return text;
-  }
+  // 使用 JDSUtils 中的 getMessage 函数
+  const getMessage = global.JDSUtils.getMessage;
 
   const JDSUI = {
     shadowRoot: null,
@@ -183,7 +134,7 @@
       // 切换插件启用状态
       toggleBtn.addEventListener('click', () => {
         state.isEnabled = !state.isEnabled;
-        toggleBtn.textContent = state.isEnabled ? '已启用' : '已禁用';
+        toggleBtn.textContent = getMessage(state.isEnabled ? 'enabled' : 'disabled');
         toggleBtn.classList.toggle('disabled', !state.isEnabled);
         handlers.onToggle(state.isEnabled);
       });
@@ -202,18 +153,16 @@
 
     /**
      * 更新Toggle按钮状态
-     * @param {string} text - 按钮文本
+     * @param {string} key - 翻译键或直接文本
      * @param {boolean} disabled - 是否禁用
      */
-    updateToggleBtn(text, disabled = false) {
+    updateToggleBtn(key, disabled = false) {
       const btn = this.shadowRoot && this.shadowRoot.querySelector('.jds-toggle-btn');
       if (btn) {
-        // 如果传入的是翻译键，先翻译
-        const translatedText = (text === '已启用' ? getMessage('enabled') : 
-                               text === '已启用(本地)' ? getMessage('enabledLocal') : 
-                               text === '已禁用' ? getMessage('disabled') : 
-                               text === '加载中' ? getMessage('loading') : text;
-        btn.textContent = translatedText;
+        // 检查是否是已知的翻译键
+        const translationKeys = ['enabled', 'enabledLocal', 'disabled', 'loading'];
+        const text = translationKeys.includes(key) ? getMessage(key) : key;
+        btn.textContent = text;
         if (disabled) {
           btn.classList.add('disabled');
         } else {

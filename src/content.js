@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.2.0
+// JD-Auction-Search/src/content.js v1.2.1
 // 主模块：整合所有功能
 
 (function() {
@@ -115,17 +115,14 @@
      * @private
      */
     _handleToggle(enabled) {
-      JDSUtils.showToast(enabled ? '插件已启用' : '插件已禁用');
+      JDSUtils.showToast(enabled ? 'toastEnabled' : 'toastDisabled');
 
       if (enabled) {
         this._applyFilterAndUpdate();
       } else {
         JDSUI.hideEmptyState();
         // 恢复所有商品显示
-        const productContainers = document.querySelectorAll(
-          '[class*="auction-item"], [class*="product-item"], [class*="goods-item"], [class*="item"]'
-        );
-        productContainers.forEach(el => el.style.display = '');
+        JDSDom.updateProductDisplay({...this.state, isEnabled: false});
       }
     },
 
@@ -137,14 +134,14 @@
       try {
         const data = await JDSApi.loadProductList();
         this._handleApiResponse(data, 'auto-load');
-        JDSUI.updateToggleBtn('已启用', false);
+        JDSUI.updateToggleBtn('enabled', false);
         this.state.isEnabled = true;
       } catch (e) {
-        var errMsg = (e && e.message) ? e.message : String(e);
-        JDSUtils.showToast('API加载失败，将依赖页面内容');
-        JDSUI.updateToggleBtn('已启用(本地)', false);
+        let errMsg = (e && e.message) ? e.message : String(e);
+        JDSUtils.showToast('toastApiFailed');
+        JDSUI.updateToggleBtn('enabledLocal', false);
 
-        var domProducts = JDSDom.extractProductsFromDOM();
+        let domProducts = JDSDom.extractProductsFromDOM();
         if (domProducts.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(domProducts);
           this._applyFilterAndUpdate();

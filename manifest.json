@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "京东夺宝搜索增强",
-  "version": "1.2.0",
-  "description": "为京东夺宝页面增加商品关键词搜索和分类过滤功能",
+  "name": "__MSG_extensionName__",
+  "version": "1.2.1",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "zh_CN",
   "permissions": [
     "storage",
     "activeTab"
