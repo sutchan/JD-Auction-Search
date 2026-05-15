@@ -4,6 +4,30 @@
 (function(global) {
   'use strict';
 
+  /**
+   * 获取翻译文本
+   * @param {string} key - 翻译键
+   * @returns {string}
+   */
+  function getMessage(key) {
+    const translations = {
+      'zh-CN': {
+        'toastEnabled': '插件已启用',
+        'toastDisabled': '插件已禁用',
+        'toastApiFailed': 'API加载失败，将依赖页面内容'
+      },
+      'en': {
+        'toastEnabled': 'Extension enabled',
+        'toastDisabled': 'Extension disabled',
+        'toastApiFailed': 'API load failed, will use page content'
+      }
+    };
+
+    const lang = navigator.language || navigator.userLanguage || 'zh-CN';
+    const langKey = Object.keys(translations).find(k => lang.startsWith(k)) || 'zh-CN';
+    return translations[langKey][key] || translations['zh-CN'][key] || key;
+  }
+
   const JDSUtils = {
     /**
      * 从多个可能的字段中获取商品ID
@@ -86,6 +110,11 @@
      * @param {string} message - 消息内容
      */
     showToast(message) {
+      // 如果传入的是翻译键，先翻译
+      const translatedMessage = (message === '插件已启用' ? getMessage('toastEnabled') : 
+                                 message === '插件已禁用' ? getMessage('toastDisabled') : 
+                                 message === 'API加载失败，将依赖页面内容' ? getMessage('toastApiFailed') : message);
+      
       let toast = document.querySelector('.jds-toast');
       if (!toast) {
         toast = document.createElement('div');
@@ -93,7 +122,7 @@
         document.body.appendChild(toast);
       }
 
-      toast.textContent = message;
+      toast.textContent = translatedMessage;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2000);
     },

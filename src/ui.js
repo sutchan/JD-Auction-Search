@@ -4,8 +4,61 @@
 (function(global) {
   'use strict';
 
+  /**
+   * 获取翻译文本
+   * @param {string} key - 翻译键
+   * @param {Object} [placeholders] - 占位符
+   * @returns {string}
+   */
+  function getMessage(key, placeholders) {
+    const translations = {
+      'zh-CN': {
+        'logoText': '夺宝搜索',
+        'searchPlaceholder': '输入商品关键词搜索...',
+        'searchButton': '搜索',
+        'tabAll': '全部',
+        'tabOngoing': '正在夺宝',
+        'tabUpcoming': '即将开始',
+        'resultCount': '共 {count} 件商品',
+        'loading': '加载中',
+        'enabled': '已启用',
+        'disabled': '已禁用',
+        'enabledLocal': '已启用(本地)',
+        'emptyTitle': '未找到匹配商品',
+        'emptyDesc': '试试其他关键词，或清除筛选条件'
+      },
+      'en': {
+        'logoText': 'Auction Search',
+        'searchPlaceholder': 'Enter product keyword to search...',
+        'searchButton': 'Search',
+        'tabAll': 'All',
+        'tabOngoing': 'Ongoing',
+        'tabUpcoming': 'Upcoming',
+        'resultCount': '{count} items total',
+        'loading': 'Loading...',
+        'enabled': 'Enabled',
+        'disabled': 'Disabled',
+        'enabledLocal': 'Enabled (Local)',
+        'emptyTitle': 'No matching products found',
+        'emptyDesc': 'Try other keywords, or clear filters'
+      }
+    };
+
+    const lang = navigator.language || navigator.userLanguage || 'zh-CN';
+    const langKey = Object.keys(translations).find(k => lang.startsWith(k)) || 'zh-CN';
+    let text = translations[langKey][key] || translations['zh-CN'][key] || key;
+    
+    if (placeholders) {
+      Object.keys(placeholders).forEach(k => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), placeholders[k]);
+      });
+    }
+    return text;
+  }
+
   const JDSUI = {
     shadowRoot: null,
+    emptyElement: null,
 
     /**
      * 渲染搜索UI
@@ -44,22 +97,22 @@
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
-          <span>夺宝搜索</span>
+          <span>${getMessage('logoText')}</span>
         </div>
         <div class="jds-search-box">
-          <input type="text" class="jds-search-input" placeholder="输入商品关键词搜索..." />
+          <input type="text" class="jds-search-input" placeholder="${getMessage('searchPlaceholder')}" />
           <button class="jds-clear-btn">×</button>
-          <button class="jds-search-btn">搜索</button>
+          <button class="jds-search-btn">${getMessage('searchButton')}</button>
         </div>
         <div class="jds-tabs">
-          <button class="jds-tab active" data-tab="all">全部</button>
-          <button class="jds-tab" data-tab="ongoing">正在夺宝</button>
-          <button class="jds-tab" data-tab="upcoming">即将开始</button>
+          <button class="jds-tab active" data-tab="all">${getMessage('tabAll')}</button>
+          <button class="jds-tab" data-tab="ongoing">${getMessage('tabOngoing')}</button>
+          <button class="jds-tab" data-tab="upcoming">${getMessage('tabUpcoming')}</button>
         </div>
         <div class="jds-result-count">
-          共 <strong class="jds-count">0</strong> 件商品
+          ${getMessage('resultCount', { count: '<strong class="jds-count">0</strong>' })}
         </div>
-        <button class="jds-toggle-btn disabled">加载中</button>
+        <button class="jds-toggle-btn disabled">${getMessage('loading')}</button>
       `;
     },
 
@@ -155,7 +208,12 @@
     updateToggleBtn(text, disabled = false) {
       const btn = this.shadowRoot && this.shadowRoot.querySelector('.jds-toggle-btn');
       if (btn) {
-        btn.textContent = text;
+        // 如果传入的是翻译键，先翻译
+        const translatedText = (text === '已启用' ? getMessage('enabled') : 
+                               text === '已启用(本地)' ? getMessage('enabledLocal') : 
+                               text === '已禁用' ? getMessage('disabled') : 
+                               text === '加载中' ? getMessage('loading') : text;
+        btn.textContent = translatedText;
         if (disabled) {
           btn.classList.add('disabled');
         } else {
@@ -168,11 +226,10 @@
      * 显示空状态
      */
     showEmptyState() {
-      let empty = this.shadowRoot && this.shadowRoot.querySelector('.jds-empty-overlay');
-      if (!empty) {
-        empty = document.createElement('div');
-        empty.className = 'jds-empty-overlay';
-        empty.style.cssText = `
+      if (!this.emptyElement) {
+        this.emptyElement = document.createElement('div');
+        this.emptyElement.className = 'jds-empty-overlay';
+        this.emptyElement.style.cssText = `
           position: fixed;
           top: 70px;
           left: 50%;
@@ -185,24 +242,23 @@
           z-index: 999998;
           box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         `;
-        empty.innerHTML = `
+        this.emptyElement.innerHTML = `
           <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-          <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">未找到匹配商品</div>
-          <div style="font-size: 14px; color: #999;">试试其他关键词，或清除筛选条件</div>
+          <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;">${getMessage('emptyTitle')}</div>
+          <div style="font-size: 14px; color: #999;">${getMessage('emptyDesc')}</div>
         `;
-        document.body.appendChild(empty);
+        document.body.appendChild(this.emptyElement);
       }
-      empty.style.display = '';
+      this.emptyElement.style.display = '';
     },
 
     /**
      * 隐藏空状态
      */
     hideEmptyState() {
-      const el1 = this.shadowRoot && this.shadowRoot.querySelector('.jds-empty-overlay');
-      if (el1) el1.style.setProperty('display', 'none');
-      const el2 = document.querySelector('.jds-empty-overlay');
-      if (el2) el2.style.setProperty('display', 'none');
+      if (this.emptyElement) {
+        this.emptyElement.style.display = 'none';
+      }
     },
 
     /**
@@ -211,8 +267,10 @@
     destroy() {
       const wrapper = document.getElementById('jds-search-wrapper');
       if (wrapper) wrapper.remove();
-      const empty = document.querySelector('.jds-empty-overlay');
-      if (empty) empty.remove();
+      if (this.emptyElement) {
+        this.emptyElement.remove();
+        this.emptyElement = null;
+      }
       const toast = document.querySelector('.jds-toast');
       if (toast) toast.remove();
     }

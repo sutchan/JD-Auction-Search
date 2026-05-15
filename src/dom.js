@@ -93,27 +93,47 @@
     updateProductDisplay(state) {
       const productContainers = this._getProductContainers();
 
-      if (state.filteredProducts.length === 0 && state.keyword) {
+      if (!state.isEnabled) {
+        // 恢复所有商品显示
+        productContainers.forEach(el => el.style.display = '');
         return;
       }
 
-      if (productContainers.length === 0 || !state.keyword) {
+      if (!state.keyword && state.currentTab === 'all') {
+        // 没有搜索和筛选，恢复所有
+        productContainers.forEach(el => el.style.display = '');
         return;
       }
 
-      productContainers.forEach((el, idx) => {
-        const product = state.filteredProducts[idx];
-        if (!product) {
-          el.style.display = 'none';
-          return;
+      // 先显示所有商品，然后隐藏不匹配的
+      productContainers.forEach(el => el.style.display = '');
+
+      // 构建匹配产品名称的集合
+      const matchedProductNames = new Set(
+        state.filteredProducts.map(p => 
+          global.JDSUtils.getProductName(p).toLowerCase()
+        )
+      );
+
+      // 遍历商品容器，检查是否匹配
+      productContainers.forEach(container => {
+        const containerText = container.textContent.toLowerCase();
+        let shouldShow = false;
+
+        // 检查是否有匹配的产品名称
+        for (const name of matchedProductNames) {
+          if (containerText.includes(name)) {
+            shouldShow = true;
+            break;
+          }
         }
 
-        const name = global.JDSUtils.getProductName(product);
-        if (!name.toLowerCase().includes(state.keyword.toLowerCase())) {
-          el.style.display = 'none';
-        } else {
-          el.style.display = '';
+        // 如果没有匹配到产品，检查关键词直接匹配
+        if (!shouldShow && state.keyword) {
+          shouldShow = containerText.includes(state.keyword.toLowerCase());
         }
+
+        container.style.display = shouldShow ? '' : 'none';
       });
     },
 

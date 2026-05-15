@@ -1,0 +1,80 @@
+{
+  "extensionName": {
+    "message": "JD Auction Search Enhanced",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "Añade búsqueda por palabras clave y filtrado por categorías a las páginas de subastas JD",
+    "description": "Description of the extension"
+  },
+  "searchPlaceholder": {
+    "message": "Ingrese palabra clave para buscar...",
+    "description": "Search input placeholder"
+  },
+  "searchButton": {
+    "message": "Buscar",
+    "description": "Search button text"
+  },
+  "tabAll": {
+    "message": "Todos",
+    "description": "Tab label for all items"
+  },
+  "tabOngoing": {
+    "message": "En curso",
+    "description": "Tab label for ongoing auctions"
+  },
+  "tabUpcoming": {
+    "message": "Próximas",
+    "description": "Tab label for upcoming auctions"
+  },
+  "resultCount": {
+    "message": "$COUNT$ productos totales",
+    "description": "Result count text",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "enabled": {
+    "message": "Activado",
+    "description": "Toggle button text when enabled"
+  },
+  "disabled": {
+    "message": "Desactivado",
+    "description": "Toggle button text when disabled"
+  },
+  "loading": {
+    "message": "Cargando...",
+    "description": "Loading state text"
+  },
+  "enabledLocal": {
+    "message": "Activado (Local)",
+    "description": "Enabled with local data only"
+  },
+  "emptyTitle": {
+    "message": "No se encontraron productos coincidentes",
+    "description": "Empty state title"
+  },
+  "emptyDesc": {
+    "message": "Pruebe otras palabras clave o borre los filtros",
+    "description": "Empty state description"
+  },
+  "toastEnabled": {
+    "message": "Extensión activada",
+    "description": "Toast when enabled"
+  },
+  "toastDisabled": {
+    "message": "Extensión desactivada",
+    "description": "Toast when disabled"
+  },
+  "toastApiFailed": {
+    "message": "Fallo al cargar API, se usará el contenido de la página",
+    "description": "Toast when API fails"
+  },
+  "logoText": {
+    "message": "Búsqueda de Subastas",
+    "description": "Logo text"
+  }
+}
