@@ -1,0 +1,80 @@
+{
+  "extensionName": {
+    "message": "JD Auction Search Enhanced",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "JDオークションページに商品キーワード検索とカテゴリフィルター機能を追加",
+    "description": "Description of the extension"
+  },
+  "searchPlaceholder": {
+    "message": "商品キーワードを入力...",
+    "description": "Search input placeholder"
+  },
+  "searchButton": {
+    "message": "検索",
+    "description": "Search button text"
+  },
+  "tabAll": {
+    "message": "すべて",
+    "description": "Tab label for all items"
+  },
+  "tabOngoing": {
+    "message": "開催中",
+    "description": "Tab label for ongoing auctions"
+  },
+  "tabUpcoming": {
+    "message": "開催予定",
+    "description": "Tab label for upcoming auctions"
+  },
+  "resultCount": {
+    "message": "計 $COUNT$ 件",
+    "description": "Result count text",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "enabled": {
+    "message": "有効",
+    "description": "Toggle button text when enabled"
+  },
+  "disabled": {
+    "message": "無効",
+    "description": "Toggle button text when disabled"
+  },
+  "loading": {
+    "message": "読み込み中...",
+    "description": "Loading state text"
+  },
+  "enabledLocal": {
+    "message": "有効(ローカル)",
+    "description": "Enabled with local data only"
+  },
+  "emptyTitle": {
+    "message": "一致する商品が見つかりません",
+    "description": "Empty state title"
+  },
+  "emptyDesc": {
+    "message": "他のキーワードを試すか、フィルターをクリアしてください",
+    "description": "Empty state description"
+  },
+  "toastEnabled": {
+    "message": "拡張機能を有効にしました",
+    "description": "Toast when enabled"
+  },
+  "toastDisabled": {
+    "message": "拡張機能を無効にしました",
+    "description": "Toast when disabled"
+  },
+  "toastApiFailed": {
+    "message": "API読み込みに失敗しました、ページコンテンツを使用します",
+    "description": "Toast when API fails"
+  },
+  "logoText": {
+    "message": "オークション検索",
+    "description": "Logo text"
+  }
+}

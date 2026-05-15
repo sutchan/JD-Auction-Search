@@ -1,0 +1,80 @@
+{
+  "extensionName": {
+    "message": "JD Auction Search Enhanced",
+    "description": "Name of the extension"
+  },
+  "extensionDescription": {
+    "message": "JD 경매 페이지에 상품 키워드 검색 및 카테고리 필터 기능 추가",
+    "description": "Description of the extension"
+  },
+  "searchPlaceholder": {
+    "message": "상품 키워드 입력...",
+    "description": "Search input placeholder"
+  },
+  "searchButton": {
+    "message": "검색",
+    "description": "Search button text"
+  },
+  "tabAll": {
+    "message": "전체",
+    "description": "Tab label for all items"
+  },
+  "tabOngoing": {
+    "message": "진행중",
+    "description": "Tab label for ongoing auctions"
+  },
+  "tabUpcoming": {
+    "message": "예정",
+    "description": "Tab label for upcoming auctions"
+  },
+  "resultCount": {
+    "message": "총 $COUNT$건",
+    "description": "Result count text",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "enabled": {
+    "message": "활성화",
+    "description": "Toggle button text when enabled"
+  },
+  "disabled": {
+    "message": "비활성화",
+    "description": "Toggle button text when disabled"
+  },
+  "loading": {
+    "message": "로딩중...",
+    "description": "Loading state text"
+  },
+  "enabledLocal": {
+    "message": "활성화(로컬)",
+    "description": "Enabled with local data only"
+  },
+  "emptyTitle": {
+    "message": "일치하는 상품을 찾을 수 없습니다",
+    "description": "Empty state title"
+  },
+  "emptyDesc": {
+    "message": "다른 키워드를 시도하거나 필터를 지우세요",
+    "description": "Empty state description"
+  },
+  "toastEnabled": {
+    "message": "확장 프로그램이 활성화되었습니다",
+    "description": "Toast when enabled"
+  },
+  "toastDisabled": {
+    "message": "확장 프로그램이 비활성화되었습니다",
+    "description": "Toast when disabled"
+  },
+  "toastApiFailed": {
+    "message": "API 로딩 실패, 페이지 내용을 사용합니다",
+    "description": "Toast when API fails"
+  },
+  "logoText": {
+    "message": "경매 검색",
+    "description": "Logo text"
+  }
+}

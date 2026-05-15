@@ -1,0 +1,80 @@
+{
+  "extensionName": {
+    "message": "京东夺宝搜索增强",
+    "description": "插件名称"
+  },
+  "extensionDescription": {
+    "message": "为京东夺宝页面增加商品关键词搜索和分类过滤功能",
+    "description": "插件描述"
+  },
+  "searchPlaceholder": {
+    "message": "输入商品关键词搜索...",
+    "description": "搜索框占位符"
+  },
+  "searchButton": {
+    "message": "搜索",
+    "description": "搜索按钮文本"
+  },
+  "tabAll": {
+    "message": "全部",
+    "description": "全部标签"
+  },
+  "tabOngoing": {
+    "message": "正在夺宝",
+    "description": "正在夺宝标签"
+  },
+  "tabUpcoming": {
+    "message": "即将开始",
+    "description": "即将开始标签"
+  },
+  "resultCount": {
+    "message": "共 $COUNT$ 件商品",
+    "description": "结果计数文本",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "10"
+      }
+    }
+  },
+  "enabled": {
+    "message": "已启用",
+    "description": "启用状态按钮文本"
+  },
+  "disabled": {
+    "message": "已禁用",
+    "description": "禁用状态按钮文本"
+  },
+  "loading": {
+    "message": "加载中",
+    "description": "加载状态文本"
+  },
+  "enabledLocal": {
+    "message": "已启用(本地)",
+    "description": "仅本地数据时的启用状态"
+  },
+  "emptyTitle": {
+    "message": "未找到匹配商品",
+    "description": "空状态标题"
+  },
+  "emptyDesc": {
+    "message": "试试其他关键词，或清除筛选条件",
+    "description": "空状态描述"
+  },
+  "toastEnabled": {
+    "message": "插件已启用",
+    "description": "启用时提示"
+  },
+  "toastDisabled": {
+    "message": "插件已禁用",
+    "description": "禁用时提示"
+  },
+  "toastApiFailed": {
+    "message": "API加载失败，将依赖页面内容",
+    "description": "API失败时提示"
+  },
+  "logoText": {
+    "message": "夺宝搜索",
+    "description": "Logo文本"
+  }
+}

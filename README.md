@@ -1,126 +1,149 @@
-# 京东夺宝搜索增强
+# JD Auction Search Enhanced
 
-> 为京东夺宝页面 (`1paipai.jd.com/auction-list/`) 增加商品关键词搜索和分类过滤功能的浏览器插件。
+> A browser extension that adds product keyword search and category filtering for JD Auction pages (`1paipai.jd.com/auction-list/`).
 
-## 功能特性
+## Features
 
-| 功能 | 说明 |
-|------|------|
-| **关键词搜索** | 输入商品名称/ID 实时过滤夺宝商品 |
-| **Tab 分类** | 全部 / 正在夺宝 / 即将开始 三种状态切换 |
-| **API 拦截缓存** | 自动拦截京东夺宝 API 响应，缓存完整商品列表 |
-| **DOM 提取** | API 不可用时自动从页面 DOM 提取商品数据 |
-| **Shadow DOM 隔离** | UI 组件使用 Shadow DOM 渲染，完全隔离样式 |
-| **一键启停** | 顶部工具栏可随时启用/禁用插件 |
+| Feature | Description |
+|---------|-------------|
+| **Keyword Search** | Real-time filtering of auction items by product name/ID |
+| **Tab Categories** | Switch between All / Ongoing / Upcoming statuses |
+| **API Interception Cache** | Automatically intercept JD Auction API responses and cache complete product list |
+| **DOM Extraction** | Automatically extract product data from page DOM when API is unavailable |
+| **Shadow DOM Isolation** | UI components rendered with Shadow DOM for complete style isolation |
+| **One-click Toggle** | Enable/disable the extension anytime from the top toolbar |
+| **Internationalization** | Multi-language support (Chinese, English, Spanish, Arabic, French, Portuguese, German, Japanese, Korean, Russian) |
 
-## 项目结构
+## Project Structure
 
 ```
 JD-Auction-Search/
-├── manifest.json        # 插件配置 (Manifest V3)
+├── manifest.json          # Extension configuration (Manifest V3)
+├── background.js          # Background script (state management)
+├── metadata.json          # Project metadata
+├── CHANGELOG.md           # Change log
+├── openspec/              # Specification documents
+│   ├── spec.md            # Specification
+│   ├── check_list.md      # Check list
+│   └── tasks.md           # Tasks list
 ├── src/
-│   ├── background.js    # 后台脚本（状态管理）
-│   ├── content.js       # 内容脚本（核心逻辑）
-│   └── styles.css       # 搜索UI样式
-└── icons/               # 插件图标目录（可选）
+│   ├── utils.js           # Utility functions
+│   ├── api.js             # API management
+│   ├── ui.js              # UI rendering
+│   ├── dom.js             # DOM handling
+│   ├── content.js         # Main content script
+│   └── styles.css         # Search UI styles
+├── locales/               # Internationalization files
+│   ├── en/messages.json
+│   ├── zh-CN/messages.json
+│   ├── zh-TW/messages.json
+│   ├── es/messages.json
+│   ├── ar/messages.json
+│   ├── fr/messages.json
+│   ├── pt-BR/messages.json
+│   ├── de/messages.json
+│   ├── ja/messages.json
+│   ├── ko/messages.json
+│   └── ru/messages.json
+└── icons/                 # Extension icons directory (optional)
 ```
 
-## 安装步骤
+## Installation
 
-### 1. 添加图标（可选）
+### 1. Add Icons (Optional)
 
-插件需要 3 个 PNG 图标文件，放到 `icons/` 目录：
+The extension requires 3 PNG icon files, placed in the `icons/` directory:
 
-| 文件 | 尺寸 | 用途 |
-|------|------|------|
-| `icon16.png` | 16×16px | 地址栏小图标 |
-| `icon48.png` | 48×48px | 扩展管理页面 |
-| `icon128.png` | 128×128px | Chrome 应用商店 |
+| File | Size | Usage |
+|------|------|-------|
+| `icon16.png` | 16×16px | Address bar icon |
+| `icon48.png` | 48×48px | Extension management page |
+| `icon128.png` | 128×128px | Chrome Web Store |
 
-可使用 [Favicon Generator](https://favicon.io/) 生成，或使用任意图标工具制作。
+Can be generated using [Favicon Generator](https://favicon.io/) or any icon tool.
 
-### 2. 加载插件
+### 2. Load Extension
 
-**Chrome / Edge (Chromium)：**
+**Chrome / Edge (Chromium):**
 
-1. 打开 `chrome://extensions/`
-2. 开启右上角 **开发者模式**
-3. 点击 **加载已解压的扩展程序**
-4. 选择 `JD-Auction-Search` 文件夹
+1. Open `chrome://extensions/`
+2. Enable **Developer mode** in the top right
+3. Click **Load unpacked extension**
+4. Select the `JD-Auction-Search` folder
 
-**Firefox：**
+**Firefox:**
 
-1. 打开 `about:debugging#/runtime/this-firefox`
-2. 点击 **临时加载附加组件**
-3. 选择 `manifest.json` 文件
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click **Load temporary Add-on**
+3. Select `manifest.json` file
 
-### 3. 使用插件
+### 3. Use the Extension
 
-1. 访问 [京东夺宝](https://1paipai.jd.com/auction-list/)
-2. 页面顶部自动出现红色搜索栏
-3. 输入关键词，点击"搜索"或按 Enter
-4. 支持 Tab 切换分类筛选
+1. Visit [JD Auction](https://1paipai.jd.com/auction-list/)
+2. A red search bar will automatically appear at the top of the page
+3. Enter keywords, click "Search" or press Enter
+4. Support tab switching for category filtering
 
-## 核心实现原理
+## Core Implementation
 
-### 1. API 拦截
+### 1. API Interception
 
 ```javascript
 window.fetch = async function(...args) {
   const res = await origFetch.apply(this, args);
-  // 克隆响应，解析JSON，缓存商品数据
+  // Clone response, parse JSON, cache product data
   const clone = res.clone();
-  clone.json().then(data => { /* 缓存 */ });
+  clone.json().then(data => { /* Cache */ });
   return res;
 };
 ```
 
-### 2. Shadow DOM 隔离
+### 2. Shadow DOM Isolation
 
 ```javascript
 const wrapper = document.createElement('div');
 document.body.appendChild(wrapper);
 this.shadowRoot = wrapper.attachShadow({ mode: 'closed' });
-// UI组件渲染在shadowRoot中，完全与页面样式隔离
+// UI components rendered in shadowRoot, completely isolated from page styles
 ```
 
-### 3. DOM 变化监听
+### 3. DOM Change Observer
 
 ```javascript
 const observer = new MutationObserver((mutations) => {
-  // 监听页面DOM变化，自动更新显示
+  // Listen for page DOM changes, auto-update display
 });
 observer.observe(container, { childList: true, subtree: true });
 ```
 
-## 数据结构
+## Data Structure
 
-商品对象字段映射（支持多种命名）：
+Product object field mappings (supports multiple naming conventions):
 
-| 字段 | 别名 |
-|------|------|
+| Field | Aliases |
+|-------|---------|
 | `id` | `skuId`, `productId`, `auctionId` |
 | `name` | `title`, `productName` |
 | `status` | `state`, `auctionStatus` |
 
-状态值：
-- `0` / `upcoming` → 即将开始
-- `1` / `ongoing` → 正在夺宝
+Status values:
+- `0` / `upcoming` → Upcoming
+- `1` / `ongoing` → Ongoing
 
-## 已知问题
+## Known Issues
 
-| 问题 | 解决方案 |
-|------|---------|
-| 页面加载时插件未响应 | 刷新页面或等待 2 秒自动加载 |
-| API 请求失败 | 插件自动降级为 DOM 提取模式 |
-| 跨域 CORS 拦截 | 已配置 `host_permissions`，正常情况无需处理 |
+| Issue | Solution |
+|-------|----------|
+| Extension not responsive on page load | Refresh page or wait 2 seconds for auto-load |
+| API request failed | Extension automatically falls back to DOM extraction mode |
+| Cross-domain CORS interception | `host_permissions` configured, normally no action needed |
 
-## 技术栈
+## Tech Stack
 
-- **Manifest V3** - 现代浏览器插件标准
-- **Shadow DOM** - 样式隔离，避免冲突
-- **MutationObserver** - 高效 DOM 变化监听
-- **Fetch/XHR 拦截** - 无侵入式数据获取
+- **Manifest V3** - Modern browser extension standard
+- **Shadow DOM** - Style isolation to avoid conflicts
+- **MutationObserver** - Efficient DOM change monitoring
+- **Fetch/XHR Interception** - Non-intrusive data acquisition
 
 ## License
 
