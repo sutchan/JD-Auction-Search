@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.2.2
+
+### Features
+- 建立完整设计系统（色彩/字体/间距/圆角/阴影/动效）
+- 创建高保真可交互原型（prototype/index.html）
+- 实现组件库规范（Button/SearchBar/Tabs/Toast/EmptyState）
+- 增强无障碍支持（ARIA 标签、键盘导航、语义化 HTML）
+- 支持 prefers-reduced-motion 动画优化
+
+### Security
+- 添加消息发送者验证（background.js）
+- 添加 URL 白名单验证（api.js）
+- 强制 HTTPS 协议
+- API 参数白名单过滤
+- 商品数据输入验证
+
+### Improvements
+- 更新 src/styles.css 使用完整设计令牌
+- 优化 src/ui.js 引入外部样式文件
+- 更新 OpenSpec 规范文档
+- 同步 README.md 和 README_EN.md 文档
+
 ## v1.2.1
 
 ### Improvements

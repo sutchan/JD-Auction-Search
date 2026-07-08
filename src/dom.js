@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom.js v1.2.1
+// JD-Auction-Search/src/dom.js v1.2.2
 // DOM观察和处理模块
 
 (function(global) {

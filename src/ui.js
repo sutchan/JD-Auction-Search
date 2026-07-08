@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui.js v1.2.1
+// JD-Auction-Search/src/ui.js v1.2.2
 // UI渲染和事件绑定模块
 
 (function(global) {

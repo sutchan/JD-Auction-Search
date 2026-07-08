@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JD-Auction-Search Design System</title>
+  <link rel="stylesheet" href="design-tokens.css">
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--jds-font-family);
+      background: var(--jds-bg-secondary);
+      color: var(--jds-text-primary);
+      line-height: var(--jds-line-height-normal);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .ds-header {
+      background: var(--jds-bg-primary);
+      border-bottom: 1px solid var(--jds-border-light);
+      padding: var(--jds-spacing-6) var(--jds-spacing-8);
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: var(--jds-z-index-sticky);
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+    .ds-header h1 {
+      font-size: var(--jds-font-size-3xl);
+      font-weight: var(--jds-font-weight-bold);
+      color: var(--jds-primary);
+      letter-spacing: var(--jds-letter-spacing-tight);
+      margin-bottom: var(--jds-spacing-2);
+    }
+    .ds-header p {
+      font-size: var(--jds-font-size-sm);
+      color: var(--jds-text-tertiary);
+    }
+
+    .ds-nav {
+      display: flex;
+      justify-content: center;
+      gap: var(--jds-spacing-4);
+      margin-top: var(--jds-spacing-4);
+      flex-wrap: wrap;
+    }
+    .ds-nav a {
+      font-size: var(--jds-font-size-sm);
+      color: var(--jds-text-secondary);
+      text-decoration: none;
+      padding: var(--jds-spacing-2) var(--jds-spacing-4);
+      border-radius: var(--jds-radius-full);
+      transition: all var(--jds-transition-fast);
+    }
+    .ds-nav a:hover {
+      background: var(--jds-bg-tertiary);
+      color: var(--jds-text-primary);
+    }
+
+    .ds-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--jds-spacing-8);
+    }
+
+    .ds-section {
+      background: var(--jds-bg-primary);
+      border-radius: var(--jds-radius-xl);
+      padding: var(--jds-spacing-8);
+      margin-bottom: var(--jds-spacing-8);
+      box-shadow: var(--jds-shadow-card);
+      border: 1px solid var(--jds-border-light);
+    }
+
+    .ds-section-title {
+      font-size: var(--jds-font-size-xl);
+      font-weight: var(--jds-font-weight-semibold);
+      color: var(--jds-text-primary);
+      margin-bottom: var(--jds-spacing-6);
+      padding-bottom: var(--jds-spacing-3);
+      border-bottom: 2px solid var(--jds-primary-100);
+      position: relative;
+    }
+    .ds-section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 48px;
+      height: 2px;
+      background: var(--jds-primary);
+      border-radius: 1px;
+    }
+
+    .ds-subtitle {
+      font-size: var(--jds-font-size-sm);
+      color: var(--jds-text-tertiary);
+      margin-bottom: var(--jds-spacing-6);
+    }
+
+    .ds-colors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--jds-spacing-4);
+    }
+
+    .ds-color-item {
+      border-radius: var(--jds-radius-lg);
+      padding: var(--jds-spacing-4);
+      text-align: center;
+      transition: transform var(--jds-transition-fast), box-shadow var(--jds-transition-fast);
+      cursor: pointer;
+    }
+    .ds-color-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--jds-shadow-md);
+    }
+    .ds-color-item .color-box {
+      width: 100%;
+      height: 80px;
+      border-radius: var(--jds-radius-md);
+      margin-bottom: var(--jds-spacing-3);
+      box-shadow: var(--jds-shadow-sm);
+    }
+    .ds-color-item .color-name {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-secondary);
+      font-weight: var(--jds-font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: var(--jds-letter-spacing-wide);
+    }
+    .ds-color-item .color-value {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+      font-family: var(--jds-font-mono);
+      margin-top: var(--jds-spacing-1);
+    }
+
+    .ds-font-sizes {
+      display: flex;
+      flex-direction: column;
+      gap: var(--jds-spacing-3);
+    }
+    .ds-font-item {
+      padding: var(--jds-spacing-4);
+      background: var(--jds-bg-secondary);
+      border-radius: var(--jds-radius-md);
+      display: flex;
+      align-items: baseline;
+      gap: var(--jds-spacing-4);
+    }
+    .ds-font-item .font-label {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+      font-family: var(--jds-font-mono);
+      min-width: 80px;
+    }
+
+    .ds-spacing-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: var(--jds-spacing-2);
+    }
+    .ds-spacing-item {
+      background: var(--jds-bg-secondary);
+      border-radius: var(--jds-radius-sm);
+      text-align: center;
+      padding: var(--jds-spacing-3);
+      transition: background var(--jds-transition-fast);
+    }
+    .ds-spacing-item:hover {
+      background: var(--jds-primary-50);
+    }
+    .ds-spacing-item .spacing-value {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-secondary);
+      font-family: var(--jds-font-mono);
+    }
+    .ds-spacing-item .spacing-bar {
+      width: 100%;
+      background: var(--jds-primary);
+      border-radius: 2px;
+      margin-top: var(--jds-spacing-2);
+    }
+
+    .ds-radii-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--jds-spacing-6);
+    }
+    .ds-radii-item {
+      text-align: center;
+    }
+    .ds-radii-item .radii-box {
+      width: 64px;
+      height: 64px;
+      background: var(--jds-bg-tertiary);
+      margin: 0 auto var(--jds-spacing-3);
+      border: 2px solid var(--jds-border);
+      transition: all var(--jds-transition-fast);
+    }
+    .ds-radii-item:hover .radii-box {
+      border-color: var(--jds-primary);
+      background: var(--jds-primary-50);
+    }
+    .ds-radii-item .radii-label {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+      font-family: var(--jds-font-mono);
+    }
+
+    .ds-shadows-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--jds-spacing-6);
+    }
+    .ds-shadows-item {
+      text-align: center;
+    }
+    .ds-shadows-item .shadow-box {
+      width: 80px;
+      height: 48px;
+      background: var(--jds-bg-primary);
+      margin: 0 auto var(--jds-spacing-3);
+      border: 1px solid var(--jds-border-light);
+      border-radius: var(--jds-radius-md);
+    }
+    .ds-shadows-item .shadow-label {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+      font-family: var(--jds-font-mono);
+    }
+
+    .ds-buttons-group {
+      display: flex;
+      gap: var(--jds-spacing-4);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .jds-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--jds-spacing-3) var(--jds-spacing-6);
+      font-family: var(--jds-font-family);
+      font-size: var(--jds-font-size-base);
+      font-weight: var(--jds-font-weight-medium);
+      border: none;
+      border-radius: var(--jds-radius-lg);
+      cursor: pointer;
+      transition: all var(--jds-transition-normal);
+      gap: var(--jds-spacing-2);
+      position: relative;
+      overflow: hidden;
+    }
+    .jds-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left var(--jds-transition-slow);
+    }
+    .jds-btn:hover::before {
+      left: 100%;
+    }
+
+    .jds-btn-primary {
+      background: var(--jds-primary);
+      color: #fff;
+      box-shadow: var(--jds-shadow-sm);
+    }
+    .jds-btn-primary:hover {
+      background: var(--jds-primary-hover);
+      box-shadow: var(--jds-shadow-md);
+      transform: translateY(-1px);
+    }
+    .jds-btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .jds-btn-secondary {
+      background: var(--jds-bg-tertiary);
+      color: var(--jds-text-secondary);
+    }
+    .jds-btn-secondary:hover {
+      background: var(--jds-bg-hover);
+      color: var(--jds-text-primary);
+    }
+
+    .jds-btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--jds-border);
+      color: var(--jds-text-primary);
+    }
+    .jds-btn-outline:hover {
+      border-color: var(--jds-primary);
+      color: var(--jds-primary);
+    }
+
+    .jds-btn-sm {
+      padding: var(--jds-spacing-2) var(--jds-spacing-4);
+      font-size: var(--jds-font-size-sm);
+    }
+    .jds-btn-lg {
+      padding: var(--jds-spacing-4) var(--jds-spacing-8);
+      font-size: var(--jds-font-size-lg);
+    }
+    .jds-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .jds-btn:disabled::before {
+      display: none;
+    }
+
+    .jds-input {
+      width: 320px;
+      padding: var(--jds-spacing-3) var(--jds-spacing-4);
+      font-family: var(--jds-font-family);
+      font-size: var(--jds-font-size-base);
+      border: 1.5px solid var(--jds-border);
+      border-radius: var(--jds-radius-lg);
+      outline: none;
+      transition: all var(--jds-transition-normal);
+      background: var(--jds-bg-primary);
+    }
+    .jds-input:focus {
+      border-color: var(--jds-primary);
+      box-shadow: 0 0 0 4px rgba(225, 37, 27, 0.08);
+    }
+    .jds-input::placeholder {
+      color: var(--jds-text-tertiary);
+    }
+
+    .jds-tabs {
+      display: flex;
+      gap: var(--jds-spacing-1);
+      background: var(--jds-bg-secondary);
+      padding: var(--jds-spacing-1);
+      border-radius: var(--jds-radius-lg);
+      width: fit-content;
+    }
+    .jds-tab {
+      padding: var(--jds-spacing-3) var(--jds-spacing-5);
+      font-size: var(--jds-font-size-sm);
+      font-weight: var(--jds-font-weight-medium);
+      border: none;
+      background: transparent;
+      color: var(--jds-text-secondary);
+      border-radius: var(--jds-radius-md);
+      cursor: pointer;
+      transition: all var(--jds-transition-fast);
+      white-space: nowrap;
+      position: relative;
+    }
+    .jds-tab:hover {
+      background: var(--jds-bg-hover);
+    }
+    .jds-tab.active {
+      background: var(--jds-bg-primary);
+      color: var(--jds-primary);
+      font-weight: var(--jds-font-weight-semibold);
+      box-shadow: var(--jds-shadow-sm);
+    }
+    .jds-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--jds-primary);
+      border-radius: 50%;
+    }
+
+    .jds-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px var(--jds-spacing-3);
+      font-size: var(--jds-font-size-xs);
+      font-weight: var(--jds-font-weight-semibold);
+      border-radius: var(--jds-radius-full);
+      letter-spacing: var(--jds-letter-spacing-wide);
+      text-transform: uppercase;
+    }
+    .jds-badge-primary { background: var(--jds-primary-100); color: var(--jds-primary); }
+    .jds-badge-success { background: rgba(82, 196, 26, 0.08); color: var(--jds-success); }
+    .jds-badge-warning { background: rgba(250, 173, 20, 0.08); color: var(--jds-warning); }
+    .jds-badge-error { background: rgba(255, 77, 79, 0.08); color: var(--jds-error); }
+
+    .jds-card {
+      background: var(--jds-bg-primary);
+      border-radius: var(--jds-radius-xl);
+      padding: var(--jds-spacing-6);
+      box-shadow: var(--jds-shadow-card);
+      border: 1px solid var(--jds-border-light);
+      transition: all var(--jds-transition-normal);
+    }
+    .jds-card:hover {
+      box-shadow: var(--jds-shadow-md);
+      transform: translateY(-2px);
+    }
+    .jds-card-title {
+      font-size: var(--jds-font-size-lg);
+      font-weight: var(--jds-font-weight-semibold);
+      color: var(--jds-text-primary);
+      margin-bottom: var(--jds-spacing-2);
+    }
+    .jds-card-desc {
+      font-size: var(--jds-font-size-sm);
+      color: var(--jds-text-secondary);
+    }
+
+    .jds-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--jds-spacing-16) var(--jds-spacing-8);
+      text-align: center;
+      background: var(--jds-bg-secondary);
+      border-radius: var(--jds-radius-xl);
+    }
+    .jds-empty-icon {
+      font-size: 80px;
+      margin-bottom: var(--jds-spacing-6);
+      opacity: 0.3;
+      animation: jds-empty-bounce 2s ease-in-out infinite;
+    }
+    @keyframes jds-empty-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .jds-empty-title {
+      font-size: var(--jds-font-size-xl);
+      font-weight: var(--jds-font-weight-semibold);
+      color: var(--jds-text-primary);
+      margin-bottom: var(--jds-spacing-3);
+    }
+    .jds-empty-desc {
+      font-size: var(--jds-font-size-base);
+      color: var(--jds-text-tertiary);
+      max-width: 320px;
+      line-height: var(--jds-line-height-relaxed);
+    }
+
+    .jds-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--jds-spacing-3);
+      padding: var(--jds-spacing-6);
+      color: var(--jds-text-tertiary);
+      font-size: var(--jds-font-size-sm);
+    }
+    .jds-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--jds-border);
+      border-top-color: var(--jds-primary);
+      border-radius: 50%;
+      animation: jds-spin 0.8s linear infinite;
+    }
+    @keyframes jds-spin { to { transform: rotate(360deg); } }
+
+    .jds-search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--jds-bg-primary);
+      border: 2px solid var(--jds-border);
+      border-radius: var(--jds-radius-full);
+      padding: var(--jds-spacing-1) var(--jds-spacing-2);
+      transition: all var(--jds-transition-normal);
+      max-width: 600px;
+    }
+    .jds-search-bar:focus-within {
+      border-color: var(--jds-primary);
+      box-shadow: 0 0 0 4px rgba(225, 37, 27, 0.08);
+    }
+    .jds-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: var(--jds-spacing-3) var(--jds-spacing-4);
+      font-size: var(--jds-font-size-base);
+      background: transparent;
+    }
+    .jds-search-input::placeholder {
+      color: var(--jds-text-tertiary);
+    }
+    .jds-search-btn {
+      background: var(--jds-primary);
+      color: #fff;
+      border: none;
+      padding: var(--jds-spacing-3) var(--jds-spacing-6);
+      border-radius: var(--jds-radius-full);
+      font-size: var(--jds-font-size-sm);
+      font-weight: var(--jds-font-weight-semibold);
+      cursor: pointer;
+      transition: all var(--jds-transition-fast);
+    }
+    .jds-search-btn:hover {
+      background: var(--jds-primary-hover);
+    }
+    .jds-clear-btn {
+      background: transparent;
+      border: none;
+      color: var(--jds-text-tertiary);
+      cursor: pointer;
+      padding: var(--jds-spacing-2);
+      font-size: var(--jds-font-size-lg);
+      transition: color var(--jds-transition-fast);
+    }
+    .jds-clear-btn:hover {
+      color: var(--jds-text-primary);
+    }
+
+    .jds-toast {
+      position: fixed;
+      bottom: var(--jds-spacing-8);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: var(--jds-spacing-4) var(--jds-spacing-8);
+      border-radius: var(--jds-radius-full);
+      font-size: var(--jds-font-size-sm);
+      z-index: var(--jds-z-index-toast);
+      opacity: 0;
+      transition: all var(--jds-transition-normal);
+      box-shadow: var(--jds-shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--jds-spacing-2);
+    }
+    .jds-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .jds-toast-success { background: var(--jds-success); }
+    .jds-toast-error { background: var(--jds-error); }
+    .jds-toast-info { background: var(--jds-info); }
+
+    .ds-preview-section {
+      background: var(--jds-bg-primary);
+      border-radius: var(--jds-radius-xl);
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--jds-shadow-card);
+    }
+    .ds-preview-header {
+      background: linear-gradient(135deg, var(--jds-primary) 0%, var(--jds-primary-dark) 100%);
+      padding: var(--jds-spacing-6);
+      text-align: center;
+    }
+    .ds-preview-header h3 {
+      color: #fff;
+      font-size: var(--jds-font-size-xl);
+      font-weight: var(--jds-font-weight-semibold);
+      letter-spacing: var(--jds-letter-spacing-wide);
+    }
+    .ds-preview-content {
+      padding: var(--jds-spacing-8);
+    }
+
+    .ds-desktop-header {
+      background: var(--jds-bg-primary);
+      border-bottom: 2px solid var(--jds-primary);
+      padding: var(--jds-spacing-4) var(--jds-spacing-6);
+      display: flex;
+      align-items: center;
+      gap: var(--jds-spacing-6);
+      border-radius: var(--jds-radius-lg);
+      box-shadow: var(--jds-shadow-primary);
+    }
+    .ds-desktop-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--jds-spacing-3);
+      font-weight: var(--jds-font-weight-bold);
+      font-size: var(--jds-font-size-lg);
+      color: var(--jds-primary);
+    }
+    .ds-desktop-logo svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .ds-product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--jds-spacing-6);
+      margin-top: var(--jds-spacing-8);
+    }
+    .ds-product-card {
+      background: var(--jds-bg-primary);
+      border-radius: var(--jds-radius-xl);
+      overflow: hidden;
+      box-shadow: var(--jds-shadow-card);
+      border: 1px solid var(--jds-border-light);
+      transition: all var(--jds-transition-normal);
+      cursor: pointer;
+    }
+    .ds-product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--jds-shadow-lg);
+    }
+    .ds-product-image {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, var(--jds-bg-secondary) 0%, var(--jds-bg-tertiary) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ds-product-image::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.05));
+    }
+    .ds-product-info {
+      padding: var(--jds-spacing-4);
+    }
+    .ds-product-name {
+      font-size: var(--jds-font-size-sm);
+      font-weight: var(--jds-font-weight-medium);
+      color: var(--jds-text-primary);
+      margin-bottom: var(--jds-spacing-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ds-product-price {
+      font-size: var(--jds-font-size-xl);
+      font-weight: var(--jds-font-weight-bold);
+      color: var(--jds-primary);
+      margin-bottom: var(--jds-spacing-3);
+    }
+    .ds-product-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ds-product-countdown {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+    }
+
+    .ds-mobile-preview {
+      max-width: 375px;
+      margin: 0 auto;
+      border: 3px solid #1a1a1a;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--jds-shadow-xl);
+      background: #1a1a1a;
+    }
+    .ds-mobile-notch {
+      width: 120px;
+      height: 24px;
+      background: #1a1a1a;
+      border-radius: 0 0 16px 16px;
+      margin: 0 auto;
+    }
+    .ds-mobile-screen {
+      background: var(--jds-bg-secondary);
+    }
+    .ds-mobile-header {
+      background: var(--jds-bg-primary);
+      border-bottom: 2px solid var(--jds-primary);
+      padding: var(--jds-spacing-3);
+      display: flex;
+      align-items: center;
+      gap: var(--jds-spacing-3);
+    }
+    .ds-mobile-logo {
+      width: 24px;
+      height: 24px;
+      fill: var(--jds-primary);
+    }
+    .ds-mobile-title {
+      font-size: var(--jds-font-size-base);
+      font-weight: var(--jds-font-weight-bold);
+      color: var(--jds-primary);
+    }
+    .ds-mobile-body {
+      padding: var(--jds-spacing-4);
+    }
+    .ds-mobile-search {
+      margin-bottom: var(--jds-spacing-4);
+    }
+    .ds-mobile-search .jds-search-bar {
+      max-width: none;
+    }
+    .ds-mobile-tabs {
+      margin-bottom: var(--jds-spacing-4);
+    }
+    .ds-mobile-tabs .jds-tab {
+      padding: var(--jds-spacing-2) var(--jds-spacing-4);
+      font-size: var(--jds-font-size-xs);
+    }
+    .ds-mobile-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ds-divider {
+      height: 1px;
+      background: var(--jds-border-light);
+      margin: var(--jds-spacing-8) 0;
+    }
+
+    .ds-feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--jds-spacing-4);
+    }
+    .ds-feature-item {
+      padding: var(--jds-spacing-4);
+      background: var(--jds-bg-secondary);
+      border-radius: var(--jds-radius-lg);
+      text-align: center;
+    }
+    .ds-feature-item .feature-icon {
+      font-size: 32px;
+      margin-bottom: var(--jds-spacing-3);
+    }
+    .ds-feature-item .feature-title {
+      font-size: var(--jds-font-size-sm);
+      font-weight: var(--jds-font-weight-semibold);
+      color: var(--jds-text-primary);
+      margin-bottom: var(--jds-spacing-1);
+    }
+    .ds-feature-item .feature-desc {
+      font-size: var(--jds-font-size-xs);
+      color: var(--jds-text-tertiary);
+    }
+
+    .ds-footer {
+      text-align: center;
+      padding: var(--jds-spacing-8);
+      color: var(--jds-text-tertiary);
+      font-size: var(--jds-font-size-xs);
+    }
+
+    @media (max-width: 768px) {
+      .ds-container {
+        padding: var(--jds-spacing-4);
+      }
+      .ds-section {
+        padding: var(--jds-spacing-4);
+      }
+      .ds-header h1 {
+        font-size: var(--jds-font-size-2xl);
+      }
+      .ds-desktop-header {
+        flex-wrap: wrap;
+        gap: var(--jds-spacing-3);
+      }
+      .ds-desktop-header .jds-search-bar {
+        order: 1;
+        width: 100%;
+      }
+      .ds-product-list {
+        grid-template-columns: 1fr;
+      }
+      .ds-colors-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .ds-spacing-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .jds-input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="ds-header">
+    <h1>JD-Auction-Search</h1>
+    <p>京东夺宝搜索增强 · 设计系统 v1.2.2</p>
+    <nav class="ds-nav">
+      <a href="#colors">色彩</a>
+      <a href="#typography">字体</a>
+      <a href="#spacing">间距</a>
+      <a href="#components">组件</a>
+      <a href="#preview">预览</a>
+    </nav>
+  </header>
+
+  <main class="ds-container">
+    <section class="ds-section" id="colors">
+      <h2 class="ds-section-title">Color Palette</h2>
+      <p class="ds-subtitle">基于京东品牌红色的完整色彩系统</p>
+      
+      <div class="ds-colors-grid">
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary);"></div><div class="color-name">Primary</div><div class="color-value">#e1251b</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-hover);"></div><div class="color-name">Hover</div><div class="color-value">#c91b14</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-light);"></div><div class="color-name">Light</div><div class="color-value">#ff6b63</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-dark);"></div><div class="color-name">Dark</div><div class="color-value">#a31810</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-50);"></div><div class="color-name">50</div><div class="color-value">#fff5f4</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-100);"></div><div class="color-name">100</div><div class="color-value">#ffe0df</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-200);"></div><div class="color-name">200</div><div class="color-value">#ffc0be</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-300);"></div><div class="color-name">300</div><div class="color-value">#ff908b</div></div>
+      </div>
+
+      <div class="ds-colors-grid" style="margin-top: var(--jds-spacing-6);">
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-success);"></div><div class="color-name">Success</div><div class="color-value">#52c41a</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-warning);"></div><div class="color-name">Warning</div><div class="color-value">#faad14</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-error);"></div><div class="color-name">Error</div><div class="color-value">#ff4d4f</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-info);"></div><div class="color-name">Info</div><div class="color-value">#1890ff</div></div>
+      </div>
+
+      <div class="ds-colors-grid" style="margin-top: var(--jds-spacing-6);">
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-primary);"></div><div class="color-name">Text Primary</div><div class="color-value">#1a1a1a</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-secondary);"></div><div class="color-name">Text Secondary</div><div class="color-value">#666666</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-tertiary);"></div><div class="color-name">Text Tertiary</div><div class="color-value">#999999</div></div>
+        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-muted);"></div><div class="color-name">Text Muted</div><div class="color-value">#cccccc</div></div>
+      </div>
+    </section>
+
+    <section class="ds-section" id="typography">
+      <h2 class="ds-section-title">Typography</h2>
+      <p class="ds-subtitle">字体层级系统，注重可读性和视觉层次</p>
+      
+      <div class="ds-font-sizes">
+        <div class="ds-font-item"><div class="font-label">3xl / 24px</div><div style="font-size: var(--jds-font-size-3xl); font-weight: var(--jds-font-weight-bold); letter-spacing: var(--jds-letter-spacing-tight);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">2xl / 20px</div><div style="font-size: var(--jds-font-size-2xl); font-weight: var(--jds-font-weight-semibold);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">xl / 18px</div><div style="font-size: var(--jds-font-size-xl); font-weight: var(--jds-font-weight-medium);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">lg / 16px</div><div style="font-size: var(--jds-font-size-lg); font-weight: var(--jds-font-weight-normal);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">base / 14px</div><div style="font-size: var(--jds-font-size-base);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">sm / 12px</div><div style="font-size: var(--jds-font-size-sm);">京东夺宝搜索增强</div></div>
+        <div class="ds-font-item"><div class="font-label">xs / 11px</div><div style="font-size: var(--jds-font-size-xs);">京东夺宝搜索增强</div></div>
+      </div>
+    </section>
+
+    <section class="ds-section" id="spacing">
+      <h2 class="ds-section-title">Spacing</h2>
+      <p class="ds-subtitle">基于4px基准的间距系统</p>
+      
+      <div class="ds-spacing-grid">
+        <div class="ds-spacing-item"><div class="spacing-value">4px</div><div class="spacing-bar" style="height: 4px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">8px</div><div class="spacing-bar" style="height: 8px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">12px</div><div class="spacing-bar" style="height: 12px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">16px</div><div class="spacing-bar" style="height: 16px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">20px</div><div class="spacing-bar" style="height: 20px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">24px</div><div class="spacing-bar" style="height: 24px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">32px</div><div class="spacing-bar" style="height: 32px;"></div></div>
+        <div class="ds-spacing-item"><div class="spacing-value">40px</div><div class="spacing-bar" style="height: 40px;"></div></div>
+      </div>
+
+      <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-top: var(--jds-spacing-6); margin-bottom: var(--jds-spacing-4);">Border Radius</h3>
+      <div class="ds-radii-grid">
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-sm);"></div><div class="radii-label">4px</div></div>
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-md);"></div><div class="radii-label">8px</div></div>
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-lg);"></div><div class="radii-label">12px</div></div>
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-xl);"></div><div class="radii-label">16px</div></div>
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-2xl);"></div><div class="radii-label">24px</div></div>
+        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-full);"></div><div class="radii-label">Full</div></div>
+      </div>
+
+      <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-top: var(--jds-spacing-6); margin-bottom: var(--jds-spacing-4);">Shadow</h3>
+      <div class="ds-shadows-grid">
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-sm);"></div><div class="shadow-label">sm</div></div>
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-md);"></div><div class="shadow-label">md</div></div>
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-lg);"></div><div class="shadow-label">lg</div></div>
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-xl);"></div><div class="shadow-label">xl</div></div>
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-primary);"></div><div class="shadow-label">primary</div></div>
+        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-card);"></div><div class="shadow-label">card</div></div>
+      </div>
+    </section>
+
+    <section class="ds-section" id="components">
+      <h2 class="ds-section-title">Components</h2>
+      <p class="ds-subtitle">基础组件库，支持完整交互状态</p>
+      
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Buttons</h3>
+        <div class="ds-buttons-group">
+          <button class="jds-btn jds-btn-primary" onclick="showToast('primary')">Primary</button>
+          <button class="jds-btn jds-btn-secondary" onclick="showToast('secondary')">Secondary</button>
+          <button class="jds-btn jds-btn-outline" onclick="showToast('outline')">Outline</button>
+          <button class="jds-btn jds-btn-primary jds-btn-sm" onclick="showToast('small')">Small</button>
+          <button class="jds-btn jds-btn-primary jds-btn-lg" onclick="showToast('large')">Large</button>
+          <button class="jds-btn jds-btn-primary" disabled>Disabled</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Input</h3>
+        <input class="jds-input" type="text" placeholder="输入关键词搜索...">
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Tabs</h3>
+        <div class="jds-tabs">
+          <button class="jds-tab active" onclick="switchTab(this)">全部</button>
+          <button class="jds-tab" onclick="switchTab(this)">正在夺宝</button>
+          <button class="jds-tab" onclick="switchTab(this)">即将开始</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Badge</h3>
+        <div class="ds-buttons-group">
+          <span class="jds-badge jds-badge-primary">进行中</span>
+          <span class="jds-badge jds-badge-success">即将结束</span>
+          <span class="jds-badge jds-badge-warning">即将开始</span>
+          <span class="jds-badge jds-badge-error">已结束</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Card</h3>
+        <div class="jds-card">
+          <div class="jds-card-title">商品搜索增强</div>
+          <div class="jds-card-desc">为京东夺宝页面提供关键词搜索和分类过滤功能，提升浏览效率</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Loading</h3>
+        <div class="jds-loading"><div class="jds-spinner"></div>正在加载商品列表...</div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Empty State</h3>
+        <div class="jds-empty-state">
+          <div class="jds-empty-icon">🔍</div>
+          <div class="jds-empty-title">未找到匹配商品</div>
+          <div class="jds-empty-desc">试试其他关键词，或清除筛选条件重新搜索</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--jds-spacing-8);">
+        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Search Bar</h3>
+        <div class="jds-search-bar">
+          <input class="jds-search-input" type="text" placeholder="输入商品关键词搜索..." id="demoSearchInput">
+          <button class="jds-clear-btn" id="demoClearBtn" onclick="clearSearch()">×</button>
+          <button class="jds-search-btn" onclick="performSearch()">搜索</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-preview-section" id="preview">
+      <div class="ds-preview-header">
+        <h3>Desktop Preview</h3>
+      </div>
+      <div class="ds-preview-content">
+        <div class="ds-desktop-header">
+          <div class="ds-desktop-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <span>夺宝搜索</span>
+          </div>
+          <div class="jds-search-bar">
+            <input class="jds-search-input" type="text" placeholder="输入商品关键词搜索...">
+            <button class="jds-search-btn">搜索</button>
+          </div>
+          <div class="jds-tabs">
+            <button class="jds-tab active">全部</button>
+            <button class="jds-tab">正在夺宝</button>
+            <button class="jds-tab">即将开始</button>
+          </div>
+          <div style="font-size: var(--jds-font-size-sm); color: var(--jds-text-tertiary); white-space: nowrap;">共 <strong style="color: var(--jds-primary); font-weight: var(--jds-font-weight-semibold);">128</strong> 件商品</div>
+          <button class="jds-btn jds-btn-outline jds-btn-sm">已启用</button>
+        </div>
+
+        <div class="ds-divider"></div>
+
+        <div class="ds-feature-list">
+          <div class="ds-feature-item">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-title">实时搜索</div>
+            <div class="feature-desc">输入关键词即时过滤</div>
+          </div>
+          <div class="ds-feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">分类筛选</div>
+            <div class="feature-desc">全部/进行中/即将开始</div>
+          </div>
+          <div class="ds-feature-item">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-title">API拦截</div>
+            <div class="feature-desc">自动缓存商品数据</div>
+          </div>
+          <div class="ds-feature-item">
+            <div class="feature-icon">🌐</div>
+            <div class="feature-title">多语言</div>
+            <div class="feature-desc">支持11种语言</div>
+          </div>
+        </div>
+
+        <div class="ds-product-list">
+          <div class="ds-product-card">
+            <div class="ds-product-image">📱</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">iPhone 15 Pro Max 256GB 原色钛金属</div>
+              <div class="ds-product-price">¥ 8,999</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-primary">进行中</span>
+                <span class="ds-product-countdown">02:35:18</span>
+              </div>
+            </div>
+          </div>
+          <div class="ds-product-card">
+            <div class="ds-product-image">💻</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">MacBook Pro 14寸 M3 Pro芯片 18GB 512GB</div>
+              <div class="ds-product-price">¥ 17,999</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-warning">即将开始</span>
+                <span class="ds-product-countdown">12:48:33</span>
+              </div>
+            </div>
+          </div>
+          <div class="ds-product-card">
+            <div class="ds-product-image">🎧</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">AirPods Pro 2代 USB-C版 主动降噪</div>
+              <div class="ds-product-price">¥ 1,899</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-primary">进行中</span>
+                <span class="ds-product-countdown">05:12:09</span>
+              </div>
+            </div>
+          </div>
+          <div class="ds-product-card">
+            <div class="ds-product-image">⌚</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">Apple Watch Series 9 GPS版 45mm</div>
+              <div class="ds-product-price">¥ 3,199</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-success">即将结束</span>
+                <span class="ds-product-countdown">00:45:22</span>
+              </div>
+            </div>
+          </div>
+          <div class="ds-product-card">
+            <div class="ds-product-image">🎮</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">PlayStation 5 Slim 轻薄版 1TB</div>
+              <div class="ds-product-price">¥ 3,899</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-primary">进行中</span>
+                <span class="ds-product-countdown">08:22:15</span>
+              </div>
+            </div>
+          </div>
+          <div class="ds-product-card">
+            <div class="ds-product-image">📺</div>
+            <div class="ds-product-info">
+              <div class="ds-product-name">三星 Neo QLED 55英寸 4K智能电视</div>
+              <div class="ds-product-price">¥ 7,999</div>
+              <div class="ds-product-status">
+                <span class="jds-badge jds-badge-warning">即将开始</span>
+                <span class="ds-product-countdown">23:55:40</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-preview-section">
+      <div class="ds-preview-header">
+        <h3>Mobile Preview</h3>
+      </div>
+      <div class="ds-preview-content">
+        <div class="ds-mobile-preview">
+          <div class="ds-mobile-notch"></div>
+          <div class="ds-mobile-screen">
+            <div class="ds-mobile-header">
+              <svg class="ds-mobile-logo" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span class="ds-mobile-title">夺宝搜索</span>
+            </div>
+            <div class="ds-mobile-body">
+              <div class="ds-mobile-search">
+                <div class="jds-search-bar">
+                  <input class="jds-search-input" type="text" placeholder="搜索商品...">
+                  <button class="jds-search-btn">搜索</button>
+                </div>
+              </div>
+              <div class="ds-mobile-tabs">
+                <div class="jds-tabs">
+                  <button class="jds-tab active">全部</button>
+                  <button class="jds-tab">进行中</button>
+                  <button class="jds-tab">即将开始</button>
+                </div>
+              </div>
+              <div class="ds-mobile-stats">
+                <span style="font-size: var(--jds-font-size-xs); color: var(--jds-text-tertiary);">共 128 件商品</span>
+                <button class="jds-btn jds-btn-outline jds-btn-sm">已启用</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ds-footer">
+    JD-Auction-Search Design System v1.2.2 · Designed with precision
+  </footer>
+
+  <div class="jds-toast" id="demoToast"></div>
+
+  <script>
+    function showToast(type) {
+      const toast = document.getElementById('demoToast');
+      const messages = {
+        primary: 'Primary Button Clicked!',
+        secondary: 'Secondary Button Clicked!',
+        outline: 'Outline Button Clicked!',
+        small: 'Small Button Clicked!',
+        large: 'Large Button Clicked!'
+      };
+      
+      toast.textContent = messages[type] || 'Action performed!';
+      toast.className = 'jds-toast show';
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function switchTab(element) {
+      const tabs = element.parentElement.querySelectorAll('.jds-tab');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function performSearch() {
+      const input = document.getElementById('demoSearchInput');
+      const toast = document.getElementById('demoToast');
+      
+      if (input.value.trim()) {
+        toast.textContent = `搜索 "${input.value}"...`;
+        toast.className = 'jds-toast show';
+        document.getElementById('demoClearBtn').style.display = 'block';
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2000);
+      }
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('demoSearchInput');
+      input.value = '';
+      document.getElementById('demoClearBtn').style.display = 'none';
+    }
+
+    document.getElementById('demoSearchInput').addEventListener('input', function() {
+      document.getElementById('demoClearBtn').style.display = this.value.trim() ? 'block' : 'none';
+    });
+
+    document.getElementById('demoSearchInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+
+    setTimeout(() => {
+      const toast = document.getElementById('demoToast');
+      toast.textContent = '🎉 Design System Loaded';
+      toast.className = 'jds-toast show jds-toast-success';
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }, 1000);
+  </script>
+</body>
+</html>

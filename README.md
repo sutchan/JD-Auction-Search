@@ -12,7 +12,32 @@
 | **DOM 提取** | API 不可用时自动从页面 DOM 提取商品数据 |
 | **Shadow DOM 隔离** | UI 组件使用 Shadow DOM 渲染，完全隔离样式 |
 | **一键启停** | 顶部工具栏可随时启用/禁用插件 |
-| **多语言支持** | 支持中文、英文、西班牙文、阿拉伯文、法文、葡萄牙文、德文、日文、韩文、俄文 |
+| **多语言支持** | 支持 11 种语言（中文、英文、西班牙文、阿拉伯文、法文、葡萄牙文、德文、日文、韩文、俄文、繁体中文） |
+| **无障碍支持** | ARIA 标签、键盘导航、语义化 HTML |
+| **动画优化** | 支持 prefers-reduced-motion 减少动画 |
+
+## 设计系统
+
+本项目建立了完整的设计令牌系统，确保 UI 一致性：
+
+### 色彩系统（基于京东品牌红）
+
+| 变量 | 值 | 用途 |
+|------|-----|------|
+| `--jds-primary` | #e1251b | 主色调 |
+| `--jds-primary-hover` | #c91b14 | 悬停状态 |
+| `--jds-bg-primary` | #ffffff | 主背景 |
+| `--jds-text-primary` | #1a1a1a | 主文本 |
+
+### 组件库
+
+- **Button**: Primary/Secondary/Outline/尺寸变体
+- **SearchBar**: 圆角搜索框 + 清除按钮
+- **Tabs**: Pill 形状 Tab 切换器
+- **Toast**: 成功/错误/信息提示
+- **EmptyState**: 空状态提示动画
+
+详见 [prototype/index.html](prototype/index.html) 高保真可交互原型。
 
 ## 项目结构
 
@@ -26,13 +51,16 @@ JD-Auction-Search/
 │   ├── spec.md            # 项目规范
 │   ├── check_list.md      # 检查清单
 │   └── tasks.md           # 任务列表
+├── prototype/             # 设计原型目录
+│   ├── index.html         # 高保真可交互原型
+│   └── design-tokens.css  # 设计令牌系统
 ├── src/
 │   ├── utils.js           # 工具函数
 │   ├── api.js             # API 管理
 │   ├── ui.js              # UI 渲染
 │   ├── dom.js             # DOM 处理
 │   ├── content.js         # 主内容脚本
-│   └── styles.css         # 搜索 UI 样式
+│   └── styles.css         # 搜索 UI 样式（设计令牌）
 ├── _locales/              # 国际化文件目录
 │   ├── en/messages.json
 │   ├── zh_CN/messages.json
@@ -95,7 +123,7 @@ npm install
 npm run build
 ```
 
-这将在项目根目录下生成 `jd-auction-search-v1.2.1.zip` 文件，可直接用于发布。
+这将在项目根目录下生成 `jd-auction-search-v1.2.2.zip` 文件，可直接用于发布。
 
 ## 核心实现原理
 
@@ -151,12 +179,21 @@ observer.observe(container, { childList: true, subtree: true });
 | API 请求失败 | 插件自动降级为 DOM 提取模式 |
 | 跨域 CORS 拦截 | 已配置 `host_permissions`，正常情况无需处理 |
 
+## 安全特性
+
+- **消息验证**: 所有 chrome.runtime.onMessage 验证发送者来源
+- **URL 白名单**: 仅允许访问 jd.com 域名
+- **HTTPS 强制**: 所有 API 请求使用 HTTPS
+- **参数过滤**: API 参数经过白名单过滤
+- **输入验证**: 商品数据验证防止异常输入
+
 ## 技术栈
 
 - **Manifest V3** - 现代浏览器插件标准
 - **Shadow DOM** - 样式隔离，避免冲突
 - **MutationObserver** - 高效 DOM 变化监听
 - **Fetch/XHR 拦截** - 无侵入式数据获取
+- **CSS Design Tokens** - 设计令牌系统
 
 ## 许可证
 
