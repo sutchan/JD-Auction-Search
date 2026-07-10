@@ -25,10 +25,10 @@ JD-Auction-Search/
 ├── src/
 │   ├── utils.js           # 工具函数
 │   ├── api.js             # API管理
-│   ├── ui.js              # UI渲染
+│   ├── ui.js              # UI渲染（shadcn设计语言 · Shadow DOM内联样式）
 │   ├── dom.js             # DOM处理
 │   ├── content.js         # 主内容脚本
-│   └── styles.css         # 样式文件
+│   └── styles.css         # Toast全局样式（Shadow DOM外）
 ├── _locales/              # 国际化文件
 │   ├── en/messages.json
 │   ├── zh_CN/messages.json
@@ -56,10 +56,47 @@ JD-Auction-Search/
 ### 核心技术
 
 - **Manifest V3** - 现代扩展标准
-- **Shadow DOM** - 样式隔离
+- **Shadow DOM** - 样式隔离（工具栏样式内联至 Shadow DOM `:host`）
 - **MutationObserver** - DOM变化监听
 - **Fetch/XHR Interceptor** - API拦截
 - **Internationalization (i18n)** - 多语言支持
+
+## 设计系统
+
+采用 shadcn 设计语言（浅色极简风），以 zinc 中性灰阶 + 京东红作为唯一强调色。
+
+### 语义令牌（Semantic Tokens）
+
+| 令牌 | 值 | 用途 |
+|------|-----|------|
+| `--background` / `--foreground` | #ffffff / #18181b | 主背景/文本 |
+| `--primary` / `--primary-hover` | #e1251b / #c1170f | 京东红强调 |
+| `--secondary` / `--muted` | #f4f4f5 / #fafafa | 次级/静默背景 |
+| `--muted-foreground` / `--subtle-foreground` | #71717a / #a1a1aa | 次级/静默文本 |
+| `--border` / `--border-strong` | #e4e4e7 / #d4d4d8 | 边框/强边框 |
+| `--success` / `--warning` / `--destructive` | #16a34a / #d97706 / #dc2626 | 状态色 |
+
+### 组件库（三层架构）
+
+| 层级 | 组件 | 数量 |
+|------|------|------|
+| 基础（Atoms） | Button, Input, Badge, Switch, Tabs, Separator, Skeleton, Toast | 8 |
+| 复合（Molecules） | SearchBar, Card, Alert, EmptyState | 4 |
+| 业务（Organisms） | AuctionToolbar, ProductGrid, FilterTabs | 3 |
+
+### 交互标准
+
+- **反馈**：Toast（sonner 风格，图标 + 自动堆叠，2.5s 自动消失）
+- **加载**：Skeleton 骨架屏（shimmer 动画，数据加载 >300ms 触发）
+- **错误**：Alert 内联提示 + 降级策略（API 失败 → DOM 提取）
+- **空状态**：EmptyState（图标 + 标题 + 描述 + 建议）
+
+### 无障碍
+
+- ARIA 角色：`role="tablist"`, `role="tab"`, `role="region"`, `role="status"`
+- ARIA 状态：`aria-selected`, `aria-pressed`, `aria-live`, `aria-busy`, `aria-hidden`
+- 键盘导航：Enter 搜索、Tab 切换焦点
+- `prefers-reduced-motion` 适配
 
 ## 功能清单
 
@@ -98,6 +135,16 @@ JD-Auction-Search/
 - 函数必须有注释
 
 ## 版本历史
+
+### v1.2.2
+- 采用 shadcn 设计语言（浅色极简风）
+- 重写 UI：语义令牌体系（zinc 中性 + 京东红强调）
+- 组件库三层架构（Atoms/Molecules/Organisms）
+- 交互标准统一（反馈/加载/错误/空状态）
+- 修复 Shadow DOM 样式注入问题（样式内联至 Shadow DOM）
+- Toast 升级为 sonner 风格（图标 + 自动堆叠）
+- ARIA 无障碍增强（aria-selected, aria-pressed, aria-live, aria-busy）
+- 整合原型为单一文件（含设计系统+组件库+交互标准展示）
 
 ### v1.2.1
 - 完善多语言支持（11种语言）

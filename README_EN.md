@@ -18,26 +18,38 @@
 
 ## Design System
 
-This project establishes a complete design token system for UI consistency:
+This project adopts the **shadcn design language** (light minimalist), using zinc neutral grays + JD red as the single chromatic accent, with a semantic token system for UI consistency.
 
-### Color System (Based on JD Brand Red)
+### Semantic Tokens
 
-| Variable | Value | Usage |
-|----------|-------|--------|
-| `--jds-primary` | #e1251b | Primary color |
-| `--jds-primary-hover` | #c91b14 | Hover state |
-| `--jds-bg-primary` | #ffffff | Main background |
-| `--jds-text-primary` | #1a1a1a | Main text |
+| Token | Value | Usage |
+|-------|-------|--------|
+| `--background` | #ffffff | Main background |
+| `--foreground` | #18181b (zinc-900) | Main text |
+| `--primary` | #e1251b | JD red accent |
+| `--primary-hover` | #c1170f | Accent hover |
+| `--secondary` | #f4f4f5 (zinc-100) | Secondary background |
+| `--muted` | #fafafa (zinc-50) | Muted background |
+| `--muted-foreground` | #71717a (zinc-500) | Secondary text |
+| `--border` | #e4e4e7 (zinc-200) | Border |
+| `--success` | #16a34a | Success state |
+| `--warning` | #d97706 | Warning state |
+| `--destructive` | #dc2626 | Error state |
 
-### Component Library
+### Component Library (3-Layer Architecture)
 
-- **Button**: Primary/Secondary/Outline/Size variants
-- **SearchBar**: Rounded search box + clear button
-- **Tabs**: Pill-shaped tab switcher
-- **Toast**: Success/Error/Info notifications
-- **EmptyState**: Empty state animation
+**Atoms (8)**: Button, Input, Badge, Switch, Tabs, Separator, Skeleton, Toast
+**Molecules (4)**: SearchBar, Card, Alert, EmptyState
+**Organisms (3)**: AuctionToolbar, ProductGrid, FilterTabs
 
-See [prototype/index.html](prototype/index.html) for the high-fidelity interactive prototype.
+### Interaction Standards
+
+- **Feedback**: Toast notifications (sonner-style, icon + auto-stack)
+- **Loading**: Skeleton placeholders (shimmer animation, >300ms trigger)
+- **Error**: Alert inline prompts + fallback strategy (API→DOM extraction)
+- **Empty**: EmptyState (icon + title + description + suggestion)
+
+See [prototype/index.html](prototype/index.html) for the high-fidelity interactive prototype (includes design system, component library, and interaction standards).
 
 ## Project Structure
 
@@ -52,15 +64,14 @@ JD-Auction-Search/
 │   ├── check_list.md      # Check list
 │   └── tasks.md           # Tasks list
 ├── prototype/             # Design prototype directory
-│   ├── index.html         # High-fidelity interactive prototype
-│   └── design-tokens.css  # Design token system
+│   └── index.html         # High-fidelity prototype (design system + components + patterns)
 ├── src/
 │   ├── utils.js           # Utility functions
 │   ├── api.js             # API management
-│   ├── ui.js              # UI rendering
+│   ├── ui.js              # UI rendering (shadcn design language · Shadow DOM inline styles)
 │   ├── dom.js             # DOM handling
 │   ├── content.js         # Main content script
-│   └── styles.css         # Search UI styles (design tokens)
+│   └── styles.css         # Toast global styles (outside Shadow DOM)
 ├── _locales/              # Internationalization files
 │   ├── en/messages.json
 │   ├── zh_CN/messages.json

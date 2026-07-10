@@ -3,10 +3,12 @@
 ## v1.2.2
 
 ### Features
-- 建立完整设计系统（色彩/字体/间距/圆角/阴影/动效）
-- 创建高保真可交互原型（prototype/index.html）
-- 实现组件库规范（Button/SearchBar/Tabs/Toast/EmptyState）
-- 增强无障碍支持（ARIA 标签、键盘导航、语义化 HTML）
+- 采用 shadcn 设计语言（浅色极简风，zinc 中性 + 京东红强调）
+- 建立语义令牌体系（--background/--foreground/--primary 等）
+- 创建高保真整合原型（设计系统+组件库+交互标准，prototype/index.html）
+- 组件库三层架构（Atoms 8 / Molecules 4 / Organisms 3）
+- 交互标准统一（反馈/加载/错误/空状态）
+- 增强无障碍支持（ARIA 角色/状态、键盘导航、语义化 HTML）
 - 支持 prefers-reduced-motion 动画优化
 
 ### Security
@@ -17,9 +19,12 @@
 - 商品数据输入验证
 
 ### Improvements
-- 更新 src/styles.css 使用完整设计令牌
-- 优化 src/ui.js 引入外部样式文件
-- 更新 OpenSpec 规范文档
+- 重写 src/ui.js：样式内联至 Shadow DOM :host，修复样式注入问题
+- 更新 src/styles.css：Toast 升级为 sonner 风格（图标+自动堆叠）
+- 更新 src/utils.js：showToast 支持类型与图标
+- 更新 src/content.js：toggle 同步工具栏视觉态
+- 清理冗余原型文件（删除 interactive.html、design-tokens.css）
+- 更新 OpenSpec 规范文档（新增设计系统章节）
 - 同步 README.md 和 README_EN.md 文档
 
 ## v1.2.1

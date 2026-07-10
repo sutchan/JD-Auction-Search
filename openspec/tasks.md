@@ -2,6 +2,18 @@
 
 ## 已完成任务
 
+### v1.2.2
+- [x] 采用 shadcn 设计语言，建立语义令牌体系（zinc + 京东红）
+- [x] 创建高保真整合原型（设计系统+组件库+交互标准）
+- [x] 重写 src/ui.js：样式内联至 Shadow DOM，对齐原型组件结构
+- [x] 更新 src/styles.css：Toast 升级为 sonner 风格
+- [x] 更新 src/utils.js：showToast 支持图标与类型
+- [x] 组件库三层架构（Atoms 8 / Molecules 4 / Organisms 3）
+- [x] 交互标准统一（反馈/加载/错误/空状态）
+- [x] ARIA 无障碍增强（aria-selected, aria-pressed, aria-live）
+- [x] 清理冗余原型文件（删除 interactive.html、design-tokens.css）
+- [x] 同步 OpenSpec 文档与 README
+
 ### v1.2.1
 - [x] 完善多语言支持（11种语言）
 - [x] 优化 DOM 匹配算法，提高准确性

@@ -18,26 +18,38 @@
 
 ## 设计系统
 
-本项目建立了完整的设计令牌系统，确保 UI 一致性：
+本项目采用 **shadcn 设计语言**（浅色极简风），以 zinc 中性灰阶 + 京东红作为唯一强调色，建立语义化令牌体系确保 UI 一致性。
 
-### 色彩系统（基于京东品牌红）
+### 语义令牌（Semantic Tokens）
 
-| 变量 | 值 | 用途 |
+| 令牌 | 值 | 用途 |
 |------|-----|------|
-| `--jds-primary` | #e1251b | 主色调 |
-| `--jds-primary-hover` | #c91b14 | 悬停状态 |
-| `--jds-bg-primary` | #ffffff | 主背景 |
-| `--jds-text-primary` | #1a1a1a | 主文本 |
+| `--background` | #ffffff | 主背景 |
+| `--foreground` | #18181b (zinc-900) | 主文本 |
+| `--primary` | #e1251b | 京东红强调色 |
+| `--primary-hover` | #c1170f | 强调色悬停 |
+| `--secondary` | #f4f4f5 (zinc-100) | 次级背景 |
+| `--muted` | #fafafa (zinc-50) | 静默背景 |
+| `--muted-foreground` | #71717a (zinc-500) | 次级文本 |
+| `--border` | #e4e4e7 (zinc-200) | 边框 |
+| `--success` | #16a34a | 成功状态 |
+| `--warning` | #d97706 | 警告状态 |
+| `--destructive` | #dc2626 | 错误状态 |
 
-### 组件库
+### 组件库（三层架构）
 
-- **Button**: Primary/Secondary/Outline/尺寸变体
-- **SearchBar**: 圆角搜索框 + 清除按钮
-- **Tabs**: Pill 形状 Tab 切换器
-- **Toast**: 成功/错误/信息提示
-- **EmptyState**: 空状态提示动画
+**基础组件（Atoms · 8）**：Button、Input、Badge、Switch、Tabs、Separator、Skeleton、Toast
+**复合组件（Molecules · 4）**：SearchBar、Card、Alert、EmptyState
+**业务组件（Organisms · 3）**：AuctionToolbar、ProductGrid、FilterTabs
 
-详见 [prototype/index.html](prototype/index.html) 高保真可交互原型。
+### 交互标准
+
+- **反馈**：Toast 通知（sonner 风格，图标 + 自动堆叠）
+- **加载**：Skeleton 骨架屏（shimmer 动画，>300ms 触发）
+- **错误**：Alert 内联提示 + 降级策略（API→DOM 提取）
+- **空状态**：EmptyState（图标 + 标题 + 描述 + 建议）
+
+详见 [prototype/index.html](prototype/index.html) 高保真可交互原型（含设计系统、组件库、交互标准完整展示）。
 
 ## 项目结构
 
@@ -52,15 +64,14 @@ JD-Auction-Search/
 │   ├── check_list.md      # 检查清单
 │   └── tasks.md           # 任务列表
 ├── prototype/             # 设计原型目录
-│   ├── index.html         # 高保真可交互原型
-│   └── design-tokens.css  # 设计令牌系统
+│   └── index.html         # 高保真可交互原型（含设计系统+组件库+交互标准）
 ├── src/
 │   ├── utils.js           # 工具函数
 │   ├── api.js             # API 管理
-│   ├── ui.js              # UI 渲染
+│   ├── ui.js              # UI 渲染（shadcn 设计语言 · Shadow DOM 内联样式）
 │   ├── dom.js             # DOM 处理
 │   ├── content.js         # 主内容脚本
-│   └── styles.css         # 搜索 UI 样式（设计令牌）
+│   └── styles.css         # Toast 全局样式（Shadow DOM 外）
 ├── _locales/              # 国际化文件目录
 │   ├── en/messages.json
 │   ├── zh_CN/messages.json

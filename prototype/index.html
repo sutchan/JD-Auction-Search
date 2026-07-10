@@ -3,1185 +3,1406 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JD-Auction-Search Design System</title>
-  <link rel="stylesheet" href="design-tokens.css">
+  <title>JD Auction Search — Design System & Interactive Prototype</title>
+  <meta name="description" content="京东夺宝搜索增强 · 设计系统、组件库与高保真可交互原型">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    html { scroll-behavior: smooth; }
+    /* ============================================================
+       DESIGN TOKENS — shadcn-inspired semantic system
+       Zinc neutral palette · JD red as single chromatic accent
+       ============================================================ */
+    :root {
+      /* Semantic surfaces (shadcn convention) */
+      --background: #ffffff;
+      --foreground: #18181b;            /* zinc-900 */
+      --card: #ffffff;
+      --card-foreground: #18181b;
+      --popover: #ffffff;
+      --popover-foreground: #18181b;
+
+      /* Brand — JD red is the only chromatic accent */
+      --primary: #e1251b;
+      --primary-hover: #c1170f;
+      --primary-foreground: #ffffff;
+      --primary-subtle: #fef2f2;        /* red-50 */
+      --primary-muted: #fee2e2;         /* red-100 */
+
+      /* Neutrals (zinc scale) */
+      --secondary: #f4f4f5;             /* zinc-100 */
+      --secondary-foreground: #18181b;
+      --muted: #fafafa;                 /* zinc-50 */
+      --muted-foreground: #71717a;      /* zinc-500 */
+      --subtle-foreground: #a1a1aa;     /* zinc-400 */
+      --accent: #f4f4f5;
+      --accent-foreground: #18181b;
+
+      /* Status */
+      --success: #16a34a;
+      --success-subtle: #f0fdf4;
+      --warning: #d97706;
+      --warning-subtle: #fffbeb;
+      --destructive: #dc2626;
+      --destructive-foreground: #ffffff;
+      --info: #2563eb;
+      --info-subtle: #eff6ff;
+
+      /* Lines & rings */
+      --border: #e4e4e7;                /* zinc-200 */
+      --border-strong: #d4d4d8;        /* zinc-300 */
+      --input: #e4e4e7;
+      --ring: #e1251b;
+
+      /* Radius (shadcn derived scale) */
+      --radius: 0.625rem;               /* 10px base */
+      --radius-sm: calc(var(--radius) - 4px);
+      --radius-md: calc(var(--radius) - 2px);
+      --radius-lg: var(--radius);
+      --radius-xl: calc(var(--radius) + 6px);
+      --radius-2xl: calc(var(--radius) + 12px);
+      --radius-full: 9999px;
+
+      /* Shadows — refined, low-spread */
+      --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+      --shadow-sm: 0 1px 3px 0 rgb(24 24 27 / 0.06), 0 1px 2px -1px rgb(24 24 27 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
+      --shadow-lg: 0 10px 24px -4px rgb(24 24 27 / 0.10), 0 4px 8px -4px rgb(24 24 27 / 0.06);
+      --shadow-ring: 0 0 0 3px rgb(225 37 27 / 0.12);
+
+      /* Typography */
+      --font-display: 'Instrument Serif', 'Noto Serif SC', Georgia, serif;
+      --font-sans: 'Hanken Grotesk', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+      /* Spacing scale (4px base) */
+      --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+      --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --dur-fast: 0.15s;
+      --dur-base: 0.2s;
+      --dur-slow: 0.4s;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     body {
-      font-family: var(--jds-font-family);
-      background: var(--jds-bg-secondary);
-      color: var(--jds-text-primary);
-      line-height: var(--jds-line-height-normal);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      font-family: var(--font-sans);
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      font-feature-settings: "cv11", "ss01";
+      overflow-x: hidden;
     }
+    ::selection { background: var(--primary); color: #fff; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--muted); }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-full); border: 2px solid var(--muted); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--subtle-foreground); }
 
-    .ds-header {
-      background: var(--jds-bg-primary);
-      border-bottom: 1px solid var(--jds-border-light);
-      padding: var(--jds-spacing-6) var(--jds-spacing-8);
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: var(--jds-z-index-sticky);
-      backdrop-filter: blur(12px);
-      background: rgba(255, 255, 255, 0.95);
-    }
-    .ds-header h1 {
-      font-size: var(--jds-font-size-3xl);
-      font-weight: var(--jds-font-weight-bold);
-      color: var(--jds-primary);
-      letter-spacing: var(--jds-letter-spacing-tight);
-      margin-bottom: var(--jds-spacing-2);
-    }
-    .ds-header p {
-      font-size: var(--jds-font-size-sm);
-      color: var(--jds-text-tertiary);
-    }
-
-    .ds-nav {
-      display: flex;
-      justify-content: center;
-      gap: var(--jds-spacing-4);
-      margin-top: var(--jds-spacing-4);
-      flex-wrap: wrap;
-    }
-    .ds-nav a {
-      font-size: var(--jds-font-size-sm);
-      color: var(--jds-text-secondary);
-      text-decoration: none;
-      padding: var(--jds-spacing-2) var(--jds-spacing-4);
-      border-radius: var(--jds-radius-full);
-      transition: all var(--jds-transition-fast);
-    }
-    .ds-nav a:hover {
-      background: var(--jds-bg-tertiary);
-      color: var(--jds-text-primary);
-    }
-
-    .ds-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: var(--jds-spacing-8);
-    }
-
-    .ds-section {
-      background: var(--jds-bg-primary);
-      border-radius: var(--jds-radius-xl);
-      padding: var(--jds-spacing-8);
-      margin-bottom: var(--jds-spacing-8);
-      box-shadow: var(--jds-shadow-card);
-      border: 1px solid var(--jds-border-light);
-    }
-
-    .ds-section-title {
-      font-size: var(--jds-font-size-xl);
-      font-weight: var(--jds-font-weight-semibold);
-      color: var(--jds-text-primary);
-      margin-bottom: var(--jds-spacing-6);
-      padding-bottom: var(--jds-spacing-3);
-      border-bottom: 2px solid var(--jds-primary-100);
-      position: relative;
-    }
-    .ds-section-title::after {
+    /* Subtle grid texture for the page background — refined, not loud */
+    body::before {
       content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 48px;
-      height: 2px;
-      background: var(--jds-primary);
-      border-radius: 1px;
-    }
-
-    .ds-subtitle {
-      font-size: var(--jds-font-size-sm);
-      color: var(--jds-text-tertiary);
-      margin-bottom: var(--jds-spacing-6);
-    }
-
-    .ds-colors-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: var(--jds-spacing-4);
-    }
-
-    .ds-color-item {
-      border-radius: var(--jds-radius-lg);
-      padding: var(--jds-spacing-4);
-      text-align: center;
-      transition: transform var(--jds-transition-fast), box-shadow var(--jds-transition-fast);
-      cursor: pointer;
-    }
-    .ds-color-item:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--jds-shadow-md);
-    }
-    .ds-color-item .color-box {
-      width: 100%;
-      height: 80px;
-      border-radius: var(--jds-radius-md);
-      margin-bottom: var(--jds-spacing-3);
-      box-shadow: var(--jds-shadow-sm);
-    }
-    .ds-color-item .color-name {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-secondary);
-      font-weight: var(--jds-font-weight-medium);
-      text-transform: uppercase;
-      letter-spacing: var(--jds-letter-spacing-wide);
-    }
-    .ds-color-item .color-value {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
-      font-family: var(--jds-font-mono);
-      margin-top: var(--jds-spacing-1);
-    }
-
-    .ds-font-sizes {
-      display: flex;
-      flex-direction: column;
-      gap: var(--jds-spacing-3);
-    }
-    .ds-font-item {
-      padding: var(--jds-spacing-4);
-      background: var(--jds-bg-secondary);
-      border-radius: var(--jds-radius-md);
-      display: flex;
-      align-items: baseline;
-      gap: var(--jds-spacing-4);
-    }
-    .ds-font-item .font-label {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
-      font-family: var(--jds-font-mono);
-      min-width: 80px;
-    }
-
-    .ds-spacing-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: var(--jds-spacing-2);
-    }
-    .ds-spacing-item {
-      background: var(--jds-bg-secondary);
-      border-radius: var(--jds-radius-sm);
-      text-align: center;
-      padding: var(--jds-spacing-3);
-      transition: background var(--jds-transition-fast);
-    }
-    .ds-spacing-item:hover {
-      background: var(--jds-primary-50);
-    }
-    .ds-spacing-item .spacing-value {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-secondary);
-      font-family: var(--jds-font-mono);
-    }
-    .ds-spacing-item .spacing-bar {
-      width: 100%;
-      background: var(--jds-primary);
-      border-radius: 2px;
-      margin-top: var(--jds-spacing-2);
-    }
-
-    .ds-radii-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: var(--jds-spacing-6);
-    }
-    .ds-radii-item {
-      text-align: center;
-    }
-    .ds-radii-item .radii-box {
-      width: 64px;
-      height: 64px;
-      background: var(--jds-bg-tertiary);
-      margin: 0 auto var(--jds-spacing-3);
-      border: 2px solid var(--jds-border);
-      transition: all var(--jds-transition-fast);
-    }
-    .ds-radii-item:hover .radii-box {
-      border-color: var(--jds-primary);
-      background: var(--jds-primary-50);
-    }
-    .ds-radii-item .radii-label {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
-      font-family: var(--jds-font-mono);
-    }
-
-    .ds-shadows-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: var(--jds-spacing-6);
-    }
-    .ds-shadows-item {
-      text-align: center;
-    }
-    .ds-shadows-item .shadow-box {
-      width: 80px;
-      height: 48px;
-      background: var(--jds-bg-primary);
-      margin: 0 auto var(--jds-spacing-3);
-      border: 1px solid var(--jds-border-light);
-      border-radius: var(--jds-radius-md);
-    }
-    .ds-shadows-item .shadow-label {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
-      font-family: var(--jds-font-mono);
-    }
-
-    .ds-buttons-group {
-      display: flex;
-      gap: var(--jds-spacing-4);
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .jds-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--jds-spacing-3) var(--jds-spacing-6);
-      font-family: var(--jds-font-family);
-      font-size: var(--jds-font-size-base);
-      font-weight: var(--jds-font-weight-medium);
-      border: none;
-      border-radius: var(--jds-radius-lg);
-      cursor: pointer;
-      transition: all var(--jds-transition-normal);
-      gap: var(--jds-spacing-2);
-      position: relative;
-      overflow: hidden;
-    }
-    .jds-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left var(--jds-transition-slow);
-    }
-    .jds-btn:hover::before {
-      left: 100%;
-    }
-
-    .jds-btn-primary {
-      background: var(--jds-primary);
-      color: #fff;
-      box-shadow: var(--jds-shadow-sm);
-    }
-    .jds-btn-primary:hover {
-      background: var(--jds-primary-hover);
-      box-shadow: var(--jds-shadow-md);
-      transform: translateY(-1px);
-    }
-    .jds-btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .jds-btn-secondary {
-      background: var(--jds-bg-tertiary);
-      color: var(--jds-text-secondary);
-    }
-    .jds-btn-secondary:hover {
-      background: var(--jds-bg-hover);
-      color: var(--jds-text-primary);
-    }
-
-    .jds-btn-outline {
-      background: transparent;
-      border: 1.5px solid var(--jds-border);
-      color: var(--jds-text-primary);
-    }
-    .jds-btn-outline:hover {
-      border-color: var(--jds-primary);
-      color: var(--jds-primary);
-    }
-
-    .jds-btn-sm {
-      padding: var(--jds-spacing-2) var(--jds-spacing-4);
-      font-size: var(--jds-font-size-sm);
-    }
-    .jds-btn-lg {
-      padding: var(--jds-spacing-4) var(--jds-spacing-8);
-      font-size: var(--jds-font-size-lg);
-    }
-    .jds-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    .jds-btn:disabled::before {
-      display: none;
-    }
-
-    .jds-input {
-      width: 320px;
-      padding: var(--jds-spacing-3) var(--jds-spacing-4);
-      font-family: var(--jds-font-family);
-      font-size: var(--jds-font-size-base);
-      border: 1.5px solid var(--jds-border);
-      border-radius: var(--jds-radius-lg);
-      outline: none;
-      transition: all var(--jds-transition-normal);
-      background: var(--jds-bg-primary);
-    }
-    .jds-input:focus {
-      border-color: var(--jds-primary);
-      box-shadow: 0 0 0 4px rgba(225, 37, 27, 0.08);
-    }
-    .jds-input::placeholder {
-      color: var(--jds-text-tertiary);
-    }
-
-    .jds-tabs {
-      display: flex;
-      gap: var(--jds-spacing-1);
-      background: var(--jds-bg-secondary);
-      padding: var(--jds-spacing-1);
-      border-radius: var(--jds-radius-lg);
-      width: fit-content;
-    }
-    .jds-tab {
-      padding: var(--jds-spacing-3) var(--jds-spacing-5);
-      font-size: var(--jds-font-size-sm);
-      font-weight: var(--jds-font-weight-medium);
-      border: none;
-      background: transparent;
-      color: var(--jds-text-secondary);
-      border-radius: var(--jds-radius-md);
-      cursor: pointer;
-      transition: all var(--jds-transition-fast);
-      white-space: nowrap;
-      position: relative;
-    }
-    .jds-tab:hover {
-      background: var(--jds-bg-hover);
-    }
-    .jds-tab.active {
-      background: var(--jds-bg-primary);
-      color: var(--jds-primary);
-      font-weight: var(--jds-font-weight-semibold);
-      box-shadow: var(--jds-shadow-sm);
-    }
-    .jds-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      background: var(--jds-primary);
-      border-radius: 50%;
-    }
-
-    .jds-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px var(--jds-spacing-3);
-      font-size: var(--jds-font-size-xs);
-      font-weight: var(--jds-font-weight-semibold);
-      border-radius: var(--jds-radius-full);
-      letter-spacing: var(--jds-letter-spacing-wide);
-      text-transform: uppercase;
-    }
-    .jds-badge-primary { background: var(--jds-primary-100); color: var(--jds-primary); }
-    .jds-badge-success { background: rgba(82, 196, 26, 0.08); color: var(--jds-success); }
-    .jds-badge-warning { background: rgba(250, 173, 20, 0.08); color: var(--jds-warning); }
-    .jds-badge-error { background: rgba(255, 77, 79, 0.08); color: var(--jds-error); }
-
-    .jds-card {
-      background: var(--jds-bg-primary);
-      border-radius: var(--jds-radius-xl);
-      padding: var(--jds-spacing-6);
-      box-shadow: var(--jds-shadow-card);
-      border: 1px solid var(--jds-border-light);
-      transition: all var(--jds-transition-normal);
-    }
-    .jds-card:hover {
-      box-shadow: var(--jds-shadow-md);
-      transform: translateY(-2px);
-    }
-    .jds-card-title {
-      font-size: var(--jds-font-size-lg);
-      font-weight: var(--jds-font-weight-semibold);
-      color: var(--jds-text-primary);
-      margin-bottom: var(--jds-spacing-2);
-    }
-    .jds-card-desc {
-      font-size: var(--jds-font-size-sm);
-      color: var(--jds-text-secondary);
-    }
-
-    .jds-empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--jds-spacing-16) var(--jds-spacing-8);
-      text-align: center;
-      background: var(--jds-bg-secondary);
-      border-radius: var(--jds-radius-xl);
-    }
-    .jds-empty-icon {
-      font-size: 80px;
-      margin-bottom: var(--jds-spacing-6);
-      opacity: 0.3;
-      animation: jds-empty-bounce 2s ease-in-out infinite;
-    }
-    @keyframes jds-empty-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .jds-empty-title {
-      font-size: var(--jds-font-size-xl);
-      font-weight: var(--jds-font-weight-semibold);
-      color: var(--jds-text-primary);
-      margin-bottom: var(--jds-spacing-3);
-    }
-    .jds-empty-desc {
-      font-size: var(--jds-font-size-base);
-      color: var(--jds-text-tertiary);
-      max-width: 320px;
-      line-height: var(--jds-line-height-relaxed);
-    }
-
-    .jds-loading {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--jds-spacing-3);
-      padding: var(--jds-spacing-6);
-      color: var(--jds-text-tertiary);
-      font-size: var(--jds-font-size-sm);
-    }
-    .jds-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--jds-border);
-      border-top-color: var(--jds-primary);
-      border-radius: 50%;
-      animation: jds-spin 0.8s linear infinite;
-    }
-    @keyframes jds-spin { to { transform: rotate(360deg); } }
-
-    .jds-search-bar {
-      display: flex;
-      align-items: center;
-      background: var(--jds-bg-primary);
-      border: 2px solid var(--jds-border);
-      border-radius: var(--jds-radius-full);
-      padding: var(--jds-spacing-1) var(--jds-spacing-2);
-      transition: all var(--jds-transition-normal);
-      max-width: 600px;
-    }
-    .jds-search-bar:focus-within {
-      border-color: var(--jds-primary);
-      box-shadow: 0 0 0 4px rgba(225, 37, 27, 0.08);
-    }
-    .jds-search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      padding: var(--jds-spacing-3) var(--jds-spacing-4);
-      font-size: var(--jds-font-size-base);
-      background: transparent;
-    }
-    .jds-search-input::placeholder {
-      color: var(--jds-text-tertiary);
-    }
-    .jds-search-btn {
-      background: var(--jds-primary);
-      color: #fff;
-      border: none;
-      padding: var(--jds-spacing-3) var(--jds-spacing-6);
-      border-radius: var(--jds-radius-full);
-      font-size: var(--jds-font-size-sm);
-      font-weight: var(--jds-font-weight-semibold);
-      cursor: pointer;
-      transition: all var(--jds-transition-fast);
-    }
-    .jds-search-btn:hover {
-      background: var(--jds-primary-hover);
-    }
-    .jds-clear-btn {
-      background: transparent;
-      border: none;
-      color: var(--jds-text-tertiary);
-      cursor: pointer;
-      padding: var(--jds-spacing-2);
-      font-size: var(--jds-font-size-lg);
-      transition: color var(--jds-transition-fast);
-    }
-    .jds-clear-btn:hover {
-      color: var(--jds-text-primary);
-    }
-
-    .jds-toast {
       position: fixed;
-      bottom: var(--jds-spacing-8);
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      padding: var(--jds-spacing-4) var(--jds-spacing-8);
-      border-radius: var(--jds-radius-full);
-      font-size: var(--jds-font-size-sm);
-      z-index: var(--jds-z-index-toast);
-      opacity: 0;
-      transition: all var(--jds-transition-normal);
-      box-shadow: var(--jds-shadow-lg);
-      display: flex;
-      align-items: center;
-      gap: var(--jds-spacing-2);
-    }
-    .jds-toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-    .jds-toast-success { background: var(--jds-success); }
-    .jds-toast-error { background: var(--jds-error); }
-    .jds-toast-info { background: var(--jds-info); }
-
-    .ds-preview-section {
-      background: var(--jds-bg-primary);
-      border-radius: var(--jds-radius-xl);
-      padding: 0;
-      overflow: hidden;
-      box-shadow: var(--jds-shadow-card);
-    }
-    .ds-preview-header {
-      background: linear-gradient(135deg, var(--jds-primary) 0%, var(--jds-primary-dark) 100%);
-      padding: var(--jds-spacing-6);
-      text-align: center;
-    }
-    .ds-preview-header h3 {
-      color: #fff;
-      font-size: var(--jds-font-size-xl);
-      font-weight: var(--jds-font-weight-semibold);
-      letter-spacing: var(--jds-letter-spacing-wide);
-    }
-    .ds-preview-content {
-      padding: var(--jds-spacing-8);
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background-image:
+        linear-gradient(to right, rgb(24 24 27 / 0.018) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(24 24 27 / 0.018) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
     }
 
-    .ds-desktop-header {
-      background: var(--jds-bg-primary);
-      border-bottom: 2px solid var(--jds-primary);
-      padding: var(--jds-spacing-4) var(--jds-spacing-6);
-      display: flex;
-      align-items: center;
-      gap: var(--jds-spacing-6);
-      border-radius: var(--jds-radius-lg);
-      box-shadow: var(--jds-shadow-primary);
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+    :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+    /* ============================================================
+       LAYOUT PRIMITIVES
+       ============================================================ */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-8); }
+    .section { padding: var(--space-24) 0; position: relative; }
+    .section-tight { padding: var(--space-16) 0; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted-foreground);
     }
-    .ds-desktop-logo {
-      display: flex;
-      align-items: center;
-      gap: var(--jds-spacing-3);
-      font-weight: var(--jds-font-weight-bold);
-      font-size: var(--jds-font-size-lg);
-      color: var(--jds-primary);
+    .eyebrow::before {
+      content: ''; width: 20px; height: 1px; background: var(--primary);
     }
-    .ds-desktop-logo svg {
-      width: 28px;
-      height: 28px;
+    .eyebrow.accent { color: var(--primary); }
+
+    .display {
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+    }
+    .display em { font-style: italic; color: var(--primary); }
+
+    .h2 { font-size: clamp(30px, 4.5vw, 48px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+    .lead { font-size: 17px; color: var(--muted-foreground); line-height: 1.7; max-width: 56ch; }
+    .muted { color: var(--muted-foreground); }
+    .subtle { color: var(--subtle-foreground); }
+
+    .section-head { margin-bottom: var(--space-12); max-width: 720px; }
+    .section-head .lead { margin-top: var(--space-4); }
+
+    /* ============================================================
+       NAVIGATION
+       ============================================================ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      backdrop-filter: blur(12px) saturate(180%);
+      background: rgb(255 255 255 / 0.72);
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out);
+    }
+    .nav.scrolled { border-bottom-color: var(--border); }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: var(--space-4) var(--space-8);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
+    }
+    .nav.scrolled .nav-inner { padding-top: var(--space-3); padding-bottom: var(--space-3); }
+
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: var(--radius-md);
+      background: var(--primary); color: #fff;
+      display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 16px; font-weight: 500;
+      box-shadow: 0 2px 8px rgb(225 37 27 / 0.3);
+    }
+    .brand-name { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+    .brand-name span { color: var(--primary); }
+
+    .nav-links { display: flex; align-items: center; gap: var(--space-1); list-style: none; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--muted-foreground);
+      padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+      transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+    }
+    .nav-links a:hover { color: var(--foreground); background: var(--secondary); }
+
+    .nav-version {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      color: var(--muted-foreground); padding: var(--space-1) var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-full);
     }
 
-    .ds-product-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: var(--jds-spacing-6);
-      margin-top: var(--jds-spacing-8);
+    /* ============================================================
+       BUTTONS (shadcn variants)
+       ============================================================ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4); font-size: 13px; font-weight: 500;
+      border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer;
+      transition: all var(--dur-base) var(--ease-out); white-space: nowrap; line-height: 1.4;
     }
-    .ds-product-card {
-      background: var(--jds-bg-primary);
-      border-radius: var(--jds-radius-xl);
-      overflow: hidden;
-      box-shadow: var(--jds-shadow-card);
-      border: 1px solid var(--jds-border-light);
-      transition: all var(--jds-transition-normal);
-      cursor: pointer;
+    .btn svg { width: 15px; height: 15px; }
+    .btn-default { background: var(--foreground); color: var(--background); }
+    .btn-default:hover { background: #27272a; }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+    .btn-secondary:hover { background: var(--accent); }
+    .btn-outline { background: transparent; border-color: var(--border); color: var(--foreground); }
+    .btn-outline:hover { background: var(--secondary); }
+    .btn-ghost { background: transparent; color: var(--foreground); }
+    .btn-ghost:hover { background: var(--secondary); }
+    .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+    .btn-destructive:hover { background: #b91c1c; }
+    .btn-sm { padding: var(--space-1) var(--space-3); font-size: 12px; height: 28px; }
+    .btn-lg { padding: var(--space-3) var(--space-6); font-size: 14px; height: 44px; }
+    .btn:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-icon { padding: 0; width: 32px; height: 32px; }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero { padding: var(--space-24) 0 var(--space-20); position: relative; overflow: hidden; }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr; gap: var(--space-10);
+      max-width: 1200px; margin: 0 auto; padding: 0 var(--space-8);
     }
-    .ds-product-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--jds-shadow-lg);
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-foreground);
+      padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+      border: 1px solid var(--border); border-radius: var(--radius-full);
+      background: var(--background);
     }
-    .ds-product-image {
-      width: 100%;
-      height: 180px;
-      background: linear-gradient(135deg, var(--jds-bg-secondary) 0%, var(--jds-bg-tertiary) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      position: relative;
-      overflow: hidden;
+    .hero-tag .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+      box-shadow: 0 0 0 3px var(--success-subtle);
     }
-    .ds-product-image::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.05));
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 8vw, 96px); font-weight: 400;
+      letter-spacing: -0.02em; line-height: 1.02; margin-top: var(--space-6);
     }
-    .ds-product-info {
-      padding: var(--jds-spacing-4);
+    .hero-title em { font-style: italic; color: var(--primary); position: relative; }
+    .hero-title em::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 0.08em; height: 2px;
+      background: var(--primary); transform: scaleX(0); transform-origin: left;
+      animation: drawUnderline 1s var(--ease-out) 0.8s forwards;
     }
-    .ds-product-name {
-      font-size: var(--jds-font-size-sm);
-      font-weight: var(--jds-font-weight-medium);
-      color: var(--jds-text-primary);
-      margin-bottom: var(--jds-spacing-2);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    @keyframes drawUnderline { to { transform: scaleX(1); } }
+
+    .hero-lead {
+      font-size: 18px; color: var(--muted-foreground); line-height: 1.7;
+      max-width: 52ch; margin-top: var(--space-6);
     }
-    .ds-product-price {
-      font-size: var(--jds-font-size-xl);
-      font-weight: var(--jds-font-weight-bold);
-      color: var(--jds-primary);
-      margin-bottom: var(--jds-spacing-3);
+    .hero-actions { display: flex; gap: var(--space-3); margin-top: var(--space-8); flex-wrap: wrap; }
+
+    .hero-meta {
+      display: flex; gap: var(--space-12); margin-top: var(--space-16);
+      padding-top: var(--space-8); border-top: 1px solid var(--border);
+      flex-wrap: wrap;
     }
-    .ds-product-status {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .hero-meta-item { display: flex; flex-direction: column; gap: var(--space-1); }
+    .hero-meta-value {
+      font-family: var(--font-display); font-size: 32px; font-weight: 400;
+      letter-spacing: -0.02em; line-height: 1;
     }
-    .ds-product-countdown {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
+    .hero-meta-value span { color: var(--primary); }
+    .hero-meta-label {
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground);
+      letter-spacing: 0.08em; text-transform: uppercase;
     }
 
-    .ds-mobile-preview {
-      max-width: 375px;
-      margin: 0 auto;
-      border: 3px solid #1a1a1a;
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: var(--jds-shadow-xl);
-      background: #1a1a1a;
+    /* ============================================================
+       BROWSER FRAME + EXTENSION TOOLBAR (the real UI)
+       ============================================================ */
+    .demo-frame {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl);
+      overflow: hidden; box-shadow: var(--shadow-lg);
     }
-    .ds-mobile-notch {
-      width: 120px;
-      height: 24px;
-      background: #1a1a1a;
-      border-radius: 0 0 16px 16px;
-      margin: 0 auto;
+    .demo-bar {
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4); background: var(--muted);
+      border-bottom: 1px solid var(--border);
     }
-    .ds-mobile-screen {
-      background: var(--jds-bg-secondary);
+    .demo-dots { display: flex; gap: 6px; }
+    .demo-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--border-strong); }
+    .demo-url {
+      flex: 1; display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-1) var(--space-3); background: var(--background);
+      border: 1px solid var(--border); border-radius: var(--radius-full);
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground);
     }
-    .ds-mobile-header {
-      background: var(--jds-bg-primary);
-      border-bottom: 2px solid var(--jds-primary);
-      padding: var(--jds-spacing-3);
-      display: flex;
-      align-items: center;
-      gap: var(--jds-spacing-3);
-    }
-    .ds-mobile-logo {
-      width: 24px;
-      height: 24px;
-      fill: var(--jds-primary);
-    }
-    .ds-mobile-title {
-      font-size: var(--jds-font-size-base);
-      font-weight: var(--jds-font-weight-bold);
-      color: var(--jds-primary);
-    }
-    .ds-mobile-body {
-      padding: var(--jds-spacing-4);
-    }
-    .ds-mobile-search {
-      margin-bottom: var(--jds-spacing-4);
-    }
-    .ds-mobile-search .jds-search-bar {
-      max-width: none;
-    }
-    .ds-mobile-tabs {
-      margin-bottom: var(--jds-spacing-4);
-    }
-    .ds-mobile-tabs .jds-tab {
-      padding: var(--jds-spacing-2) var(--jds-spacing-4);
-      font-size: var(--jds-font-size-xs);
-    }
-    .ds-mobile-stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .demo-url svg { width: 11px; height: 11px; color: var(--success); }
+    .demo-url span { color: var(--foreground); }
+    .demo-badge {
+      font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 2px var(--space-2); border-radius: var(--radius-sm);
+      background: var(--success-subtle); color: var(--success); border: 1px solid rgb(22 163 74 / 0.2);
     }
 
-    .ds-divider {
-      height: 1px;
-      background: var(--jds-border-light);
-      margin: var(--jds-spacing-8) 0;
+    /* Extension toolbar — mirrors src/styles.css + src/ui.js */
+    .ext-toolbar {
+      display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+      padding: var(--space-3) var(--space-4);
+      background: var(--card); border-bottom: 1px solid var(--border);
+      transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
+    }
+    .ext-toolbar.is-disabled { opacity: 0.45; filter: grayscale(0.7); pointer-events: none; }
+
+    .ext-logo { display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+    .ext-logo-mark {
+      width: 22px; height: 22px; border-radius: var(--radius-sm); background: var(--primary);
+      display: grid; place-items: center;
+    }
+    .ext-logo-mark svg { width: 13px; height: 13px; color: #fff; }
+    .ext-logo-text { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: -0.01em; }
+
+    .ext-search {
+      flex: 1; min-width: 200px; max-width: 420px; display: flex; align-items: center;
+      gap: var(--space-2); padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+      background: var(--background); border: 1px solid var(--border);
+      border-radius: var(--radius-md); transition: all var(--dur-base) var(--ease-out);
+    }
+    .ext-search:focus-within { border-color: var(--primary); box-shadow: var(--shadow-ring); }
+    .ext-search svg { width: 15px; height: 15px; color: var(--muted-foreground); flex-shrink: 0; }
+    .ext-search input {
+      flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+      font-family: var(--font-sans); font-size: 13px; color: var(--foreground); padding: var(--space-2) 0;
+    }
+    .ext-search input::placeholder { color: var(--subtle-foreground); }
+    .ext-clear {
+      display: none; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border: none; border-radius: var(--radius-sm);
+      background: var(--secondary); color: var(--muted-foreground); cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-out); flex-shrink: 0;
+    }
+    .ext-clear:hover { background: var(--accent); color: var(--foreground); }
+    .ext-clear.is-visible { display: flex; }
+    .ext-search-btn {
+      border: none; background: var(--primary); color: var(--primary-foreground);
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: background var(--dur-fast) var(--ease-out); flex-shrink: 0;
+    }
+    .ext-search-btn:hover { background: var(--primary-hover); }
+
+    .ext-tabs {
+      display: inline-flex; gap: 2px; padding: 3px; background: var(--secondary);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+    }
+    .ext-tab {
+      padding: var(--space-2) var(--space-3); border: none; background: transparent;
+      color: var(--muted-foreground); font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+      transition: all var(--dur-fast) var(--ease-out);
+    }
+    .ext-tab:hover { color: var(--foreground); }
+    .ext-tab.is-active {
+      background: var(--background); color: var(--foreground); font-weight: 600;
+      box-shadow: var(--shadow-xs);
     }
 
-    .ds-feature-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--jds-spacing-4);
+    .ext-count {
+      font-family: var(--font-mono); font-size: 12px; color: var(--muted-foreground); white-space: nowrap;
     }
-    .ds-feature-item {
-      padding: var(--jds-spacing-4);
-      background: var(--jds-bg-secondary);
-      border-radius: var(--jds-radius-lg);
-      text-align: center;
+    .ext-count strong { color: var(--primary); font-weight: 600; }
+
+    .ext-toggle {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3); border: 1px solid var(--border);
+      border-radius: var(--radius-md); background: var(--background); cursor: pointer;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--muted-foreground);
+      transition: all var(--dur-base) var(--ease-out);
     }
-    .ds-feature-item .feature-icon {
-      font-size: 32px;
-      margin-bottom: var(--jds-spacing-3);
+    .ext-toggle:hover { border-color: var(--border-strong); }
+    .ext-toggle.is-on { border-color: var(--primary); color: var(--primary); background: var(--primary-subtle); }
+    .ext-toggle-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle-foreground); transition: all var(--dur-fast) var(--ease-out); }
+    .ext-toggle.is-on .ext-toggle-dot { background: var(--primary); box-shadow: 0 0 0 3px rgb(225 37 27 / 0.18); }
+
+    /* Product grid */
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3); padding: var(--space-4); background: var(--muted); min-height: 420px;
     }
-    .ds-feature-item .feature-title {
-      font-size: var(--jds-font-size-sm);
-      font-weight: var(--jds-font-weight-semibold);
-      color: var(--jds-text-primary);
-      margin-bottom: var(--jds-spacing-1);
+    .product-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden; cursor: pointer; transition: all var(--dur-base) var(--ease-out);
+      animation: cardIn 0.4s var(--ease-out) backwards;
     }
-    .ds-feature-item .feature-desc {
-      font-size: var(--jds-font-size-xs);
-      color: var(--jds-text-tertiary);
+    .product-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .product-img {
+      height: 120px; display: grid; place-items: center; font-size: 40px;
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
+      position: relative; overflow: hidden;
+    }
+    .product-img span { transition: transform var(--dur-base) var(--ease-spring); }
+    .product-card:hover .product-img span { transform: scale(1.1); }
+    .product-body { padding: var(--space-3); }
+    .product-name {
+      font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
+      margin-bottom: var(--space-2); min-height: 34px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .product-price {
+      font-family: var(--font-display); font-size: 18px; font-weight: 400;
+      color: var(--primary); letter-spacing: -0.01em; margin-bottom: var(--space-2);
+    }
+    .product-price small { font-size: 11px; color: var(--muted-foreground); }
+    .product-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+
+    /* Badge */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-2);
+      font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
+      border-radius: var(--radius-sm); border: 1px solid transparent;
+    }
+    .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+    .badge-default { background: var(--secondary); color: var(--secondary-foreground); }
+    .badge-default::before { background: var(--muted-foreground); }
+    .badge-primary { background: var(--primary-subtle); color: var(--primary); }
+    .badge-primary::before { background: var(--primary); }
+    .badge-success { background: var(--success-subtle); color: var(--success); }
+    .badge-success::before { background: var(--success); }
+    .badge-warning { background: var(--warning-subtle); color: var(--warning); }
+    .badge-warning::before { background: var(--warning); }
+    .badge-destructive { background: #fef2f2; color: var(--destructive); }
+    .badge-destructive::before { background: var(--destructive); }
+    .badge-ongoing::before { animation: pulse 1.6s var(--ease-out) infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .countdown { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); font-weight: 500; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: var(--space-16) var(--space-8); text-align: center;
+    }
+    .empty-icon { width: 56px; height: 56px; border-radius: var(--radius-full); background: var(--secondary); display: grid; place-items: center; margin-bottom: var(--space-4); color: var(--subtle-foreground); }
+    .empty-icon svg { width: 26px; height: 26px; }
+    .empty-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; margin-bottom: var(--space-2); }
+    .empty-desc { font-size: 13px; color: var(--muted-foreground); max-width: 36ch; }
+
+    /* Skeleton */
+    .skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .skel { background: linear-gradient(90deg, var(--secondary) 25%, var(--accent) 50%, var(--secondary) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skel-img { height: 120px; }
+    .skel-line { height: 10px; margin: var(--space-3); border-radius: var(--radius-sm); }
+    .skel-line:last-child { width: 50%; margin-bottom: var(--space-4); }
+
+    /* ============================================================
+       DESIGN SYSTEM SHOWCASE
+       ============================================================ */
+    .ds-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
+    .ds-block {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: var(--space-5);
+    }
+    .ds-block-title {
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted-foreground); margin-bottom: var(--space-4);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ds-block-title span { font-weight: 400; color: var(--subtle-foreground); }
+
+    .token-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
+    .token-row:last-child { border-bottom: none; }
+    .swatch { width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--border); flex-shrink: 0; }
+    .token-info { flex: 1; min-width: 0; }
+    .token-name { font-size: 12px; font-weight: 500; }
+    .token-value { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); }
+
+    .type-sample { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+    .type-sample:last-child { border-bottom: none; }
+    .type-meta { font-family: var(--font-mono); font-size: 10px; color: var(--muted-foreground); white-space: nowrap; }
+
+    .scale-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
+    .scale-row:last-child { border-bottom: none; }
+    .scale-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); width: 64px; flex-shrink: 0; }
+    .scale-bar { background: var(--primary); border-radius: var(--radius-sm); height: 12px; }
+
+    .radius-box { width: 56px; height: 56px; background: var(--secondary); border: 1px solid var(--border-strong); transition: all var(--dur-fast) var(--ease-out); }
+    .radius-box:hover { border-color: var(--primary); background: var(--primary-subtle); }
+
+    .shadow-box { width: 72px; height: 44px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
+
+    /* ============================================================
+       COMPONENT LIBRARY TABLE
+       ============================================================ */
+    .comp-section { margin-bottom: var(--space-12); }
+    .comp-section-title { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-5); }
+    .comp-section-title h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+    .comp-section-title .count { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); }
+    .comp-row {
+      display: grid; grid-template-columns: 220px 1fr 1fr; gap: var(--space-6);
+      padding: var(--space-5) 0; border-top: 1px solid var(--border); align-items: start;
+    }
+    .comp-meta h4 { font-size: 14px; font-weight: 600; margin-bottom: var(--space-1); }
+    .comp-meta p { font-size: 12px; color: var(--muted-foreground); line-height: 1.5; }
+    .comp-meta code { font-family: var(--font-mono); font-size: 11px; color: var(--primary); }
+    .comp-preview { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+    .comp-spec { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); line-height: 1.7; }
+
+    /* Input */
+    .input {
+      width: 100%; padding: var(--space-2) var(--space-3); font-family: var(--font-sans); font-size: 13px;
+      border: 1px solid var(--input); border-radius: var(--radius-md); background: var(--background);
+      color: var(--foreground); outline: none; transition: all var(--dur-base) var(--ease-out);
+    }
+    .input:focus { border-color: var(--primary); box-shadow: var(--shadow-ring); }
+    .input::placeholder { color: var(--subtle-foreground); }
+    .input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Switch */
+    .switch { position: relative; display: inline-flex; width: 36px; height: 20px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-track {
+      position: absolute; inset: 0; cursor: pointer; background: var(--border-strong);
+      border-radius: var(--radius-full); transition: background var(--dur-base) var(--ease-out);
+    }
+    .switch-track::before {
+      content: ''; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px;
+      background: #fff; border-radius: 50%; transition: transform var(--dur-base) var(--ease-spring);
+      box-shadow: var(--shadow-sm);
+    }
+    .switch input:checked + .switch-track { background: var(--primary); }
+    .switch input:checked + .switch-track::before { transform: translateX(16px); }
+
+    /* Separator */
+    .separator { height: 1px; background: var(--border); width: 100%; }
+    .separator-vertical { width: 1px; height: 20px; background: var(--border); }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .card-header { padding: var(--space-5) var(--space-5) 0; }
+    .card-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+    .card-desc { font-size: 13px; color: var(--muted-foreground); margin-top: var(--space-1); }
+    .card-content { padding: var(--space-5); }
+    .card-footer { padding: 0 var(--space-5) var(--space-5); display: flex; gap: var(--space-2); }
+
+    /* Alert */
+    .alert { display: flex; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); }
+    .alert-info { border-color: rgb(37 99 235 / 0.3); background: var(--info-subtle); }
+    .alert-warning { border-color: rgb(217 119 6 / 0.3); background: var(--warning-subtle); }
+    .alert-destructive { border-color: rgb(220 38 38 / 0.3); background: #fef2f2; }
+    .alert-icon { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
+    .alert-info .alert-icon { color: var(--info); }
+    .alert-warning .alert-icon { color: var(--warning); }
+    .alert-destructive .alert-icon { color: var(--destructive); }
+    .alert-title { font-size: 13px; font-weight: 600; }
+    .alert-desc { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+
+    /* ============================================================
+       INTERACTION STANDARDS
+       ============================================================ */
+    .ix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-4); }
+    .ix-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5); }
+    .ix-label { font-family: var(--font-mono); font-size: 11px; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-3); }
+    .ix-title { font-size: 15px; font-weight: 600; margin-bottom: var(--space-2); }
+    .ix-desc { font-size: 13px; color: var(--muted-foreground); line-height: 1.6; margin-bottom: var(--space-4); }
+    .ix-demo { border: 1px dashed var(--border-strong); border-radius: var(--radius-md); padding: var(--space-4); background: var(--muted); }
+
+    /* ============================================================
+       MOBILE PREVIEW
+       ============================================================ */
+    .mobile-section { display: grid; grid-template-columns: 1fr 360px; gap: var(--space-12); align-items: center; }
+    .phone { position: relative; max-width: 340px; margin: 0 auto; }
+    .phone-frame { background: #1c1c1e; border-radius: 44px; padding: 10px; box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-strong); position: relative; }
+    .phone-notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 96px; height: 26px; background: #1c1c1e; border-radius: 0 0 16px 16px; z-index: 2; }
+    .phone-screen { background: var(--muted); border-radius: 34px; overflow: hidden; min-height: 580px; }
+    .phone-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 40px var(--space-3) var(--space-2); display: flex; align-items: center; gap: var(--space-2); }
+    .phone-title { font-size: 13px; font-weight: 700; color: var(--primary); }
+    .phone-body { padding: var(--space-3); }
+    .phone-search { display: flex; gap: var(--space-1); padding: 2px 2px 2px var(--space-3); background: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
+    .phone-search input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 12px; padding: var(--space-2) 0; color: var(--foreground); }
+    .phone-search input::placeholder { color: var(--subtle-foreground); }
+    .phone-search-btn { border: none; background: var(--primary); color: #fff; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; }
+    .phone-tabs { display: flex; gap: 2px; padding: 3px; background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
+    .phone-tab { flex: 1; padding: var(--space-1) var(--space-2); border: none; background: transparent; color: var(--muted-foreground); font-size: 11px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; text-align: center; }
+    .phone-tab.is-active { background: var(--background); color: var(--foreground); font-weight: 600; box-shadow: var(--shadow-xs); }
+    .phone-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+    .phone-count { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); }
+    .phone-count strong { color: var(--primary); }
+    .phone-toggle { font-family: var(--font-mono); font-size: 10px; padding: 2px var(--space-2); border: 1px solid var(--primary); border-radius: var(--radius-sm); color: var(--primary); background: var(--primary-subtle); font-weight: 600; }
+    .phone-products { display: flex; flex-direction: column; gap: var(--space-2); }
+    .phone-product { display: flex; gap: var(--space-2); padding: var(--space-2); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .phone-product-img { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--secondary); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+    .phone-product-info { flex: 1; min-width: 0; }
+    .phone-product-name { font-size: 11px; color: var(--foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+    .phone-product-price { font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--primary); }
+
+    /* ============================================================
+       TOAST (sonner-style)
+       ============================================================ */
+    .toast-stack { position: fixed; bottom: var(--space-8); left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: var(--space-2); align-items: center; pointer-events: none; }
+    .toast {
+      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5);
+      background: var(--foreground); color: var(--background); border-radius: var(--radius-full);
+      font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
+      transform: translateY(20px); opacity: 0; pointer-events: auto;
+      transition: all var(--dur-base) var(--ease-spring); max-width: 90vw;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .toast-success .toast-icon { color: #4ade80; }
+    .toast-error .toast-icon { color: #f87171; }
+    .toast-info .toast-icon { color: #60a5fa; }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .footer { border-top: 1px solid var(--border); padding: var(--space-16) 0; margin-top: var(--space-20); }
+    .footer-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-8); flex-wrap: wrap; }
+    .footer-mark { font-family: var(--font-display); font-size: clamp(40px, 7vw, 72px); font-weight: 400; letter-spacing: -0.02em; line-height: 1; }
+    .footer-mark span { color: var(--primary); font-style: italic; }
+    .footer-meta { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); line-height: 1.8; text-align: right; }
+
+    /* ============================================================
+       SCROLL REVEAL
+       ============================================================ */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.08s; }
+    .reveal-d2 { transition-delay: 0.16s; }
+    .reveal-d3 { transition-delay: 0.24s; }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .mobile-section { grid-template-columns: 1fr; }
+      .comp-row { grid-template-columns: 1fr; gap: var(--space-3); }
+      .comp-spec { padding-top: var(--space-2); border-top: 1px solid var(--border); }
+    }
+    @media (max-width: 640px) {
+      .container { padding: 0 var(--space-4); }
+      .section { padding: var(--space-16) 0; }
+      .hero { padding: var(--space-20) 0 var(--space-12); }
+      .ext-logo { display: none; }
+      .ext-search { order: 1; max-width: none; width: 100%; }
+      .ext-tabs { order: 2; }
+      .ext-count { order: 3; }
+      .ext-toggle { order: 4; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); padding: var(--space-3); }
+      .hero-meta { gap: var(--space-6); }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .footer-meta { text-align: left; }
     }
 
-    .ds-footer {
-      text-align: center;
-      padding: var(--jds-spacing-8);
-      color: var(--jds-text-tertiary);
-      font-size: var(--jds-font-size-xs);
-    }
-
-    @media (max-width: 768px) {
-      .ds-container {
-        padding: var(--jds-spacing-4);
-      }
-      .ds-section {
-        padding: var(--jds-spacing-4);
-      }
-      .ds-header h1 {
-        font-size: var(--jds-font-size-2xl);
-      }
-      .ds-desktop-header {
-        flex-wrap: wrap;
-        gap: var(--jds-spacing-3);
-      }
-      .ds-desktop-header .jds-search-bar {
-        order: 1;
-        width: 100%;
-      }
-      .ds-product-list {
-        grid-template-columns: 1fr;
-      }
-      .ds-colors-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-      .ds-spacing-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-      .jds-input {
-        width: 100%;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      html { scroll-behavior: auto; }
     }
   </style>
 </head>
 <body>
-  <header class="ds-header">
-    <h1>JD-Auction-Search</h1>
-    <p>京东夺宝搜索增强 · 设计系统 v1.2.2</p>
-    <nav class="ds-nav">
-      <a href="#colors">色彩</a>
-      <a href="#typography">字体</a>
-      <a href="#spacing">间距</a>
-      <a href="#components">组件</a>
-      <a href="#preview">预览</a>
-    </nav>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand" aria-label="JD Auction Search home">
+        <div class="brand-mark">J</div>
+        <span class="brand-name">JD<span>.</span>Auction</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#demo">Live Demo</a></li>
+        <li><a href="#tokens">Tokens</a></li>
+        <li><a href="#components">Components</a></li>
+        <li><a href="#patterns">Patterns</a></li>
+        <li><a href="#mobile">Mobile</a></li>
+      </ul>
+      <span class="nav-version">v1.2.2</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="top">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-tag reveal"><span class="dot"></span>Chrome Extension · Manifest V3</div>
+        <h1 class="hero-title reveal reveal-d1">
+          Auction<br>search, <em>refined</em>.
+        </h1>
+        <p class="hero-lead reveal reveal-d2">
+          为京东夺宝页面注入实时搜索、分类筛选与数据缓存。Shadow DOM 隔离、11 种语言、无障碍优先——
+          以克制的视觉语言，承载高效的功能体验。
+        </p>
+        <div class="hero-actions reveal reveal-d3">
+          <button class="btn btn-primary btn-lg" onclick="scrollToDemo()">
+            体验交互演示
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <a href="#tokens" class="btn btn-outline btn-lg">设计系统</a>
+        </div>
+      </div>
+
+      <div class="hero-meta reveal reveal-d3">
+        <div class="hero-meta-item">
+          <div class="hero-meta-value">11<span>+</span></div>
+          <div class="hero-meta-label">Languages</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-value">0<span>ms</span></div>
+          <div class="hero-meta-label">Search Latency</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-value">100<span>%</span></div>
+          <div class="hero-meta-label">A11y Coverage</div>
+        </div>
+        <div class="hero-meta-item">
+          <div class="hero-meta-value">26<span>KB</span></div>
+          <div class="hero-meta-label">Bundle Size</div>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <main class="ds-container">
-    <section class="ds-section" id="colors">
-      <h2 class="ds-section-title">Color Palette</h2>
-      <p class="ds-subtitle">基于京东品牌红色的完整色彩系统</p>
-      
-      <div class="ds-colors-grid">
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary);"></div><div class="color-name">Primary</div><div class="color-value">#e1251b</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-hover);"></div><div class="color-name">Hover</div><div class="color-value">#c91b14</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-light);"></div><div class="color-name">Light</div><div class="color-value">#ff6b63</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-dark);"></div><div class="color-name">Dark</div><div class="color-value">#a31810</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-50);"></div><div class="color-name">50</div><div class="color-value">#fff5f4</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-100);"></div><div class="color-name">100</div><div class="color-value">#ffe0df</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-200);"></div><div class="color-name">200</div><div class="color-value">#ffc0be</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-primary-300);"></div><div class="color-name">300</div><div class="color-value">#ff908b</div></div>
+  <!-- Live Demo -->
+  <section class="section" id="demo">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow accent">01 — Interactive Demo</span>
+        <h2 class="h2 display" style="margin-top: var(--space-4);">在真实页面中 <em>实时搜索</em></h2>
+        <p class="lead">下方是扩展注入京东夺宝页面的完整模拟。搜索框输入、Tab 切换、启停开关、骨架加载、空状态——所有交互均已接通真实数据。</p>
       </div>
 
-      <div class="ds-colors-grid" style="margin-top: var(--jds-spacing-6);">
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-success);"></div><div class="color-name">Success</div><div class="color-value">#52c41a</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-warning);"></div><div class="color-name">Warning</div><div class="color-value">#faad14</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-error);"></div><div class="color-name">Error</div><div class="color-value">#ff4d4f</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-info);"></div><div class="color-name">Info</div><div class="color-value">#1890ff</div></div>
-      </div>
-
-      <div class="ds-colors-grid" style="margin-top: var(--jds-spacing-6);">
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-primary);"></div><div class="color-name">Text Primary</div><div class="color-value">#1a1a1a</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-secondary);"></div><div class="color-name">Text Secondary</div><div class="color-value">#666666</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-tertiary);"></div><div class="color-name">Text Tertiary</div><div class="color-value">#999999</div></div>
-        <div class="ds-color-item"><div class="color-box" style="background: var(--jds-text-muted);"></div><div class="color-name">Text Muted</div><div class="color-value">#cccccc</div></div>
-      </div>
-    </section>
-
-    <section class="ds-section" id="typography">
-      <h2 class="ds-section-title">Typography</h2>
-      <p class="ds-subtitle">字体层级系统，注重可读性和视觉层次</p>
-      
-      <div class="ds-font-sizes">
-        <div class="ds-font-item"><div class="font-label">3xl / 24px</div><div style="font-size: var(--jds-font-size-3xl); font-weight: var(--jds-font-weight-bold); letter-spacing: var(--jds-letter-spacing-tight);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">2xl / 20px</div><div style="font-size: var(--jds-font-size-2xl); font-weight: var(--jds-font-weight-semibold);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">xl / 18px</div><div style="font-size: var(--jds-font-size-xl); font-weight: var(--jds-font-weight-medium);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">lg / 16px</div><div style="font-size: var(--jds-font-size-lg); font-weight: var(--jds-font-weight-normal);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">base / 14px</div><div style="font-size: var(--jds-font-size-base);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">sm / 12px</div><div style="font-size: var(--jds-font-size-sm);">京东夺宝搜索增强</div></div>
-        <div class="ds-font-item"><div class="font-label">xs / 11px</div><div style="font-size: var(--jds-font-size-xs);">京东夺宝搜索增强</div></div>
-      </div>
-    </section>
-
-    <section class="ds-section" id="spacing">
-      <h2 class="ds-section-title">Spacing</h2>
-      <p class="ds-subtitle">基于4px基准的间距系统</p>
-      
-      <div class="ds-spacing-grid">
-        <div class="ds-spacing-item"><div class="spacing-value">4px</div><div class="spacing-bar" style="height: 4px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">8px</div><div class="spacing-bar" style="height: 8px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">12px</div><div class="spacing-bar" style="height: 12px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">16px</div><div class="spacing-bar" style="height: 16px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">20px</div><div class="spacing-bar" style="height: 20px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">24px</div><div class="spacing-bar" style="height: 24px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">32px</div><div class="spacing-bar" style="height: 32px;"></div></div>
-        <div class="ds-spacing-item"><div class="spacing-value">40px</div><div class="spacing-bar" style="height: 40px;"></div></div>
-      </div>
-
-      <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-top: var(--jds-spacing-6); margin-bottom: var(--jds-spacing-4);">Border Radius</h3>
-      <div class="ds-radii-grid">
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-sm);"></div><div class="radii-label">4px</div></div>
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-md);"></div><div class="radii-label">8px</div></div>
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-lg);"></div><div class="radii-label">12px</div></div>
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-xl);"></div><div class="radii-label">16px</div></div>
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-2xl);"></div><div class="radii-label">24px</div></div>
-        <div class="ds-radii-item"><div class="radii-box" style="border-radius: var(--jds-radius-full);"></div><div class="radii-label">Full</div></div>
-      </div>
-
-      <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-top: var(--jds-spacing-6); margin-bottom: var(--jds-spacing-4);">Shadow</h3>
-      <div class="ds-shadows-grid">
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-sm);"></div><div class="shadow-label">sm</div></div>
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-md);"></div><div class="shadow-label">md</div></div>
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-lg);"></div><div class="shadow-label">lg</div></div>
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-xl);"></div><div class="shadow-label">xl</div></div>
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-primary);"></div><div class="shadow-label">primary</div></div>
-        <div class="ds-shadows-item"><div class="shadow-box" style="box-shadow: var(--jds-shadow-card);"></div><div class="shadow-label">card</div></div>
-      </div>
-    </section>
-
-    <section class="ds-section" id="components">
-      <h2 class="ds-section-title">Components</h2>
-      <p class="ds-subtitle">基础组件库，支持完整交互状态</p>
-      
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Buttons</h3>
-        <div class="ds-buttons-group">
-          <button class="jds-btn jds-btn-primary" onclick="showToast('primary')">Primary</button>
-          <button class="jds-btn jds-btn-secondary" onclick="showToast('secondary')">Secondary</button>
-          <button class="jds-btn jds-btn-outline" onclick="showToast('outline')">Outline</button>
-          <button class="jds-btn jds-btn-primary jds-btn-sm" onclick="showToast('small')">Small</button>
-          <button class="jds-btn jds-btn-primary jds-btn-lg" onclick="showToast('large')">Large</button>
-          <button class="jds-btn jds-btn-primary" disabled>Disabled</button>
-        </div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Input</h3>
-        <input class="jds-input" type="text" placeholder="输入关键词搜索...">
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Tabs</h3>
-        <div class="jds-tabs">
-          <button class="jds-tab active" onclick="switchTab(this)">全部</button>
-          <button class="jds-tab" onclick="switchTab(this)">正在夺宝</button>
-          <button class="jds-tab" onclick="switchTab(this)">即将开始</button>
-        </div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Badge</h3>
-        <div class="ds-buttons-group">
-          <span class="jds-badge jds-badge-primary">进行中</span>
-          <span class="jds-badge jds-badge-success">即将结束</span>
-          <span class="jds-badge jds-badge-warning">即将开始</span>
-          <span class="jds-badge jds-badge-error">已结束</span>
-        </div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Card</h3>
-        <div class="jds-card">
-          <div class="jds-card-title">商品搜索增强</div>
-          <div class="jds-card-desc">为京东夺宝页面提供关键词搜索和分类过滤功能，提升浏览效率</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Loading</h3>
-        <div class="jds-loading"><div class="jds-spinner"></div>正在加载商品列表...</div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Empty State</h3>
-        <div class="jds-empty-state">
-          <div class="jds-empty-icon">🔍</div>
-          <div class="jds-empty-title">未找到匹配商品</div>
-          <div class="jds-empty-desc">试试其他关键词，或清除筛选条件重新搜索</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: var(--jds-spacing-8);">
-        <h3 style="font-size: var(--jds-font-size-base); font-weight: var(--jds-font-weight-semibold); margin-bottom: var(--jds-spacing-4);">Search Bar</h3>
-        <div class="jds-search-bar">
-          <input class="jds-search-input" type="text" placeholder="输入商品关键词搜索..." id="demoSearchInput">
-          <button class="jds-clear-btn" id="demoClearBtn" onclick="clearSearch()">×</button>
-          <button class="jds-search-btn" onclick="performSearch()">搜索</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="ds-preview-section" id="preview">
-      <div class="ds-preview-header">
-        <h3>Desktop Preview</h3>
-      </div>
-      <div class="ds-preview-content">
-        <div class="ds-desktop-header">
-          <div class="ds-desktop-logo">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <span>夺宝搜索</span>
+      <div class="demo-frame reveal reveal-d1">
+        <!-- Browser chrome -->
+        <div class="demo-bar">
+          <div class="demo-dots"><span class="demo-dot"></span><span class="demo-dot"></span><span class="demo-dot"></span></div>
+          <div class="demo-url">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            <span>https://1paipai.jd.com/auction/list</span>
           </div>
-          <div class="jds-search-bar">
-            <input class="jds-search-input" type="text" placeholder="输入商品关键词搜索...">
-            <button class="jds-search-btn">搜索</button>
-          </div>
-          <div class="jds-tabs">
-            <button class="jds-tab active">全部</button>
-            <button class="jds-tab">正在夺宝</button>
-            <button class="jds-tab">即将开始</button>
-          </div>
-          <div style="font-size: var(--jds-font-size-sm); color: var(--jds-text-tertiary); white-space: nowrap;">共 <strong style="color: var(--jds-primary); font-weight: var(--jds-font-weight-semibold);">128</strong> 件商品</div>
-          <button class="jds-btn jds-btn-outline jds-btn-sm">已启用</button>
+          <span class="demo-badge">SECURE</span>
         </div>
 
-        <div class="ds-divider"></div>
+        <!-- Extension toolbar -->
+        <div class="ext-toolbar" id="extToolbar" role="region" aria-label="扩展工具栏">
+          <div class="ext-logo">
+            <span class="ext-logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            </span>
+            <span class="ext-logo-text">夺宝搜索</span>
+          </div>
+          <div class="ext-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="输入商品关键词搜索..." aria-label="搜索商品">
+            <button class="ext-clear" id="clearBtn" aria-label="清除搜索">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <button class="ext-search-btn" id="searchBtn">搜索</button>
+          </div>
+          <div class="ext-tabs" role="tablist" aria-label="商品分类">
+            <button class="ext-tab is-active" data-tab="all" role="tab" aria-selected="true">全部</button>
+            <button class="ext-tab" data-tab="ongoing" role="tab" aria-selected="false">正在夺宝</button>
+            <button class="ext-tab" data-tab="upcoming" role="tab" aria-selected="false">即将开始</button>
+          </div>
+          <div class="ext-count">共 <strong id="resultCount">0</strong> 件</div>
+          <button class="ext-toggle is-on" id="toggleBtn" aria-pressed="true" aria-label="启用或停用扩展">
+            <span class="ext-toggle-dot"></span>
+            <span id="toggleText">已启用</span>
+          </button>
+        </div>
 
-        <div class="ds-feature-list">
-          <div class="ds-feature-item">
-            <div class="feature-icon">🔍</div>
-            <div class="feature-title">实时搜索</div>
-            <div class="feature-desc">输入关键词即时过滤</div>
-          </div>
-          <div class="ds-feature-item">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">分类筛选</div>
-            <div class="feature-desc">全部/进行中/即将开始</div>
-          </div>
-          <div class="ds-feature-item">
-            <div class="feature-icon">⚡</div>
-            <div class="feature-title">API拦截</div>
-            <div class="feature-desc">自动缓存商品数据</div>
-          </div>
-          <div class="ds-feature-item">
-            <div class="feature-icon">🌐</div>
-            <div class="feature-title">多语言</div>
-            <div class="feature-desc">支持11种语言</div>
+        <!-- Product grid -->
+        <div class="product-grid" id="productGrid" aria-live="polite" aria-busy="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Tokens -->
+  <section class="section" id="tokens" style="background: var(--muted);">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow accent">02 — Design System</span>
+        <h2 class="h2 display" style="margin-top: var(--space-4);">令牌驱动的 <em>设计语言</em></h2>
+        <p class="lead">采用 shadcn 语义令牌体系：中性 zinc 灰阶 + 京东红作为唯一强调色。所有视觉决策源于同一套 CSS 自定义属性。</p>
+      </div>
+
+      <div class="ds-grid">
+        <!-- Semantic colors -->
+        <div class="ds-block reveal">
+          <div class="ds-block-title">Semantic Colors <span>zinc + red</span></div>
+          <div class="token-row"><div class="swatch" style="background: var(--background);"></div><div class="token-info"><div class="token-name">background</div><div class="token-value">#ffffff</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--foreground);"></div><div class="token-info"><div class="token-name">foreground</div><div class="token-value">#18181b</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--primary);"></div><div class="token-info"><div class="token-name">primary</div><div class="token-value">#e1251b</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--secondary);"></div><div class="token-info"><div class="token-name">secondary</div><div class="token-value">#f4f4f5</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--muted);"></div><div class="token-info"><div class="token-name">muted</div><div class="token-value">#fafafa</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--border);"></div><div class="token-info"><div class="token-name">border</div><div class="token-value">#e4e4e7</div></div></div>
+        </div>
+
+        <!-- Status colors -->
+        <div class="ds-block reveal reveal-d1">
+          <div class="ds-block-title">Status Colors <span>feedback</span></div>
+          <div class="token-row"><div class="swatch" style="background: var(--success);"></div><div class="token-info"><div class="token-name">success</div><div class="token-value">#16a34a</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--warning);"></div><div class="token-info"><div class="token-name">warning</div><div class="token-value">#d97706</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--destructive);"></div><div class="token-info"><div class="token-name">destructive</div><div class="token-value">#dc2626</div></div></div>
+          <div class="token-row"><div class="swatch" style="background: var(--info);"></div><div class="token-info"><div class="token-name">info</div><div class="token-value">#2563eb</div></div></div>
+        </div>
+
+        <!-- Typography -->
+        <div class="ds-block reveal reveal-d2">
+          <div class="ds-block-title">Typography <span>4px scale</span></div>
+          <div class="type-sample"><span style="font-family: var(--font-display); font-size: 22px;">Instrument Serif</span><span class="type-meta">Display · serif</span></div>
+          <div class="type-sample"><span style="font-family: var(--font-sans); font-size: 15px; font-weight: 600;">Hanken Grotesk</span><span class="type-meta">UI · sans</span></div>
+          <div class="type-sample"><span style="font-family: var(--font-mono); font-size: 13px;">JetBrains Mono</span><span class="type-meta">Mono · code</span></div>
+          <div class="type-sample"><span style="font-size: 12px; color: var(--muted-foreground);">xs / 12px — caption</span><span class="type-meta">--text-xs</span></div>
+          <div class="type-sample"><span style="font-size: 13px;">sm / 13px — body</span><span class="type-meta">--text-sm</span></div>
+          <div class="type-sample"><span style="font-size: 15px; font-weight: 600;">base / 15px — title</span><span class="type-meta">--text-base</span></div>
+        </div>
+
+        <!-- Spacing -->
+        <div class="ds-block reveal">
+          <div class="ds-block-title">Spacing <span>4px base</span></div>
+          <div class="scale-row"><span class="scale-label">space-1</span><div class="scale-bar" style="width: 4px;"></div><span class="token-value">4px</span></div>
+          <div class="scale-row"><span class="scale-label">space-2</span><div class="scale-bar" style="width: 8px;"></div><span class="token-value">8px</span></div>
+          <div class="scale-row"><span class="scale-label">space-3</span><div class="scale-bar" style="width: 12px;"></div><span class="token-value">12px</span></div>
+          <div class="scale-row"><span class="scale-label">space-4</span><div class="scale-bar" style="width: 16px;"></div><span class="token-value">16px</span></div>
+          <div class="scale-row"><span class="scale-label">space-6</span><div class="scale-bar" style="width: 24px;"></div><span class="token-value">24px</span></div>
+          <div class="scale-row"><span class="scale-label">space-8</span><div class="scale-bar" style="width: 32px;"></div><span class="token-value">32px</span></div>
+        </div>
+
+        <!-- Radius -->
+        <div class="ds-block reveal reveal-d1">
+          <div class="ds-block-title">Radius <span>derived</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); text-align: center;">
+            <div><div class="radius-box" style="border-radius: var(--radius-sm); margin: 0 auto var(--space-2);"></div><div class="token-value">sm · 6px</div></div>
+            <div><div class="radius-box" style="border-radius: var(--radius-md); margin: 0 auto var(--space-2);"></div><div class="token-value">md · 8px</div></div>
+            <div><div class="radius-box" style="border-radius: var(--radius-lg); margin: 0 auto var(--space-2);"></div><div class="token-value">lg · 10px</div></div>
+            <div><div class="radius-box" style="border-radius: var(--radius-xl); margin: 0 auto var(--space-2);"></div><div class="token-value">xl · 16px</div></div>
+            <div><div class="radius-box" style="border-radius: var(--radius-2xl); margin: 0 auto var(--space-2);"></div><div class="token-value">2xl · 22px</div></div>
+            <div><div class="radius-box" style="border-radius: var(--radius-full); margin: 0 auto var(--space-2);"></div><div class="token-value">full</div></div>
           </div>
         </div>
 
-        <div class="ds-product-list">
-          <div class="ds-product-card">
-            <div class="ds-product-image">📱</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">iPhone 15 Pro Max 256GB 原色钛金属</div>
-              <div class="ds-product-price">¥ 8,999</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-primary">进行中</span>
-                <span class="ds-product-countdown">02:35:18</span>
-              </div>
+        <!-- Shadow -->
+        <div class="ds-block reveal reveal-d2">
+          <div class="ds-block-title">Shadow <span>low-spread</span></div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); text-align: center;">
+            <div><div class="shadow-box" style="box-shadow: var(--shadow-xs); margin: 0 auto var(--space-2);"></div><div class="token-value">xs</div></div>
+            <div><div class="shadow-box" style="box-shadow: var(--shadow-sm); margin: 0 auto var(--space-2);"></div><div class="token-value">sm</div></div>
+            <div><div class="shadow-box" style="box-shadow: var(--shadow-md); margin: 0 auto var(--space-2);"></div><div class="token-value">md</div></div>
+            <div><div class="shadow-box" style="box-shadow: var(--shadow-lg); margin: 0 auto var(--space-2);"></div><div class="token-value">lg</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Component Library -->
+  <section class="section" id="components">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow accent">03 — Component Library</span>
+        <h2 class="h2 display" style="margin-top: var(--space-4);">分层组织的 <em>组件体系</em></h2>
+        <p class="lead">基础组件（原子）→ 复合组件（分子）→ 业务组件（组织），三层架构清晰可复用。</p>
+      </div>
+
+      <!-- Basic components -->
+      <div class="comp-section reveal">
+        <div class="comp-section-title"><h3>基础组件</h3><span class="count">/ Atoms · 8</span></div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Button</h4><p>6 种变体 · 3 种尺寸</p><code>variant, size, disabled</code></div>
+          <div class="comp-preview">
+            <button class="btn btn-default">Default</button>
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-outline">Outline</button>
+            <button class="btn btn-ghost">Ghost</button>
+            <button class="btn btn-destructive btn-sm">Destructive</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="comp-spec">default · primary · secondary<br>outline · ghost · destructive<br>sm · md · lg · icon</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Input</h4><p>表单输入，支持 focus ring</p><code>placeholder, disabled</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <input class="input" placeholder="输入关键词..." style="max-width: 280px;">
+          </div>
+          <div class="comp-spec">border + shadow-ring on focus<br>placeholder: --subtle-foreground<br>disabled: opacity 0.5</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Badge</h4><p>状态标记 · 圆点指示</p><code>variant</code></div>
+          <div class="comp-preview">
+            <span class="badge badge-default">Default</span>
+            <span class="badge badge-primary">Primary</span>
+            <span class="badge badge-success">Success</span>
+            <span class="badge badge-warning">Warning</span>
+            <span class="badge badge-destructive">Error</span>
+            <span class="badge badge-primary badge-ongoing">进行中</span>
+          </div>
+          <div class="comp-spec">dot + label<br>ongoing: pulse animation<br>5 variants</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Switch</h4><p>开关切换</p><code>checked, onChange</code></div>
+          <div class="comp-preview">
+            <label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>
+            <label class="switch"><input type="checkbox"><span class="switch-track"></span></label>
+          </div>
+          <div class="comp-spec">spring transition<br>track: --border-strong → --primary<br>knob translateX 16px</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Tabs</h4><p>分类切换 · pill 容器</p><code>value, onValueChange</code></div>
+          <div class="comp-preview">
+            <div class="ext-tabs"><button class="ext-tab is-active">全部</button><button class="ext-tab">进行中</button><button class="ext-tab">即将开始</button></div>
+          </div>
+          <div class="comp-spec">container: --secondary<br>active: --background + shadow-xs<br>role="tablist"</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Separator</h4><p>分隔线</p><code>orientation</code></div>
+          <div class="comp-preview" style="gap: var(--space-4); align-items: center;">
+            <div class="separator" style="width: 120px;"></div>
+            <div class="separator-vertical"></div>
+          </div>
+          <div class="comp-spec">1px · --border<br>horizontal / vertical</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Skeleton</h4><p>加载占位 · shimmer</p><code>width, height</code></div>
+          <div class="comp-preview" style="gap: var(--space-2);">
+            <div style="width: 120px;"><div class="skel skel-img" style="height: 60px; border-radius: var(--radius-md);"></div><div class="skel skel-line"></div></div>
+          </div>
+          <div class="comp-spec">shimmer 1.4s infinite<br>gradient: secondary → accent<br>aria-busy</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Toast</h4><p>反馈通知 · sonner 风格</p><code>message, type</code></div>
+          <div class="comp-preview">
+            <button class="btn btn-outline btn-sm" onclick="showToast('操作成功', 'success')">成功</button>
+            <button class="btn btn-outline btn-sm" onclick="showToast('发生错误', 'error')">错误</button>
+            <button class="btn btn-outline btn-sm" onclick="showToast('提示信息', 'info')">信息</button>
+          </div>
+          <div class="comp-spec">auto-hide 2.5s<br>success / error / info<br>foreground bg</div>
+        </div>
+      </div>
+
+      <!-- Composite components -->
+      <div class="comp-section reveal">
+        <div class="comp-section-title"><h3>复合组件</h3><span class="count">/ Molecules · 4</span></div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>SearchBar</h4><p>搜索输入 + 清除 + 按钮</p><code>Input + Button</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <div class="ext-search" style="max-width: 360px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="input" placeholder="搜索商品..." style="border: none; box-shadow: none; padding: var(--space-2) 0;">
+              <button class="ext-search-btn">搜索</button>
             </div>
           </div>
-          <div class="ds-product-card">
-            <div class="ds-product-image">💻</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">MacBook Pro 14寸 M3 Pro芯片 18GB 512GB</div>
-              <div class="ds-product-price">¥ 17,999</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-warning">即将开始</span>
-                <span class="ds-product-countdown">12:48:33</span>
-              </div>
+          <div class="comp-spec">focus → --primary + ring<br>clear btn conditional<br>aria-label</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Card</h4><p>内容容器</p><code>Header + Content + Footer</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <div class="card" style="max-width: 280px;">
+              <div class="card-header"><div class="card-title">商品搜索增强</div><div class="card-desc">为京东夺宝页面提供搜索与筛选</div></div>
+              <div class="card-content"><span class="badge badge-primary badge-ongoing">运行中</span></div>
+              <div class="card-footer"><button class="btn btn-primary btn-sm">启用</button><button class="btn btn-ghost btn-sm">详情</button></div>
             </div>
           </div>
-          <div class="ds-product-card">
-            <div class="ds-product-image">🎧</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">AirPods Pro 2代 USB-C版 主动降噪</div>
-              <div class="ds-product-price">¥ 1,899</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-primary">进行中</span>
-                <span class="ds-product-countdown">05:12:09</span>
-              </div>
+          <div class="comp-spec">border + radius-lg<br>header / content / footer<br>composition pattern</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>Alert</h4><p>内联提示</p><code>variant, title, desc</code></div>
+          <div class="comp-preview" style="flex: 1; flex-direction: column; gap: var(--space-2);">
+            <div class="alert alert-info">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              <div><div class="alert-title">提示</div><div class="alert-desc">API 加载失败，将依赖页面内容提取。</div></div>
+            </div>
+            <div class="alert alert-warning">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+              <div><div class="alert-title">注意</div><div class="alert-desc">搜索结果为空，请尝试其他关键词。</div></div>
             </div>
           </div>
-          <div class="ds-product-card">
-            <div class="ds-product-image">⌚</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">Apple Watch Series 9 GPS版 45mm</div>
-              <div class="ds-product-price">¥ 3,199</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-success">即将结束</span>
-                <span class="ds-product-countdown">00:45:22</span>
-              </div>
+          <div class="comp-spec">info / warning / destructive<br>icon + title + desc<br>subtle bg + colored border</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>EmptyState</h4><p>空状态</p><code>icon, title, desc</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <div class="empty-state" style="padding: var(--space-8); background: var(--muted); border-radius: var(--radius-lg); border: 1px solid var(--border);">
+              <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+              <div class="empty-title">未找到匹配商品</div>
+              <div class="empty-desc">试试其他关键词，或切换筛选条件</div>
             </div>
           </div>
-          <div class="ds-product-card">
-            <div class="ds-product-image">🎮</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">PlayStation 5 Slim 轻薄版 1TB</div>
-              <div class="ds-product-price">¥ 3,899</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-primary">进行中</span>
-                <span class="ds-product-countdown">08:22:15</span>
-              </div>
+          <div class="comp-spec">icon circle + title + desc<br>centered, generous padding<br>used on no-results</div>
+        </div>
+      </div>
+
+      <!-- Business components -->
+      <div class="comp-section reveal">
+        <div class="comp-section-title"><h3>业务组件</h3><span class="count">/ Organisms · 3</span></div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>AuctionToolbar</h4><p>扩展注入的顶部工具栏</p><code>Logo + Search + Tabs + Toggle</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--primary);">夺宝搜索</span>
+              <div style="flex: 1; min-width: 120px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 8px; font-size: 11px; color: var(--subtle-foreground);">搜索...</div>
+              <span class="badge badge-primary badge-ongoing">已启用</span>
             </div>
           </div>
-          <div class="ds-product-card">
-            <div class="ds-product-image">📺</div>
-            <div class="ds-product-info">
-              <div class="ds-product-name">三星 Neo QLED 55英寸 4K智能电视</div>
-              <div class="ds-product-price">¥ 7,999</div>
-              <div class="ds-product-status">
-                <span class="jds-badge jds-badge-warning">即将开始</span>
-                <span class="ds-product-countdown">23:55:40</span>
-              </div>
+          <div class="comp-spec">fixed top · z-999999<br>Shadow DOM isolated<br>matches src/ui.js</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>ProductGrid</h4><p>商品网格</p><code>products, filter</code></div>
+          <div class="comp-preview" style="flex: 1;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2);">
+              <div class="product-card" style="cursor: default;"><div class="product-img" style="height: 50px; font-size: 20px;">📱</div><div class="product-body" style="padding: var(--space-2);"><div style="font-size: 11px; font-weight: 600; color: var(--primary);">¥8,999</div></div></div>
+              <div class="product-card" style="cursor: default;"><div class="product-img" style="height: 50px; font-size: 20px;">💻</div><div class="product-body" style="padding: var(--space-2);"><div style="font-size: 11px; font-weight: 600; color: var(--primary);">¥17,999</div></div></div>
+            </div>
+          </div>
+          <div class="comp-spec">auto-fill minmax(200px, 1fr)<br>card hover lift + shadow<br>staggered cardIn animation</div>
+        </div>
+        <div class="comp-row">
+          <div class="comp-meta"><h4>FilterTabs</h4><p>分类筛选标签</p><code>tabs, active, onChange</code></div>
+          <div class="comp-preview">
+            <div class="ext-tabs" role="tablist">
+              <button class="ext-tab is-active" role="tab">全部</button>
+              <button class="ext-tab" role="tab">正在夺宝</button>
+              <button class="ext-tab" role="tab">即将开始</button>
+            </div>
+          </div>
+          <div class="comp-spec">all / ongoing / upcoming<br>aria-selected sync<br>shadow-xs on active</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interaction Patterns -->
+  <section class="section" id="patterns" style="background: var(--muted);">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow accent">04 — Interaction Standards</span>
+        <h2 class="h2 display" style="margin-top: var(--space-4);">一致的 <em>交互准则</em></h2>
+        <p class="lead">反馈、加载、错误、空状态——四种核心交互模式统一规范，确保用户在任何场景下都获得可预期的体验。</p>
+      </div>
+
+      <div class="ix-grid">
+        <div class="ix-card reveal">
+          <div class="ix-label">/ Feedback</div>
+          <div class="ix-title">操作反馈</div>
+          <div class="ix-desc">所有用户操作必须即时反馈：Toast 通知、按钮态变化、计数更新。反馈延迟不超过 100ms。</div>
+          <div class="ix-demo">
+            <button class="btn btn-primary btn-sm" onclick="showToast('搜索完成', 'success')">触发反馈</button>
+          </div>
+        </div>
+        <div class="ix-card reveal reveal-d1">
+          <div class="ix-label">/ Loading</div>
+          <div class="ix-title">加载状态</div>
+          <div class="ix-desc">数据加载超过 300ms 时显示 Skeleton 占位，避免空白闪烁。商品卡片用 shimmer 动画。</div>
+          <div class="ix-demo" style="padding: var(--space-2);">
+            <div class="skeleton-card"><div class="skel skel-img" style="height: 40px;"></div><div class="skel skel-line"></div></div>
+          </div>
+        </div>
+        <div class="ix-card reveal reveal-d2">
+          <div class="ix-label">/ Error</div>
+          <div class="ix-title">错误状态</div>
+          <div class="ix-desc">API 失败时降级为 DOM 提取，并以 destructive Toast 提示。不阻塞核心功能。</div>
+          <div class="ix-demo">
+            <div class="alert alert-destructive" style="padding: var(--space-3);">
+              <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+              <div><div class="alert-title">API 加载失败</div><div class="alert-desc">已切换至页面内容提取模式</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="ix-card reveal reveal-d3">
+          <div class="ix-label">/ Empty</div>
+          <div class="ix-title">空状态</div>
+          <div class="ix-desc">无匹配结果时展示 EmptyState，提供图标、标题、描述与建议操作，引导用户调整筛选。</div>
+          <div class="ix-demo">
+            <div class="empty-state" style="padding: var(--space-5);">
+              <div class="empty-icon" style="width: 40px; height: 40px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+              <div class="empty-title" style="font-size: 16px;">未找到匹配商品</div>
+              <div class="empty-desc" style="font-size: 12px;">试试其他关键词</div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="ds-preview-section">
-      <div class="ds-preview-header">
-        <h3>Mobile Preview</h3>
-      </div>
-      <div class="ds-preview-content">
-        <div class="ds-mobile-preview">
-          <div class="ds-mobile-notch"></div>
-          <div class="ds-mobile-screen">
-            <div class="ds-mobile-header">
-              <svg class="ds-mobile-logo" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-              <span class="ds-mobile-title">夺宝搜索</span>
+  <!-- Mobile -->
+  <section class="section" id="mobile">
+    <div class="container">
+      <div class="mobile-section">
+        <div class="reveal">
+          <span class="eyebrow accent">05 — Mobile</span>
+          <h2 class="h2 display" style="margin-top: var(--space-4); margin-bottom: var(--space-4);">移动端 <em>同样克制</em></h2>
+          <p class="lead" style="margin-bottom: var(--space-6);">响应式断点自动适配。768px 以下切换为垂直堆叠：搜索框全宽置顶、Tab 横向排布、Logo 隐藏以节省空间。</p>
+          <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
+              <span class="badge badge-primary" style="flex-shrink: 0; margin-top: 2px;">断点</span>
+              <div><div style="font-size: 13px; font-weight: 600;">900px / 640px</div><div style="font-size: 12px; color: var(--muted-foreground);">导航折叠 · 网格降列 · 工具栏重排</div></div>
             </div>
-            <div class="ds-mobile-body">
-              <div class="ds-mobile-search">
-                <div class="jds-search-bar">
-                  <input class="jds-search-input" type="text" placeholder="搜索商品...">
-                  <button class="jds-search-btn">搜索</button>
+            <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
+              <span class="badge badge-success" style="flex-shrink: 0; margin-top: 2px;">性能</span>
+              <div><div style="font-size: 13px; font-weight: 600;">26.82 KB · 零依赖</div><div style="font-size: 12px; color: var(--muted-foreground);">纯原生 JS + CSS，Shadow DOM 隔离</div></div>
+            </div>
+            <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
+              <span class="badge badge-warning" style="flex-shrink: 0; margin-top: 2px;">无障碍</span>
+              <div><div style="font-size: 13px; font-weight: 600;">ARIA + 键盘导航</div><div style="font-size: 12px; color: var(--muted-foreground);">prefers-reduced-motion 适配</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal reveal-d1">
+          <div class="phone">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-header">
+                  <span class="ext-logo-mark" style="width: 18px; height: 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+                  <span class="phone-title">夺宝搜索</span>
+                </div>
+                <div class="phone-body">
+                  <div class="phone-search">
+                    <input placeholder="搜索商品...">
+                    <button class="phone-search-btn">搜索</button>
+                  </div>
+                  <div class="phone-tabs">
+                    <button class="phone-tab is-active">全部</button>
+                    <button class="phone-tab">进行中</button>
+                    <button class="phone-tab">即将开始</button>
+                  </div>
+                  <div class="phone-stats">
+                    <span class="phone-count">共 <strong>128</strong> 件</span>
+                    <span class="phone-toggle">已启用</span>
+                  </div>
+                  <div class="phone-products">
+                    <div class="phone-product"><div class="phone-product-img">📱</div><div class="phone-product-info"><div class="phone-product-name">iPhone 15 Pro Max</div><div class="phone-product-price">¥8,999</div></div></div>
+                    <div class="phone-product"><div class="phone-product-img">💻</div><div class="phone-product-info"><div class="phone-product-name">MacBook Pro 14"</div><div class="phone-product-price">¥17,999</div></div></div>
+                    <div class="phone-product"><div class="phone-product-img">🎧</div><div class="phone-product-info"><div class="phone-product-name">AirPods Pro 2</div><div class="phone-product-price">¥1,899</div></div></div>
+                    <div class="phone-product"><div class="phone-product-img">⌚</div><div class="phone-product-info"><div class="phone-product-name">Apple Watch S9</div><div class="phone-product-price">¥3,199</div></div></div>
+                  </div>
                 </div>
               </div>
-              <div class="ds-mobile-tabs">
-                <div class="jds-tabs">
-                  <button class="jds-tab active">全部</button>
-                  <button class="jds-tab">进行中</button>
-                  <button class="jds-tab">即将开始</button>
-                </div>
-              </div>
-              <div class="ds-mobile-stats">
-                <span style="font-size: var(--jds-font-size-xs); color: var(--jds-text-tertiary);">共 128 件商品</span>
-                <button class="jds-btn jds-btn-outline jds-btn-sm">已启用</button>
-              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <footer class="ds-footer">
-    JD-Auction-Search Design System v1.2.2 · Designed with precision
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <div class="footer-mark">JD<span>.</span>Auction<span>.</span>Search</div>
+      </div>
+      <div class="footer-meta">
+        Design System v1.2.2<br>
+        Refined Minimalism · shadcn-inspired<br>
+        Built with precision · 2026
+      </div>
+    </div>
   </footer>
 
-  <div class="jds-toast" id="demoToast"></div>
+  <!-- Toast stack -->
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
   <script>
-    function showToast(type) {
-      const toast = document.getElementById('demoToast');
-      const messages = {
-        primary: 'Primary Button Clicked!',
-        secondary: 'Secondary Button Clicked!',
-        outline: 'Outline Button Clicked!',
-        small: 'Small Button Clicked!',
-        large: 'Large Button Clicked!'
-      };
-      
-      toast.textContent = messages[type] || 'Action performed!';
-      toast.className = 'jds-toast show';
-      
+    // ============================================================
+    // MOCK PRODUCT DATA — realistic auction items
+    // ============================================================
+    const PRODUCTS = [
+      { id: 1, name: 'iPhone 15 Pro Max 256GB 原色钛金属', price: 8999, icon: '📱', status: 'ongoing', countdown: '02:35:18' },
+      { id: 2, name: 'MacBook Pro 14寸 M3 Pro 18GB 512GB', price: 17999, icon: '💻', status: 'upcoming', countdown: '12:48:33' },
+      { id: 3, name: 'AirPods Pro 2代 USB-C 主动降噪', price: 1899, icon: '🎧', status: 'ongoing', countdown: '05:12:09' },
+      { id: 4, name: 'Apple Watch Series 9 GPS 45mm', price: 3199, icon: '⌚', status: 'ongoing', countdown: '00:45:22' },
+      { id: 5, name: 'PlayStation 5 Slim 轻薄版 1TB', price: 3899, icon: '🎮', status: 'ongoing', countdown: '08:22:15' },
+      { id: 6, name: '三星 Neo QLED 55英寸 4K智能电视', price: 7999, icon: '📺', status: 'upcoming', countdown: '23:55:40' },
+      { id: 7, name: 'Dyson V15 Detect 无线吸尘器', price: 4990, icon: '🌀', status: 'ongoing', countdown: '01:18:44' },
+      { id: 8, name: 'Nintendo Switch OLED 白色主机', price: 2099, icon: '🕹️', status: 'ongoing', countdown: '00:22:08' },
+      { id: 9, name: 'iPad Pro 12.9寸 M2芯片 256GB WiFi', price: 8499, icon: '📟', status: 'upcoming', countdown: '15:30:00' },
+      { id: 10, name: 'Bose QuietComfort 45 降噪耳机', price: 2299, icon: '🎧', status: 'ongoing', countdown: '03:44:52' },
+      { id: 11, name: '大疆 DJI Mini 4 Pro 航拍无人机', price: 4788, icon: '🚁', status: 'ongoing', countdown: '00:58:33' },
+      { id: 12, name: '小米 14 Ultra 16GB 512GB 黑色', price: 6499, icon: '📱', status: 'upcoming', countdown: '18:20:15' },
+    ];
+
+    const STATUS_LABELS = { ongoing: '进行中', upcoming: '即将开始', ending: '即将结束' };
+    const state = { keyword: '', tab: 'all', enabled: true };
+
+    // ============================================================
+    // NAV SCROLL
+    // ============================================================
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
+
+    // ============================================================
+    // SCROLL REVEAL
+    // ============================================================
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ============================================================
+    // SCROLL TO DEMO
+    // ============================================================
+    function scrollToDemo() {
+      document.getElementById('demo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================================
+    // TOAST (sonner-style stack)
+    // ============================================================
+    const ICONS = {
+      success: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
+      error: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+      info: '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+    };
+
+    function showToast(message, type = 'info') {
+      const stack = document.getElementById('toastStack');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `${ICONS[type] || ICONS.info}<span>${message}</span>`;
+      stack.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 2000);
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
     }
 
-    function switchTab(element) {
-      const tabs = element.parentElement.querySelectorAll('.jds-tab');
-      tabs.forEach(tab => tab.classList.remove('active'));
-      element.classList.add('active');
-    }
+    // ============================================================
+    // PRODUCT RENDERING
+    // ============================================================
+    const grid = document.getElementById('productGrid');
 
-    function performSearch() {
-      const input = document.getElementById('demoSearchInput');
-      const toast = document.getElementById('demoToast');
-      
-      if (input.value.trim()) {
-        toast.textContent = `搜索 "${input.value}"...`;
-        toast.className = 'jds-toast show';
-        document.getElementById('demoClearBtn').style.display = 'block';
-        
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 2000);
+    function renderSkeletons() {
+      grid.setAttribute('aria-busy', 'true');
+      grid.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = '<div class="skel skel-img"></div><div class="skel skel-line"></div><div class="skel skel-line"></div>';
+        grid.appendChild(card);
       }
     }
 
-    function clearSearch() {
-      const input = document.getElementById('demoSearchInput');
-      input.value = '';
-      document.getElementById('demoClearBtn').style.display = 'none';
+    function renderProducts() {
+      let filtered = PRODUCTS;
+      if (state.tab !== 'all') filtered = filtered.filter(p => p.status === state.tab);
+      if (state.keyword) {
+        const kw = state.keyword.toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(kw));
+      }
+
+      document.getElementById('resultCount').textContent = filtered.length;
+      grid.setAttribute('aria-busy', 'false');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+            <div class="empty-title">未找到匹配商品</div>
+            <div class="empty-desc">试试其他关键词，或切换筛选条件</div>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      filtered.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.animationDelay = `${i * 0.03}s`;
+        card.innerHTML = `
+          <div class="product-img"><span>${p.icon}</span></div>
+          <div class="product-body">
+            <div class="product-name">${p.name}</div>
+            <div class="product-price"><small>¥ </small>${p.price.toLocaleString()}</div>
+            <div class="product-meta">
+              <span class="badge badge-${p.status === 'ongoing' ? 'primary' : 'warning'} ${p.status === 'ongoing' ? 'badge-ongoing' : ''}">${STATUS_LABELS[p.status]}</span>
+              <span class="countdown">${p.countdown}</span>
+            </div>
+          </div>`;
+        card.addEventListener('click', () => showToast(`查看：${p.name.slice(0, 18)}…`, 'success'));
+        grid.appendChild(card);
+      });
     }
 
-    document.getElementById('demoSearchInput').addEventListener('input', function() {
-      document.getElementById('demoClearBtn').style.display = this.value.trim() ? 'block' : 'none';
+    // ============================================================
+    // EVENT BINDING
+    // ============================================================
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+
+    searchInput.addEventListener('input', (e) => {
+      state.keyword = e.target.value.trim();
+      clearBtn.classList.toggle('is-visible', state.keyword.length > 0);
+      renderProducts();
     });
 
-    document.getElementById('demoSearchInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        performSearch();
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && state.keyword) {
+        showToast(`搜索 "${state.keyword}" · 找到 ${document.getElementById('resultCount').textContent} 件`, 'success');
       }
     });
 
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      state.keyword = '';
+      clearBtn.classList.remove('is-visible');
+      renderProducts();
+      searchInput.focus();
+      showToast('已清除搜索', 'info');
+    });
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      if (state.keyword) {
+        showToast(`搜索 "${state.keyword}" · 找到 ${document.getElementById('resultCount').textContent} 件`, 'success');
+      } else {
+        showToast('请输入搜索关键词', 'error');
+        searchInput.focus();
+      }
+    });
+
+    document.querySelectorAll('.ext-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.ext-tab').forEach(t => {
+          t.classList.remove('is-active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('is-active');
+        tab.setAttribute('aria-selected', 'true');
+        state.tab = tab.dataset.tab;
+        renderProducts();
+        showToast(`筛选：${tab.textContent}`, 'info');
+      });
+    });
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    const toggleText = document.getElementById('toggleText');
+    const extToolbar = document.getElementById('extToolbar');
+
+    toggleBtn.addEventListener('click', () => {
+      state.enabled = !state.enabled;
+      toggleBtn.classList.toggle('is-on', state.enabled);
+      toggleBtn.setAttribute('aria-pressed', state.enabled);
+      toggleText.textContent = state.enabled ? '已启用' : '已停用';
+      extToolbar.classList.toggle('is-disabled', !state.enabled);
+
+      if (state.enabled) {
+        showToast('扩展已启用 · 搜索功能恢复', 'success');
+        renderProducts();
+      } else {
+        showToast('扩展已停用', 'error');
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></div>
+            <div class="empty-title">扩展已停用</div>
+            <div class="empty-desc">点击右上角"已停用"按钮重新启用</div>
+          </div>`;
+        document.getElementById('resultCount').textContent = '0';
+      }
+    });
+
+    // Mobile tabs (static demo)
+    document.querySelectorAll('.phone-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.phone-tab').forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+      });
+    });
+
+    // Component library demo tabs
+    document.querySelectorAll('#components .ext-tab').forEach(tab => {
+      if (!tab.dataset.tab) {
+        tab.addEventListener('click', () => {
+          tab.parentElement.querySelectorAll('.ext-tab').forEach(t => t.classList.remove('is-active'));
+          tab.classList.add('is-active');
+        });
+      }
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    renderSkeletons();
     setTimeout(() => {
-      const toast = document.getElementById('demoToast');
-      toast.textContent = '🎉 Design System Loaded';
-      toast.className = 'jds-toast show jds-toast-success';
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }, 1000);
+      renderProducts();
+      setTimeout(() => showToast('设计系统已加载 · 试试搜索 "iPhone"', 'success'), 400);
+    }, 1100);
   </script>
 </body>
 </html>

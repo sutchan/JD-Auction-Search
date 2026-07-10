@@ -1,275 +1,74 @@
 /* JD-Auction-Search/src/styles.css v1.2.2 */
-/* 搜索增强样式 - 通过 web_accessible_resources 注入 */
+/* 全局样式 — 仅用于 Shadow DOM 外的 Toast 反馈组件 */
+/* 工具栏与空状态样式已内联至 Shadow DOM (见 src/ui.js _getInlineStyles) */
 
 :root {
+  /* shadcn 语义令牌（与 Shadow DOM 内 :host 令牌保持一致） */
+  --jds-foreground: #18181b;
+  --jds-background: #ffffff;
   --jds-primary: #e1251b;
-  --jds-primary-hover: #c91b14;
-  --jds-bg: #f5f5f5;
-  --jds-border: #e8e8e8;
-  --jds-text: #333;
-  --jds-text-light: #999;
-  --jds-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --jds-radius: 4px;
+  --jds-success: #16a34a;
+  --jds-destructive: #dc2626;
+  --jds-info: #2563eb;
+  --jds-shadow-lg: 0 10px 24px -4px rgb(24 24 27 / 0.10), 0 4px 8px -4px rgb(24 24 27 / 0.06);
+  --jds-radius-full: 9999px;
+  --jds-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --jds-dur-base: 0.2s;
 }
 
-.jds-search-container {
+/* ===== Toast 栈 (sonner 风格) ===== */
+.jds-toast-stack {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 999999;
-  background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
-  border-bottom: 2px solid var(--jds-primary);
-  box-shadow: 0 2px 12px rgba(225, 37, 27, 0.15);
-  padding: 12px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.jds-logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--jds-primary);
-  white-space: nowrap;
-}
-
-.jds-logo svg {
-  width: 24px;
-  height: 24px;
-}
-
-.jds-search-box {
-  flex: 1;
-  max-width: 600px;
-  display: flex;
-  border: 2px solid var(--jds-border);
-  border-radius: 24px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  background: #fff;
-}
-
-.jds-search-box:focus-within {
-  border-color: var(--jds-primary);
-  box-shadow: 0 0 0 3px rgba(225, 37, 27, 0.1);
-}
-
-.jds-search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 10px 16px;
-  font-size: 14px;
-  color: var(--jds-text);
-  background: transparent;
-}
-
-.jds-search-input::placeholder {
-  color: var(--jds-text-light);
-}
-
-.jds-clear-btn {
-  border: none;
-  background: transparent;
-  color: var(--jds-text-light);
-  cursor: pointer;
-  padding: 0 12px;
-  font-size: 18px;
-  display: none;
-  transition: color 0.2s;
-}
-
-.jds-clear-btn:hover {
-  color: var(--jds-text);
-}
-
-.jds-clear-btn.visible {
-  display: block;
-}
-
-.jds-search-btn {
-  border: none;
-  background: var(--jds-primary);
-  color: #fff;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.jds-search-btn:hover {
-  background: var(--jds-primary-hover);
-}
-
-.jds-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--jds-bg);
-  padding: 4px;
-  border-radius: var(--jds-radius);
-}
-
-.jds-tab {
-  padding: 8px 16px;
-  border: none;
-  background: transparent;
-  color: var(--jds-text);
-  font-size: 13px;
-  cursor: pointer;
-  border-radius: var(--jds-radius);
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.jds-tab:hover {
-  background: rgba(225, 37, 27, 0.05);
-}
-
-.jds-tab.active {
-  background: #fff;
-  color: var(--jds-primary);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.jds-result-count {
-  font-size: 13px;
-  color: var(--jds-text-light);
-  white-space: nowrap;
-}
-
-.jds-result-count strong {
-  color: var(--jds-primary);
-  font-weight: 600;
-}
-
-.jds-toggle-btn {
-  border: 1px solid var(--jds-border);
-  background: #fff;
-  color: var(--jds-text);
-  padding: 8px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: var(--jds-radius);
-  transition: all 0.2s;
-}
-
-.jds-toggle-btn:hover {
-  border-color: var(--jds-primary);
-  color: var(--jds-primary);
-}
-
-.jds-toggle-btn.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.jds-empty-state {
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000001;
   display: flex;
   flex-direction: column;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.jds-empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.jds-empty-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--jds-text);
-  margin-bottom: 8px;
-}
-
-.jds-empty-desc {
-  font-size: 14px;
-  color: var(--jds-text-light);
-}
-
-.jds-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  color: var(--jds-text-light);
-}
-
-.jds-loading::after {
-  content: '';
-  width: 24px;
-  height: 24px;
-  border: 3px solid var(--jds-border);
-  border-top-color: var(--jds-primary);
-  border-radius: 50%;
-  animation: jds-spin 0.8s linear infinite;
-  margin-left: 12px;
-}
-
-@keyframes jds-spin {
-  to { transform: rotate(360deg); }
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 .jds-toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 24px;
-  font-size: 14px;
-  z-index: 1000001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--jds-foreground);
+  color: var(--jds-background);
+  border-radius: var(--jds-radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--jds-shadow-lg);
+  transform: translateY(20px);
   opacity: 0;
-  transition: all 0.3s ease;
+  pointer-events: auto;
+  transition: all var(--jds-dur-base) var(--jds-ease-spring);
+  max-width: 90vw;
 }
 
-.jds-toast.show {
-  transform: translateX(-50%) translateY(0);
+.jds-toast.is-show {
+  transform: translateY(0);
   opacity: 1;
 }
 
+.jds-toast-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.jds-toast-success .jds-toast-icon { color: #4ade80; }
+.jds-toast-error .jds-toast-icon { color: #f87171; }
+.jds-toast-info .jds-toast-icon { color: #60a5fa; }
+
 @media (max-width: 768px) {
-  .jds-search-container {
-    flex-wrap: wrap;
-    padding: 10px 12px;
-    gap: 10px;
-  }
+  .jds-toast-stack { bottom: 16px; }
+  .jds-toast { font-size: 12px; padding: 10px 16px; }
+}
 
-  .jds-search-box {
-    order: 1;
-    width: 100%;
-    max-width: none;
-  }
-
-  .jds-tabs {
-    order: 2;
-    flex: 1;
-  }
-
-  .jds-result-count {
-    order: 3;
-    font-size: 12px;
-  }
-
-  .jds-toggle-btn {
-    order: 4;
-    font-size: 11px;
-    padding: 6px 10px;
-  }
-
-  .jds-logo {
-    display: none;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .jds-toast { transition-duration: 0.01ms; }
 }

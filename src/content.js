@@ -116,6 +116,7 @@
      */
     _handleToggle(enabled) {
       JDSUtils.showToast(enabled ? 'toastEnabled' : 'toastDisabled');
+      JDSUI.setToolbarEnabled(enabled);
 
       if (enabled) {
         this._applyFilterAndUpdate();
