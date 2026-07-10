@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JD Auction Search — Interactive Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,800;9..144,900&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       DESIGN TOKENS — Dark Editorial Auction House
+       ============================================ */
+    :root {
+      /* Brand */
+      --jd-red: #e1251b;
+      --jd-red-bright: #ff3528;
+      --jd-red-deep: #a31810;
+      --jd-red-glow: rgba(225, 37, 27, 0.25);
+
+      /* Surfaces — warm charcoal */
+      --bg-void: #0a0908;
+      --bg-base: #0f0e0c;
+      --bg-surface: #17150f;
+      --bg-elevated: #1f1d17;
+      --bg-glass: rgba(23, 21, 15, 0.7);
+
+      /* Text — warm off-white */
+      --text-primary: #f5f0e8;
+      --text-secondary: #a8a097;
+      --text-tertiary: #6b655c;
+      --text-faint: #3d3934;
+
+      /* Borders */
+      --border-subtle: rgba(245, 240, 232, 0.06);
+      --border-default: rgba(245, 240, 232, 0.12);
+      --border-strong: rgba(245, 240, 232, 0.2);
+
+      /* Status */
+      --success: #5ec65e;
+      --warning: #f5b943;
+      --error: #ff4d4f;
+      --info: #4dabff;
+
+      /* Typography */
+      --font-display: 'Fraunces', 'Noto Serif SC', Georgia, serif;
+      --font-body: 'Noto Sans SC', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 40px;
+      --space-2xl: 64px;
+      --space-3xl: 96px;
+
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-glow: 0 0 40px var(--jd-red-glow);
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-elevated: 0 12px 48px rgba(0,0,0,0.5);
+
+      /* Transitions */
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --dur-fast: 0.15s;
+      --dur-normal: 0.3s;
+      --dur-slow: 0.5s;
+    }
+
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-void);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    ::selection {
+      background: var(--jd-red);
+      color: #fff;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
+    }
+
+    /* Custom cursor */
+    .cursor-dot, .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10000;
+      border-radius: 50%;
+      mix-blend-mode: difference;
+    }
+    .cursor-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-primary);
+      transition: transform 0.1s var(--ease-out);
+    }
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--text-primary);
+      transition: transform 0.25s var(--ease-out), width 0.25s, height 0.25s, border-color 0.25s;
+    }
+    .cursor-ring.hover {
+      width: 56px;
+      height: 56px;
+      border-color: var(--jd-red-bright);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-void); }
+    ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+    /* ============================================
+       LOADING SCREEN
+       ============================================ */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-void);
+      z-index: 10001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+    .loader-mark {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--jd-red);
+      letter-spacing: -0.04em;
+      animation: loaderPulse 1.2s var(--ease-out) infinite;
+    }
+    .loader-bar {
+      width: 200px;
+      height: 2px;
+      background: var(--border-subtle);
+      overflow: hidden;
+      border-radius: 1px;
+    }
+    .loader-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: var(--jd-red);
+      animation: loaderSlide 1s var(--ease-out) infinite;
+    }
+    @keyframes loaderPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.95); }
+    }
+    @keyframes loaderSlide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+    .loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s var(--ease-out);
+    }
+
+    /* ============================================
+       NAVIGATION
+       ============================================ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: var(--space-md) var(--space-xl);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+      background: rgba(10, 9, 8, 0.6);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: padding var(--dur-normal) var(--ease-out);
+    }
+    .nav.scrolled {
+      padding: var(--space-sm) var(--space-xl);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .nav-logo-mark {
+      width: 28px;
+      height: 28px;
+      background: var(--jd-red);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      box-shadow: 0 0 20px var(--jd-red-glow);
+    }
+    .nav-logo-text { color: var(--text-primary); }
+    .nav-logo-text span { color: var(--jd-red); }
+
+    .nav-links {
+      display: flex;
+      gap: var(--space-lg);
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--dur-fast) var(--ease-out);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--jd-red);
+      transition: width var(--dur-normal) var(--ease-out);
+    }
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--jd-red);
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--jd-red);
+      border-radius: var(--radius-full);
+      background: transparent;
+      cursor: none;
+      transition: all var(--dur-normal) var(--ease-out);
+    }
+    .nav-cta:hover {
+      background: var(--jd-red);
+      color: #fff;
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* ============================================
+       HERO
+       ============================================ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-3xl) var(--space-xl);
+    }
+
+    /* Gradient mesh background */
+    .hero-mesh {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .hero-mesh::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      top: -10%;
+      right: -10%;
+      background: radial-gradient(circle, var(--jd-red-glow) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: meshFloat1 12s var(--ease-smooth) infinite alternate;
+    }
+    .hero-mesh::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      bottom: -15%;
+      left: -5%;
+      background: radial-gradient(circle, rgba(94, 198, 94, 0.08) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: meshFloat2 15s var(--ease-smooth) infinite alternate;
+    }
+    @keyframes meshFloat1 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-60px, 40px) scale(1.15); }
+    }
+    @keyframes meshFloat2 {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, -30px) scale(1.1); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-xl);
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 0.3s forwards;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulseDot 2s var(--ease-out) infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(94, 198, 94, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(94, 198, 94, 0); }
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 10vw, 140px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      margin-bottom: var(--space-lg);
+      opacity: 0;
+      animation: fadeUp 1s var(--ease-out) 0.5s forwards;
+    }
+    .hero-title .accent {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--jd-red);
+      position: relative;
+    }
+    .hero-title .accent::after {
+      content: '';
+      position: absolute;
+      bottom: 0.15em;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--jd-red);
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: drawLine 0.8s var(--ease-out) 1.5s forwards;
+    }
+    @keyframes drawLine {
+      to { transform: scaleX(1); }
+    }
+
+    .hero-subtitle {
+      font-size: clamp(15px, 1.8vw, 18px);
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin: 0 auto var(--space-2xl);
+      line-height: 1.7;
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 0.8s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 1s forwards;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-xl);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: none;
+      transition: all var(--dur-normal) var(--ease-out);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary {
+      background: var(--jd-red);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--jd-red-glow);
+    }
+    .btn-primary:hover {
+      background: var(--jd-red-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--jd-red-glow);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+    .btn-ghost:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-surface);
+    }
+
+    /* Hero stats */
+    .hero-stats {
+      display: flex;
+      gap: var(--space-2xl);
+      justify-content: center;
+      margin-top: var(--space-3xl);
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 1.2s forwards;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-value {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+    }
+    .hero-stat-value span { color: var(--jd-red); }
+    .hero-stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: var(--space-xs);
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: var(--space-xl);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 1.5s forwards;
+    }
+    .scroll-hint-text {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      writing-mode: vertical-rl;
+    }
+    .scroll-hint-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--text-tertiary), transparent);
+      animation: scrollLine 2s var(--ease-out) infinite;
+    }
+    @keyframes scrollLine {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      51% { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================
+       SECTION SHARED
+       ============================================ */
+    .section {
+      padding: var(--space-3xl) var(--space-xl);
+      max-width: 1280px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .section-header {
+      margin-bottom: var(--space-2xl);
+    }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--jd-red);
+      margin-bottom: var(--space-md);
+    }
+    .section-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--jd-red);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      max-width: 700px;
+    }
+    .section-title em {
+      font-weight: 300;
+      color: var(--text-tertiary);
+    }
+    .section-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin-top: var(--space-md);
+      line-height: 1.7;
+    }
+
+    /* ============================================
+       LIVE DEMO — Browser Frame
+       ============================================ */
+    .demo-wrapper {
+      perspective: 2000px;
+    }
+
+    .browser-frame {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-elevated);
+      border: 1px solid var(--border-default);
+      transform: rotateX(2deg);
+      transform-style: preserve-3d;
+      transition: transform var(--dur-slow) var(--ease-out);
+    }
+    .browser-frame:hover {
+      transform: rotateX(0deg);
+    }
+
+    .browser-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .browser-dots {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .browser-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .browser-dot:nth-child(1) { background: #ff5f57; }
+    .browser-dot:nth-child(2) { background: #febc2e; }
+    .browser-dot:nth-child(3) { background: #28c840; }
+
+    .browser-url {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-void);
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    .browser-url svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+    .browser-url span { color: var(--text-secondary); }
+
+    .browser-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      background: rgba(94, 198, 94, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(94, 198, 94, 0.2);
+    }
+
+    /* Extension toolbar (the actual UI) */
+    .ext-toolbar {
+      background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+      border-bottom: 2px solid var(--jd-red);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      box-shadow: 0 4px 20px rgba(225, 37, 27, 0.08);
+      transition: opacity var(--dur-normal) var(--ease-out), filter var(--dur-normal) var(--ease-out);
+    }
+    .ext-toolbar.disabled {
+      opacity: 0.4;
+      filter: grayscale(0.8);
+      pointer-events: none;
+    }
+
+    .ext-logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--jd-red);
+      white-space: nowrap;
+    }
+    .ext-logo-mark {
+      width: 24px;
+      height: 24px;
+      background: var(--jd-red);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ext-logo-mark svg {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .ext-search {
+      flex: 1;
+      min-width: 200px;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      background: var(--bg-void);
+      border: 1.5px solid var(--border-default);
+      border-radius: var(--radius-full);
+      padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-md);
+      transition: all var(--dur-normal) var(--ease-out);
+    }
+    .ext-search:focus-within {
+      border-color: var(--jd-red);
+      box-shadow: 0 0 0 3px var(--jd-red-glow);
+    }
+    .ext-search svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+    .ext-search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 13px;
+      padding: var(--space-sm) var(--space-sm);
+    }
+    .ext-search input::placeholder {
+      color: var(--text-tertiary);
+    }
+    .ext-clear {
+      display: none;
+      border: none;
+      background: var(--bg-elevated);
+      color: var(--text-tertiary);
+      cursor: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all var(--dur-fast) var(--ease-out);
+      flex-shrink: 0;
+    }
+    .ext-clear:hover {
+      background: var(--border-default);
+      color: var(--text-primary);
+    }
+    .ext-clear.visible {
+      display: flex;
+    }
+    .ext-search-btn {
+      border: none;
+      background: var(--jd-red);
+      color: #fff;
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: none;
+      transition: background var(--dur-fast) var(--ease-out);
+      flex-shrink: 0;
+    }
+    .ext-search-btn:hover {
+      background: var(--jd-red-bright);
+    }
+
+    .ext-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-void);
+      padding: 3px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+    }
+    .ext-tab {
+      padding: var(--space-sm) var(--space-md);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: var(--radius-full);
+      cursor: none;
+      transition: all var(--dur-fast) var(--ease-out);
+      white-space: nowrap;
+      position: relative;
+    }
+    .ext-tab:hover {
+      color: var(--text-primary);
+    }
+    .ext-tab.active {
+      background: var(--bg-elevated);
+      color: var(--jd-red);
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .ext-count {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+    .ext-count strong {
+      color: var(--jd-red);
+      font-weight: 600;
+    }
+
+    .ext-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      background: transparent;
+      cursor: none;
+      transition: all var(--dur-normal) var(--ease-out);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .ext-toggle:hover {
+      border-color: var(--border-strong);
+    }
+    .ext-toggle.on {
+      border-color: var(--jd-red);
+      color: var(--jd-red);
+      background: var(--jd-red-glow);
+    }
+    .ext-toggle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      transition: background var(--dur-fast) var(--ease-out);
+    }
+    .ext-toggle.on .ext-toggle-dot {
+      background: var(--jd-red);
+      box-shadow: 0 0 8px var(--jd-red);
+    }
+
+    /* Product grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-md);
+      padding: var(--space-lg);
+      min-height: 400px;
+      background: var(--bg-base);
+    }
+
+    .product-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: none;
+      transition: all var(--dur-normal) var(--ease-out);
+      animation: cardIn 0.4s var(--ease-spring) backwards;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-default);
+      box-shadow: var(--shadow-card);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .product-image {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+    }
+    .product-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 70% 30%, var(--jd-red-glow), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--dur-normal) var(--ease-out);
+    }
+    .product-card:hover .product-image::before {
+      opacity: 1;
+    }
+    .product-image span {
+      position: relative;
+      z-index: 1;
+      transition: transform var(--dur-normal) var(--ease-spring);
+    }
+    .product-card:hover .product-image span {
+      transform: scale(1.15);
+    }
+
+    .product-info {
+      padding: var(--space-md);
+    }
+    .product-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      min-height: 34px;
+      line-height: 1.4;
+    }
+    .product-price {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--jd-red);
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .product-price small {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-tertiary);
+    }
+    .product-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border-radius: var(--radius-sm);
+    }
+    .badge::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+    .badge-ongoing { background: rgba(225, 37, 27, 0.12); color: var(--jd-red-bright); }
+    .badge-ongoing::before { background: var(--jd-red-bright); animation: pulseDot 1.5s infinite; }
+    .badge-upcoming { background: rgba(245, 185, 67, 0.1); color: var(--warning); }
+    .badge-upcoming::before { background: var(--warning); }
+    .badge-ending { background: rgba(94, 198, 94, 0.1); color: var(--success); }
+    .badge-ending::before { background: var(--success); }
+
+    .countdown {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-3xl) var(--space-xl);
+      text-align: center;
+    }
+    .empty-icon {
+      font-size: 56px;
+      margin-bottom: var(--space-md);
+      opacity: 0.3;
+    }
+    .empty-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+    }
+    .empty-desc {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Loading skeleton */
+    .skeleton-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .skeleton-img {
+      height: 140px;
+      background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .skeleton-line {
+      height: 12px;
+      margin: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .skeleton-line:last-child { width: 60%; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ============================================
+       FEATURES
+       ============================================ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-md);
+    }
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      transition: all var(--dur-normal) var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--jd-red);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--dur-slow) var(--ease-out);
+    }
+    .feature-card:hover {
+      border-color: var(--border-default);
+      transform: translateY(-4px);
+    }
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+    .feature-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-lg);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--jd-red-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--space-lg);
+      font-size: 22px;
+    }
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       DESIGN TOKENS DISPLAY
+       ============================================ */
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-md);
+    }
+    .token-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+    }
+    .token-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: var(--space-md);
+    }
+    .token-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .token-row:last-child { border-bottom: none; }
+    .token-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+    .token-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .token-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .token-value {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .type-sample {
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .type-sample:last-child { border-bottom: none; }
+    .type-text {
+      color: var(--text-primary);
+    }
+    .type-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    /* ============================================
+       MOBILE PREVIEW
+       ============================================ */
+    .mobile-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2xl);
+      align-items: center;
+    }
+    .mobile-phone {
+      max-width: 340px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .phone-frame {
+      background: #1a1a1a;
+      border-radius: 44px;
+      padding: 12px;
+      box-shadow: var(--shadow-elevated), 0 0 0 2px var(--border-default);
+      position: relative;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 28px;
+      background: #1a1a1a;
+      border-radius: 0 0 18px 18px;
+      z-index: 2;
+    }
+    .phone-screen {
+      background: var(--bg-base);
+      border-radius: 32px;
+      overflow: hidden;
+      min-height: 600px;
+    }
+    .phone-header {
+      background: var(--bg-elevated);
+      border-bottom: 2px solid var(--jd-red);
+      padding: var(--space-lg) var(--space-md) var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding-top: 44px;
+    }
+    .phone-logo-mark {
+      width: 20px;
+      height: 20px;
+      background: var(--jd-red);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-logo-mark svg { width: 12px; height: 12px; fill: #fff; }
+    .phone-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--jd-red);
+    }
+    .phone-body { padding: var(--space-md); }
+    .phone-search {
+      display: flex;
+      align-items: center;
+      background: var(--bg-void);
+      border: 1.5px solid var(--border-default);
+      border-radius: var(--radius-full);
+      padding: 3px 3px 3px var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    .phone-search input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 12px;
+      padding: var(--space-sm) 0;
+    }
+    .phone-search input::placeholder { color: var(--text-tertiary); }
+    .phone-search-btn {
+      background: var(--jd-red);
+      color: #fff;
+      border: none;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: none;
+    }
+    .phone-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-void);
+      padding: 3px;
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-md);
+    }
+    .phone-tab {
+      flex: 1;
+      padding: var(--space-xs) var(--space-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: var(--radius-full);
+      cursor: none;
+      text-align: center;
+    }
+    .phone-tab.active {
+      background: var(--bg-elevated);
+      color: var(--jd-red);
+      font-weight: 600;
+    }
+    .phone-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+    .phone-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+    .phone-count strong { color: var(--jd-red); }
+    .phone-toggle {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 3px var(--space-sm);
+      border: 1px solid var(--jd-red);
+      border-radius: var(--radius-full);
+      color: var(--jd-red);
+      background: var(--jd-red-glow);
+      font-weight: 600;
+    }
+    .phone-products {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .phone-product {
+      display: flex;
+      gap: var(--space-sm);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+    }
+    .phone-product-img {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .phone-product-info { flex: 1; min-width: 0; }
+    .phone-product-name {
+      font-size: 11px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+    .phone-product-price {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--jd-red);
+    }
+
+    /* ============================================
+       TOAST
+       ============================================ */
+    .toast {
+      position: fixed;
+      bottom: var(--space-2xl);
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      padding: var(--space-md) var(--space-xl);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 10001;
+      opacity: 0;
+      transition: all var(--dur-normal) var(--ease-spring);
+      box-shadow: var(--shadow-elevated);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      max-width: 90vw;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .toast::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--jd-red);
+      flex-shrink: 0;
+    }
+    .toast.success::before { background: var(--success); }
+    .toast.error::before { background: var(--error); }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .footer {
+      padding: var(--space-2xl) var(--space-xl);
+      text-align: center;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-3xl);
+    }
+    .footer-mark {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--text-faint);
+      margin-bottom: var(--space-md);
+    }
+    .footer-mark span { color: var(--jd-red); }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================
+       SCROLL REVEAL
+       ============================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 900px) {
+      .mobile-section { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hero-stats { gap: var(--space-xl); }
+    }
+    @media (max-width: 600px) {
+      body { cursor: auto; }
+      .cursor-dot, .cursor-ring { display: none; }
+      .btn, .ext-tab, .ext-toggle, .ext-search-btn, .ext-clear,
+      .phone-search-btn, .phone-tab, .phone-toggle { cursor: pointer; }
+      .section { padding: var(--space-2xl) var(--space-md); }
+      .hero { padding: var(--space-3xl) var(--space-md); }
+      .ext-toolbar { gap: var(--space-sm); }
+      .ext-logo { display: none; }
+      .ext-search { max-width: none; width: 100%; order: 1; }
+      .ext-tabs { order: 2; }
+      .ext-count { order: 3; }
+      .ext-toggle { order: 4; }
+      .hero-stats { flex-wrap: wrap; gap: var(--space-lg); }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero-mesh::before, .hero-mesh::after { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Loading screen -->
+  <div class="loader" id="loader">
+    <div class="loader-mark">JDS</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">J</div>
+      <span class="nav-logo-text">JD<span>.</span>Auction</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#demo">Live Demo</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#tokens">Design Tokens</a></li>
+      <li><a href="#mobile">Mobile</a></li>
+    </ul>
+    <button class="nav-cta" onclick="scrollToDemo()">Try Demo</button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-mesh"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Chrome Extension · Manifest V3 · v1.2.2</div>
+      <h1 class="hero-title">
+        Auction<br><span class="accent">Search</span> Enhanced
+      </h1>
+      <p class="hero-subtitle">
+        为京东夺宝页面注入实时搜索、分类筛选与数据缓存能力。<br>
+        11 种语言、Shadow DOM 隔离、无障碍优先。
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="scrollToDemo()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          体验交互演示
+        </button>
+        <a href="#features" class="btn btn-ghost">查看功能特性</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value">11<span>+</span></div>
+          <div class="hero-stat-label">Languages</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">0<span>ms</span></div>
+          <div class="hero-stat-label">Search Latency</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">100<span>%</span></div>
+          <div class="hero-stat-label">A11y Compliant</div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span class="scroll-hint-text">Scroll</span>
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+  <!-- Live Demo -->
+  <section class="section" id="demo">
+    <div class="section-header reveal">
+      <div class="section-label">01 — Interactive Demo</div>
+      <h2 class="section-title">在真实页面中 <em>实时搜索</em></h2>
+      <p class="section-desc">下方是扩展注入京东夺宝页面的完整模拟。试试搜索框输入、Tab 切换、启用/停用开关——所有交互均已接通。</p>
+    </div>
+
+    <div class="demo-wrapper reveal reveal-delay-1">
+      <div class="browser-frame">
+        <!-- Browser chrome -->
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+          </div>
+          <div class="browser-url">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>https://1paipai.jd.com/auction/list</span>
+          </div>
+          <div class="browser-badge">SECURE</div>
+        </div>
+
+        <!-- Extension toolbar -->
+        <div class="ext-toolbar" id="extToolbar">
+          <div class="ext-logo">
+            <div class="ext-logo-mark">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            </div>
+            夺宝搜索
+          </div>
+          <div class="ext-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="输入商品关键词搜索..." aria-label="搜索商品">
+            <button class="ext-clear" id="clearBtn" aria-label="清除搜索">×</button>
+            <button class="ext-search-btn" id="searchBtn">搜索</button>
+          </div>
+          <div class="ext-tabs" role="tablist">
+            <button class="ext-tab active" data-tab="all" role="tab" aria-selected="true">全部</button>
+            <button class="ext-tab" data-tab="ongoing" role="tab" aria-selected="false">正在夺宝</button>
+            <button class="ext-tab" data-tab="upcoming" role="tab" aria-selected="false">即将开始</button>
+          </div>
+          <div class="ext-count">共 <strong id="resultCount">0</strong> 件</div>
+          <button class="ext-toggle on" id="toggleBtn" aria-pressed="true">
+            <span class="ext-toggle-dot"></span>
+            <span id="toggleText">已启用</span>
+          </button>
+        </div>
+
+        <!-- Product grid -->
+        <div class="product-grid" id="productGrid">
+          <!-- Products injected by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-header reveal">
+      <div class="section-label">02 — Capabilities</div>
+      <h2 class="section-title">为效率而生的 <em>每一处细节</em></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-num">/ 01</div>
+        <div class="feature-icon">🔍</div>
+        <h3 class="feature-title">实时搜索</h3>
+        <p class="feature-desc">输入即过滤，基于已缓存商品数据本地匹配，零网络延迟。支持模糊匹配与关键词高亮。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-num">/ 02</div>
+        <div class="feature-icon">📡</div>
+        <h3 class="feature-title">API 拦截缓存</h3>
+        <p class="feature-desc">通过 Fetch/XHR 拦截器自动捕获商品列表数据，本地缓存避免重复请求，页面切换不丢失。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-num">/ 03</div>
+        <div class="feature-icon">🛡️</div>
+        <h3 class="feature-title">安全加固</h3>
+        <p class="feature-desc">消息发送者域名验证、URL 白名单、HTTPS 强制、API 参数过滤、商品数据输入校验五重防护。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-num">/ 04</div>
+        <div class="feature-icon">🌍</div>
+        <h3 class="feature-title">11 语言国际化</h3>
+        <p class="feature-desc">原生 chrome.i18n 支持，覆盖中、英、日、韩、法、德、西、俄、阿拉伯、葡、繁体十一种语言。</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-num">/ 05</div>
+        <div class="feature-icon">♿</div>
+        <h3 class="feature-title">无障碍优先</h3>
+        <p class="feature-desc">ARIA 标签完整覆盖、role 属性语义化、键盘导航支持、prefers-reduced-motion 媒体查询适配。</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-num">/ 06</div>
+        <div class="feature-icon">🎨</div>
+        <h3 class="feature-title">设计令牌系统</h3>
+        <p class="feature-desc">完整的 CSS 自定义属性体系：色彩、字体、间距、圆角、阴影、动效——一处定义，全局一致。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Tokens -->
+  <section class="section" id="tokens">
+    <div class="section-header reveal">
+      <div class="section-label">03 — Design System</div>
+      <h2 class="section-title">令牌驱动的 <em>设计语言</em></h2>
+      <p class="section-desc">所有视觉决策源于同一套 CSS 自定义属性，确保跨组件、跨平台的一致性。</p>
+    </div>
+    <div class="tokens-grid">
+      <!-- Colors -->
+      <div class="token-block reveal">
+        <div class="token-title">Color / Brand</div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #e1251b;"></div>
+          <div class="token-info"><div class="token-name">Primary</div><div class="token-value">#e1251b</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #ff3528;"></div>
+          <div class="token-info"><div class="token-name">Primary Bright</div><div class="token-value">#ff3528</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #a31810;"></div>
+          <div class="token-info"><div class="token-name">Primary Deep</div><div class="token-value">#a31810</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: rgba(225,37,27,0.25);"></div>
+          <div class="token-info"><div class="token-name">Primary Glow</div><div class="token-value">rgba(225,37,27,.25)</div></div>
+        </div>
+      </div>
+
+      <!-- Surfaces -->
+      <div class="token-block reveal reveal-delay-1">
+        <div class="token-title">Color / Surface</div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #0a0908;"></div>
+          <div class="token-info"><div class="token-name">Void</div><div class="token-value">#0a0908</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #0f0e0c;"></div>
+          <div class="token-info"><div class="token-name">Base</div><div class="token-value">#0f0e0c</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #17150f;"></div>
+          <div class="token-info"><div class="token-name">Surface</div><div class="token-value">#17150f</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #1f1d17;"></div>
+          <div class="token-info"><div class="token-name">Elevated</div><div class="token-value">#1f1d17</div></div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="token-block reveal reveal-delay-2">
+        <div class="token-title">Typography</div>
+        <div class="type-sample">
+          <span class="type-text" style="font-family: var(--font-display); font-size: 24px; font-weight: 800;">Fraunces</span>
+          <span class="type-meta">Display / Serif</span>
+        </div>
+        <div class="type-sample">
+          <span class="type-text" style="font-family: var(--font-body); font-size: 16px; font-weight: 400;">Noto Sans SC</span>
+          <span class="type-meta">Body / Sans</span>
+        </div>
+        <div class="type-sample">
+          <span class="type-text" style="font-family: var(--font-mono); font-size: 14px; font-weight: 500;">JetBrains Mono</span>
+          <span class="type-meta">Mono / Code</span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="token-block reveal reveal-delay-3">
+        <div class="token-title">Color / Status</div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #5ec65e;"></div>
+          <div class="token-info"><div class="token-name">Success</div><div class="token-value">#5ec65e</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #f5b943;"></div>
+          <div class="token-info"><div class="token-name">Warning</div><div class="token-value">#f5b943</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #ff4d4f;"></div>
+          <div class="token-info"><div class="token-name">Error</div><div class="token-value">#ff4d4f</div></div>
+        </div>
+        <div class="token-row">
+          <div class="token-swatch" style="background: #4dabff;"></div>
+          <div class="token-info"><div class="token-name">Info</div><div class="token-value">#4dabff</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mobile Preview -->
+  <section class="section" id="mobile">
+    <div class="section-header reveal">
+      <div class="section-label">04 — Mobile</div>
+      <h2 class="section-title">移动端 <em>同样出色</em></h2>
+      <p class="section-desc">响应式布局自动适配，在手机浏览器中保持完整的搜索与筛选能力。</p>
+    </div>
+    <div class="mobile-section">
+      <div class="reveal">
+        <div class="feature-card" style="margin-bottom: var(--space-md);">
+          <div class="feature-num">/ Responsive</div>
+          <h3 class="feature-title" style="margin-bottom: var(--space-md);">自适应断点</h3>
+          <p class="feature-desc" style="margin-bottom: var(--space-lg);">
+            768px 以下自动切换为垂直堆叠布局：搜索框全宽置顶、Tab 横向滚动、Logo 隐藏以节省空间。
+          </p>
+          <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+            <span class="badge badge-ongoing">Flexbox</span>
+            <span class="badge badge-upcoming">CSS Grid</span>
+            <span class="badge badge-ending">clamp()</span>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-num">/ Performance</div>
+          <h3 class="feature-title" style="margin-bottom: var(--space-md);">轻量高效</h3>
+          <p class="feature-desc">
+            扩展本体仅 26.82 KB，零依赖，纯原生 JavaScript + CSS。Shadow DOM 隔离样式，不影响宿主页面渲染。
+          </p>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <div class="mobile-phone">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-header">
+                <div class="phone-logo-mark">
+                  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                </div>
+                <span class="phone-title">夺宝搜索</span>
+              </div>
+              <div class="phone-body">
+                <div class="phone-search">
+                  <input type="text" placeholder="搜索商品...">
+                  <button class="phone-search-btn">搜索</button>
+                </div>
+                <div class="phone-tabs">
+                  <button class="phone-tab active">全部</button>
+                  <button class="phone-tab">进行中</button>
+                  <button class="phone-tab">即将开始</button>
+                </div>
+                <div class="phone-stats">
+                  <span class="phone-count">共 <strong>128</strong> 件</span>
+                  <span class="phone-toggle">已启用</span>
+                </div>
+                <div class="phone-products">
+                  <div class="phone-product">
+                    <div class="phone-product-img">📱</div>
+                    <div class="phone-product-info">
+                      <div class="phone-product-name">iPhone 15 Pro Max</div>
+                      <div class="phone-product-price">¥ 8,999</div>
+                    </div>
+                  </div>
+                  <div class="phone-product">
+                    <div class="phone-product-img">💻</div>
+                    <div class="phone-product-info">
+                      <div class="phone-product-name">MacBook Pro 14" M3</div>
+                      <div class="phone-product-price">¥ 17,999</div>
+                    </div>
+                  </div>
+                  <div class="phone-product">
+                    <div class="phone-product-img">🎧</div>
+                    <div class="phone-product-info">
+                      <div class="phone-product-name">AirPods Pro 2 USB-C</div>
+                      <div class="phone-product-price">¥ 1,899</div>
+                    </div>
+                  </div>
+                  <div class="phone-product">
+                    <div class="phone-product-img">⌚</div>
+                    <div class="phone-product-info">
+                      <div class="phone-product-name">Apple Watch S9 45mm</div>
+                      <div class="phone-product-price">¥ 3,199</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-mark">JD<span>.</span>Auction<span>.</span>Search</div>
+    <div class="footer-text">Interactive Prototype v1.2.2 · Dark Editorial Theme · Built with precision</div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============================================
+    // MOCK PRODUCT DATA
+    // ============================================
+    const PRODUCTS = [
+      { id: 1, name: 'iPhone 15 Pro Max 256GB 原色钛金属', price: 8999, icon: '📱', status: 'ongoing', countdown: '02:35:18' },
+      { id: 2, name: 'MacBook Pro 14寸 M3 Pro 18GB 512GB', price: 17999, icon: '💻', status: 'upcoming', countdown: '12:48:33' },
+      { id: 3, name: 'AirPods Pro 2代 USB-C 主动降噪', price: 1899, icon: '🎧', status: 'ongoing', countdown: '05:12:09' },
+      { id: 4, name: 'Apple Watch Series 9 GPS 45mm', price: 3199, icon: '⌚', status: 'ending', countdown: '00:45:22' },
+      { id: 5, name: 'PlayStation 5 Slim 轻薄版 1TB', price: 3899, icon: '🎮', status: 'ongoing', countdown: '08:22:15' },
+      { id: 6, name: '三星 Neo QLED 55英寸 4K智能电视', price: 7999, icon: '📺', status: 'upcoming', countdown: '23:55:40' },
+      { id: 7, name: 'Dyson V15 Detect 无线吸尘器', price: 4990, icon: '🌀', status: 'ongoing', countdown: '01:18:44' },
+      { id: 8, name: 'Nintendo Switch OLED 白色主机', price: 2099, icon: '🕹️', status: 'ending', countdown: '00:22:08' },
+      { id: 9, name: 'iPad Pro 12.9寸 M2芯片 256GB WiFi', price: 8499, icon: '📟', status: 'upcoming', countdown: '15:30:00' },
+      { id: 10, name: 'Bose QuietComfort 45 降噪耳机', price: 2299, icon: '🎧', status: 'ongoing', countdown: '03:44:52' },
+      { id: 11, name: '大疆 DJI Mini 4 Pro 航拍无人机', price: 4788, icon: '🚁', status: 'ending', countdown: '00:58:33' },
+      { id: 12, name: '小米 14 Ultra 16GB 512GB 黑色', price: 6499, icon: '📱', status: 'upcoming', countdown: '18:20:15' },
+    ];
+
+    // ============================================
+    // STATE
+    // ============================================
+    const state = {
+      keyword: '',
+      tab: 'all',
+      enabled: true,
+      loaded: false,
+    };
+
+    // ============================================
+    // LOADING SCREEN
+    // ============================================
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+      }, 800);
+    });
+
+    // ============================================
+    // CUSTOM CURSOR
+    // ============================================
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    let mouseX = 0, mouseY = 0;
+    let ringX = 0, ringY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.transform = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
+    });
+
+    function animateRing() {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.transform = `translate(${ringX - 18}px, ${ringY - 18}px)`;
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    // Cursor hover states
+    document.querySelectorAll('button, a, input, .product-card, .feature-card').forEach(el => {
+      el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
+    });
+
+    // ============================================
+    // NAV SCROLL
+    // ============================================
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // ============================================
+    // SCROLL REVEAL
+    // ============================================
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // ============================================
+    // SCROLL TO DEMO
+    // ============================================
+    function scrollToDemo() {
+      document.getElementById('demo').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ============================================
+    // TOAST
+    // ============================================
+    let toastTimer = null;
+    function showToast(message, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // ============================================
+    // PRODUCT RENDERING
+    // ============================================
+    function renderSkeletons() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = `
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line"></div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      let filtered = PRODUCTS;
+
+      // Filter by tab
+      if (state.tab !== 'all') {
+        filtered = filtered.filter(p => p.status === state.tab);
+      }
+
+      // Filter by keyword
+      if (state.keyword) {
+        const kw = state.keyword.toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(kw));
+      }
+
+      // Update count
+      document.getElementById('resultCount').textContent = filtered.length;
+
+      // Empty state
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">未找到匹配商品</div>
+            <div class="empty-desc">试试其他关键词，或切换筛选条件</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Render cards
+      grid.innerHTML = '';
+      const statusLabels = {
+        ongoing: '进行中',
+        upcoming: '即将开始',
+        ending: '即将结束',
+      };
+
+      filtered.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.animationDelay = `${i * 0.04}s`;
+        card.innerHTML = `
+          <div class="product-image"><span>${p.icon}</span></div>
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="product-price"><small>¥ </small>${p.price.toLocaleString()}</div>
+            <div class="product-meta">
+              <span class="badge badge-${p.status}">${statusLabels[p.status]}</span>
+              <span class="countdown">${p.countdown}</span>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          showToast(`查看商品：${p.name.slice(0, 20)}...`, 'success');
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    // ============================================
+    // EVENT BINDING
+    // ============================================
+    // Search input
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+
+    searchInput.addEventListener('input', (e) => {
+      state.keyword = e.target.value.trim();
+      clearBtn.classList.toggle('visible', state.keyword.length > 0);
+      renderProducts();
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (state.keyword) {
+          showToast(`搜索 "${state.keyword}" — 找到 ${document.getElementById('resultCount').textContent} 件商品`, 'success');
+        }
+      }
+    });
+
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      state.keyword = '';
+      clearBtn.classList.remove('visible');
+      renderProducts();
+      searchInput.focus();
+      showToast('已清除搜索', '');
+    });
+
+    // Search button
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      if (state.keyword) {
+        showToast(`搜索 "${state.keyword}" — 找到 ${document.getElementById('resultCount').textContent} 件商品`, 'success');
+      } else {
+        showToast('请输入搜索关键词', 'error');
+        searchInput.focus();
+      }
+    });
+
+    // Tabs
+    document.querySelectorAll('.ext-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.ext-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        state.tab = tab.dataset.tab;
+        renderProducts();
+        const labels = { all: '全部', ongoing: '正在夺宝', upcoming: '即将开始' };
+        showToast(`筛选：${labels[state.tab]}`, '');
+      });
+    });
+
+    // Toggle
+    const toggleBtn = document.getElementById('toggleBtn');
+    const toggleText = document.getElementById('toggleText');
+    const extToolbar = document.getElementById('extToolbar');
+
+    toggleBtn.addEventListener('click', () => {
+      state.enabled = !state.enabled;
+      toggleBtn.classList.toggle('on', state.enabled);
+      toggleBtn.setAttribute('aria-pressed', state.enabled);
+      toggleText.textContent = state.enabled ? '已启用' : '已停用';
+      extToolbar.classList.toggle('disabled', !state.enabled);
+
+      if (state.enabled) {
+        showToast('扩展已启用 — 搜索功能恢复', 'success');
+        renderProducts();
+      } else {
+        showToast('扩展已停用', 'error');
+        document.getElementById('productGrid').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⏸</div>
+            <div class="empty-title">扩展已停用</div>
+            <div class="empty-desc">点击右上角"已停用"按钮重新启用搜索功能</div>
+          </div>
+        `;
+        document.getElementById('resultCount').textContent = '0';
+      }
+    });
+
+    // Mobile tabs (static demo)
+    document.querySelectorAll('.phone-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.phone-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+
+    // ============================================
+    // INIT
+    // ============================================
+    function init() {
+      renderSkeletons();
+      setTimeout(() => {
+        state.loaded = true;
+        renderProducts();
+        setTimeout(() => {
+          showToast('设计系统已加载 — 试试搜索 "iPhone"', 'success');
+        }, 500);
+      }, 1200);
+    }
+
+    init();
+  </script>
+</body>
+</html>
