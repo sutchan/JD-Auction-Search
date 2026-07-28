@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api.js v1.2.5
+// JD-Auction-Search/src/api.js v1.2.6
 // API管理模块
 
 (function(global) {
@@ -59,7 +59,7 @@
         this.addEventListener('load', function() {
           try {
             const data = JSON.parse(this.responseText);
-            if (state.isEnabled && JDSApi._isAuctionUrl(this._jdsUrl)) {
+            if (JDSApi._isAuctionUrl(this._jdsUrl)) {
               handleResponse(data, this._jdsUrl);
             }
           } catch (e) {

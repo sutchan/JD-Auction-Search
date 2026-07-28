@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui.js v1.2.5
+// JD-Auction-Search/src/ui.js v1.2.6
 // UI渲染和事件绑定模块 — shadcn 设计语言 · Shadow DOM 隔离
 
 (function(global) {
@@ -103,12 +103,6 @@
     _getUIMarkup() {
       return `
         <div class="jds-toolbar" role="region" aria-label="夺宝搜索工具栏">
-          <div class="jds-logo">
-            <span class="jds-logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            </span>
-            <span class="jds-logo-text">${getMessage('logoText')}</span>
-          </div>
           <div class="jds-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" class="jds-search-input" placeholder="${getMessage('searchPlaceholder')}" aria-label="搜索商品" />
@@ -122,11 +116,6 @@
             <button class="jds-tab" data-tab="ongoing" role="tab" aria-selected="false">${getMessage('tabOngoing')}</button>
             <button class="jds-tab" data-tab="upcoming" role="tab" aria-selected="false">${getMessage('tabUpcoming')}</button>
           </div>
-          <div class="jds-count">${getMessage('resultCount', { count: '<strong class="jds-count-value">0</strong>' })}</div>
-          <button class="jds-toggle" aria-pressed="false" aria-label="启用或停用扩展">
-            <span class="jds-toggle-dot" aria-hidden="true"></span>
-            <span class="jds-toggle-text">${getMessage('loading')}</span>
-          </button>
         </div>
       `;
     },
@@ -223,23 +212,6 @@
 
         /* ===== TOOLBAR ===== */
         ${toolbarCss}
-        .jds-toolbar.is-disabled {
-          opacity: 0.45;
-          filter: grayscale(0.7);
-          pointer-events: none;
-        }
-
-        /* Logo */
-        .jds-logo { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-        .jds-logo-mark {
-          width: 22px; height: 22px;
-          border-radius: var(--radius-sm);
-          background: var(--primary);
-          display: grid; place-items: center;
-          box-shadow: 0 2px 8px rgb(225 37 27 / 0.3);
-        }
-        .jds-logo-mark svg { width: 13px; height: 13px; color: #fff; }
-        .jds-logo-text { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: -0.01em; }
 
         /* Search bar */
         .jds-search {
@@ -297,38 +269,6 @@
         .jds-tab.is-active {
           background: var(--background); color: var(--foreground);
           font-weight: 600; box-shadow: var(--shadow-xs);
-        }
-
-        /* Count */
-        .jds-count {
-          font-family: var(--font-mono); font-size: 12px;
-          color: var(--muted-foreground); white-space: nowrap;
-        }
-        .jds-count strong { color: var(--primary); font-weight: 600; }
-
-        /* Toggle */
-        .jds-toggle {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 8px 12px; border: 1px solid var(--border);
-          border-radius: var(--radius-md); background: var(--background);
-          cursor: pointer; font-family: var(--font-mono);
-          font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-          text-transform: uppercase; color: var(--muted-foreground);
-          transition: all var(--dur-base) var(--ease-out);
-        }
-        .jds-toggle:hover { border-color: var(--border-strong); }
-        .jds-toggle.is-on {
-          border-color: var(--primary); color: var(--primary);
-          background: var(--primary-subtle);
-        }
-        .jds-toggle-dot {
-          width: 7px; height: 7px; border-radius: 50%;
-          background: var(--subtle-foreground);
-          transition: all var(--dur-fast) var(--ease-out);
-        }
-        .jds-toggle.is-on .jds-toggle-dot {
-          background: var(--primary);
-          box-shadow: 0 0 0 3px rgb(225 37 27 / 0.18);
         }
 
         /* ===== PRODUCT GRID (optional, for renderProducts API) ===== */
@@ -448,11 +388,8 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
           .jds-toolbar { padding: 10px 12px; gap: 10px; }
-          .jds-logo { display: none; }
           .jds-search { order: 1; max-width: none; width: 100%; }
           .jds-tabs { order: 2; }
-          .jds-count { order: 3; font-size: 11px; }
-          .jds-toggle { order: 4; font-size: 10px; padding: 6px 10px; }
           .jds-product-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px; padding: 12px;
@@ -480,7 +417,6 @@
       const clearBtn = container.querySelector('.jds-clear');
       const searchBtn = container.querySelector('.jds-search-btn');
       const tabs = container.querySelectorAll('.jds-tab');
-      const toggleBtn = container.querySelector('.jds-toggle');
 
       // 搜索框输入 — 实时过滤 + 清除按钮显隐
       input.addEventListener('input', (e) => {
@@ -520,48 +456,6 @@
           handlers.onTabChange();
         });
       });
-
-      // 启停切换
-      toggleBtn.addEventListener('click', () => {
-        state.isEnabled = !state.isEnabled;
-        this.updateToggleBtn(state.isEnabled ? 'enabled' : 'disabled', !state.isEnabled);
-        handlers.onToggle(state.isEnabled);
-      });
-    },
-
-    /**
-     * 更新搜索结果计数
-     * @param {number} count - 结果数量
-     */
-    updateResultCount(count) {
-      const countEl = this.shadowRoot && this.shadowRoot.querySelector('.jds-count-value');
-      if (countEl) countEl.textContent = count;
-    },
-
-    /**
-     * 更新Toggle按钮状态
-     * @param {string} key - 翻译键或直接文本
-     * @param {boolean} disabled - 是否停用
-     */
-    updateToggleBtn(key, disabled = false) {
-      const btn = this.shadowRoot && this.shadowRoot.querySelector('.jds-toggle');
-      const textEl = this.shadowRoot && this.shadowRoot.querySelector('.jds-toggle-text');
-      if (!btn || !textEl) return;
-
-      const translationKeys = ['enabled', 'enabledLocal', 'disabled', 'loading'];
-      const text = translationKeys.includes(key) ? getMessage(key) : key;
-      textEl.textContent = text;
-      btn.classList.toggle('is-on', !disabled);
-      btn.setAttribute('aria-pressed', String(!disabled));
-    },
-
-    /**
-     * 启用/停用工具栏视觉态
-     * @param {boolean} enabled - 是否启用
-     */
-    setToolbarEnabled(enabled) {
-      const toolbar = this.shadowRoot && this.shadowRoot.querySelector('.jds-toolbar');
-      if (toolbar) toolbar.classList.toggle('is-disabled', !enabled);
     },
 
     /**

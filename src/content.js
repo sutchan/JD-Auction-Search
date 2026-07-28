@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.2.5
+// JD-Auction-Search/src/content.js v1.2.6
 // 主模块：整合所有功能
 
 (function() {
@@ -10,7 +10,6 @@
       filteredProducts: [],
       currentTab: 'all',
       keyword: '',
-      isEnabled: true,
       isLoading: false,
       searchMode: false
     },
@@ -29,8 +28,7 @@
         onInput: () => this._applyFilterAndUpdate(),
         onSearch: () => this._applyFilterAndUpdate(),
         onClear: () => this._applyFilterAndUpdate(),
-        onTabChange: () => this._applyFilterAndUpdate(),
-        onToggle: (enabled) => this._handleToggle(enabled)
+        onTabChange: () => this._applyFilterAndUpdate()
       });
 
       // 拦截API
@@ -76,18 +74,9 @@
     _applyFilterAndUpdate() {
       this._applyFilter();
       const filtered = this.state.filteredProducts;
-      JDSUI.updateResultCount(filtered.length);
 
       // 是否处于筛选态（关键词或分类 Tab 任一生效）
       const hasFilter = !!this.state.keyword || this.state.currentTab !== 'all';
-
-      if (!this.state.isEnabled) {
-        // 停用：恢复原生列表，隐藏结果面板
-        this.state.searchMode = false;
-        JDSDom.showNativeProducts();
-        JDSUI.hideResults();
-        return;
-      }
 
       if (hasFilter) {
         // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
@@ -131,25 +120,6 @@
     },
 
     /**
-     * 处理切换启用/禁用
-     * @private
-     */
-    _handleToggle(enabled) {
-      JDSUtils.showToast(enabled ? 'toastEnabled' : 'toastDisabled');
-      JDSUI.setToolbarEnabled(enabled);
-
-      if (enabled) {
-        this._applyFilterAndUpdate();
-      } else {
-        JDSUI.hideEmptyState();
-        // 停用：恢复所有商品显示，隐藏结果面板
-        this.state.searchMode = false;
-        JDSDom.showNativeProducts();
-        JDSUI.hideResults();
-      }
-    },
-
-    /**
      * 自动加载商品
      * @private
      */
@@ -160,15 +130,12 @@
         if (products && products.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(products);
           this._applyFilterAndUpdate();
-          JDSUI.updateToggleBtn('enabled', false);
-          this.state.isEnabled = true;
           console.log(`[JD-Auction-Search] 已聚合 ${this.state.products.length} 个商品（跨页）`);
         } else {
           throw new Error('empty');
         }
       } catch (e) {
         JDSUtils.showToast('toastApiFailed');
-        JDSUI.updateToggleBtn('enabledLocal', false);
         let domProducts = JDSDom.extractProductsFromDOM();
         if (domProducts.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(domProducts);
@@ -185,9 +152,6 @@
     _setupMessageListener() {
       chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         switch (request.type) {
-          case 'TOGGLE_ENABLED':
-            this._handleToggle(request.enabled);
-            break;
           case 'PRODUCTS_UPDATE':
             this.state.products = request.products || [];
             this._applyFilterAndUpdate();

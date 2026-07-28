@@ -134,7 +134,7 @@ npm install
 npm run build
 ```
 
-This will generate a `jd-auction-search-v1.2.5.zip` file in the project root directory, ready for release.
+This will generate a `jd-auction-search-v1.2.6.zip` file in the project root directory, ready for release.
 
 ## Core Implementation
 

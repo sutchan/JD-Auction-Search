@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom.js v1.2.5
+// JD-Auction-Search/src/dom.js v1.2.6
 // DOM观察和处理模块
 
 (function(global) {
@@ -23,7 +23,7 @@
             break;
           }
         }
-        if (shouldUpdate && state.isEnabled) {
+        if (shouldUpdate) {
           onChange();
         }
       });
@@ -92,12 +92,6 @@
      */
     updateProductDisplay(state) {
       const productContainers = this._getProductContainers();
-
-      if (!state.isEnabled) {
-        // 恢复所有商品显示
-        productContainers.forEach(el => el.style.display = '');
-        return;
-      }
 
       if (!state.keyword && state.currentTab === 'all') {
         // 没有搜索和筛选，恢复所有

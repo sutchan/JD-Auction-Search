@@ -1,8 +1,7 @@
-// JD-Auction-Search/background.js v1.2.5
+// JD-Auction-Search/background.js v1.2.6
 // 后台脚本：管理扩展状态和跨标签通信
 
 const state = {
-  isEnabled: true,
   cache: new Map(),
   lastUpdate: null
 };
@@ -29,9 +28,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { type } = request;
 
   switch (type) {
-    case 'GET_STATE':
-      sendResponse({ success: true, data: { isEnabled: state.isEnabled } });
-      break;
     case 'UPDATE_CACHE':
       if (typeof request.key !== 'string' || !request.key) {
         sendResponse({ success: false, error: 'Invalid cache key' });
@@ -49,14 +45,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const cached = state.cache.get(request.key);
       sendResponse({ success: true, data: cached || null });
       break;
-    case 'TOGGLE_ENABLED':
-      if (typeof request.enabled !== 'boolean') {
-        sendResponse({ success: false, error: 'Invalid enabled value' });
-        break;
-      }
-      state.isEnabled = request.enabled;
-      sendResponse({ success: true, data: { isEnabled: state.isEnabled } });
-      break;
     default:
       sendResponse({ success: false, error: 'Unknown message type' });
   }
@@ -64,5 +52,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[JD-Auction-Search] 插件已安装 v1.2.5');
+  console.log('[JD-Auction-Search] 插件已安装 v1.2.6');
 });

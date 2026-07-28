@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.6
+
+### Improvements
+- 简化扩展工具栏 UI：移除「夺宝搜索」标题（Logo）、搜索结果数量统计（Count）与「已启用本地」开关（Toggle）
+- 移除启用/禁用运行开关及其相关运行时代码（content/dom/api/background 的 isEnabled 守卫与消息处理），扩展默认常驻启用
+
 ## v1.2.5
 
 ### Features
