@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.2.6
+// JD-Auction-Search/src/content.js v1.2.7
 // 主模块：整合所有功能
 
 (function() {

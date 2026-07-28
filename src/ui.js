@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui.js v1.2.6
+// JD-Auction-Search/src/ui.js v1.2.7
 // UI渲染和事件绑定模块 — shadcn 设计语言 · Shadow DOM 隔离
 
 (function(global) {
@@ -113,8 +113,6 @@
           </div>
           <div class="jds-tabs" role="tablist" aria-label="商品分类">
             <button class="jds-tab is-active" data-tab="all" role="tab" aria-selected="true">${getMessage('tabAll')}</button>
-            <button class="jds-tab" data-tab="ongoing" role="tab" aria-selected="false">${getMessage('tabOngoing')}</button>
-            <button class="jds-tab" data-tab="upcoming" role="tab" aria-selected="false">${getMessage('tabUpcoming')}</button>
           </div>
         </div>
       `;
@@ -138,7 +136,6 @@
           flex-wrap: wrap;
           padding: 10px 16px;
           background: var(--card);
-          border: 1px solid var(--border);
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-xs);
           transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
@@ -154,7 +151,6 @@
           flex-wrap: wrap;
           padding: 12px 24px;
           background: var(--card);
-          border-bottom: 1px solid var(--border);
           box-shadow: var(--shadow-sm);
           transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
         }
@@ -303,6 +299,8 @@
           background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
           position: relative; overflow: hidden;
         }
+        .jds-product-img-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .jds-product-img-fallback { display: none; }
         .jds-product-body { padding: 12px; }
         .jds-product-name {
           font-size: 12px; font-weight: 500; color: var(--foreground);
@@ -508,26 +506,43 @@
 
       this.gridElement.innerHTML = '';
       products.forEach((p, i) => {
-        const name = p.name || p.title || '';
-        const price = p.price || p.currentPrice || 0;
+        const name = global.JDSUtils.escapeHtml(global.JDSUtils.getProductName(p));
+        const priceText = global.JDSUtils.formatPrice(global.JDSUtils.getProductPrice(p));
+        const image = global.JDSUtils.getProductImage(p);
         const isOngoing = global.JDSUtils.isOngoing(p);
         const statusLabel = isOngoing ? getMessage('tabOngoing') : getMessage('tabUpcoming');
-        const countdown = p.countdown || p.remainTime || '';
+        const countdown = global.JDSUtils.escapeHtml(p.countdown || p.remainTime || '');
+
+        // 有主图则渲染 <img>（加载失败回退图标），无主图直接显示图标
+        const imgHtml = image
+          ? `<img class="jds-product-img-el" src="${global.JDSUtils.escapeHtml(image)}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" /><span class="jds-product-img-fallback">📦</span>`
+          : `<span class="jds-product-img-fallback" style="display:grid">📦</span>`;
 
         const card = document.createElement('div');
         card.className = 'jds-product-card';
         card.style.animationDelay = `${i * 0.03}s`;
         card.innerHTML = `
-          <div class="jds-product-img"><span>${p.icon || '📦'}</span></div>
+          <div class="jds-product-img">${imgHtml}</div>
           <div class="jds-product-body">
             <div class="jds-product-name">${name}</div>
-            <div class="jds-product-price"><small>¥ </small>${Number(price).toLocaleString()}</div>
+            <div class="jds-product-price"><small>¥ </small>${priceText}</div>
             <div class="jds-product-meta">
               <span class="jds-badge jds-badge-${isOngoing ? 'primary' : 'warning'} ${isOngoing ? 'jds-badge-ongoing' : ''}">${statusLabel}</span>
               ${countdown ? `<span class="jds-countdown">${countdown}</span>` : ''}
             </div>
           </div>`;
         this.gridElement.appendChild(card);
+      });
+
+      // 主图加载失败时回退为图标
+      this.gridElement.querySelectorAll('.jds-product-img-el').forEach(img => {
+        const fail = () => {
+          img.style.display = 'none';
+          const fb = img.parentElement.querySelector('.jds-product-img-fallback');
+          if (fb) fb.style.display = 'grid';
+        };
+        if (img.complete && img.naturalWidth === 0) fail();
+        else img.addEventListener('error', fail);
       });
     },
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils.js v1.2.6
+// JD-Auction-Search/src/utils.js v1.2.7
 // 工具函数模块
 
 (function(global) {
@@ -52,24 +52,6 @@
         'toastEnabled': '插件已启用',
         'toastDisabled': '插件已禁用',
         'toastApiFailed': 'API加载失败，将依赖页面内容'
-      },
-      'en': {
-        'logoText': 'Auction Search',
-        'searchPlaceholder': 'Enter product keyword to search...',
-        'searchButton': 'Search',
-        'tabAll': 'All',
-        'tabOngoing': 'Ongoing',
-        'tabUpcoming': 'Upcoming',
-        'resultCount': '{count} items total',
-        'loading': 'Loading...',
-        'enabled': 'Enabled',
-        'disabled': 'Disabled',
-        'enabledLocal': 'Enabled (Local)',
-        'emptyTitle': 'No matching products found',
-        'emptyDesc': 'Try other keywords, or clear filters',
-        'toastEnabled': 'Extension enabled',
-        'toastDisabled': 'Extension disabled',
-        'toastApiFailed': 'API load failed, will use page content'
       }
     };
 
@@ -122,6 +104,92 @@
      */
     isUpcoming(product) {
       return product.status === 0 || product.state === 'upcoming' || product.auctionStatus === 0;
+    },
+
+    /**
+     * 从多个可能字段中获取商品主图 URL
+     * 兼容京东拍卖常见字段；仅允许 http/https/协议相对/绝对路径，防止注入非法 scheme
+     * @param {Object} product - 商品对象
+     * @returns {string|null}
+     */
+    getProductImage(product) {
+      if (!product || typeof product !== 'object') return null;
+      const candidates = [
+        product.imageUrl, product.imgUrl, product.picUrl, product.image,
+        product.img, product.picture, product.pic, product.skuImg,
+        product.coverUrl, product.thumbUrl, product.photo, product.imagePath
+      ];
+      const isValid = (v) => typeof v === 'string' && /^(https?:|\/\/|\/)/i.test(v.trim());
+      for (const c of candidates) {
+        if (isValid(c)) return c.trim();
+        if (Array.isArray(c) && c.length && isValid(c[0])) return c[0].trim();
+      }
+      if (product.image && typeof product.image === 'object' && isValid(product.image.url)) {
+        return product.image.url.trim();
+      }
+      return null;
+    },
+
+    /**
+     * 从多个可能字段中获取商品价格，统一归一为数值（单位：元）
+     * @param {Object} product - 商品对象
+     * @returns {number}
+     */
+    getProductPrice(product) {
+      if (!product || typeof product !== 'object') return 0;
+      const toNum = (v) => {
+        if (typeof v === 'number' && isFinite(v)) return v;
+        if (typeof v === 'string') {
+          const n = parseFloat(v.replace(/[^\d.]/g, ''));
+          return isFinite(n) ? n : null;
+        }
+        return null;
+      };
+      const flat = [
+        product.price, product.currentPrice, product.startPrice,
+        product.auctionPrice, product.realPrice, product.salePrice,
+        product.nowPrice, product.finalPrice, product.minPrice, product.maxPrice
+      ];
+      for (const f of flat) {
+        const n = toNum(f);
+        if (n !== null && n >= 0) return n;
+      }
+      if (product.price && typeof product.price === 'object') {
+        const n = toNum(product.price.currentPrice ?? product.price.price ?? product.price.value);
+        if (n !== null && n >= 0) return n;
+      }
+      if (product.priceInfo) {
+        const n = toNum(product.priceInfo.currentPrice ?? product.priceInfo.price);
+        if (n !== null && n >= 0) return n;
+      }
+      return 0;
+    },
+
+    /**
+     * HTML 转义，防止商品字段注入破坏卡片布局或造成 XSS
+     * @param {string} str
+     * @returns {string}
+     */
+    escapeHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
+
+    /**
+     * 格式化价格：整数不带小数，小数保留两位
+     * @param {number} n
+     * @returns {string}
+     */
+    formatPrice(n) {
+      const num = Number(n) || 0;
+      return num.toLocaleString('zh-CN', {
+        minimumFractionDigits: Number.isInteger(num) ? 0 : 2,
+        maximumFractionDigits: 2
+      });
     },
 
     /**

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api.js v1.2.6
+// JD-Auction-Search/src/api.js v1.2.7
 // API管理模块
 
 (function(global) {
