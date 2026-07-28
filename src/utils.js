@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils.js v1.2.2
+// JD-Auction-Search/src/utils.js v1.2.5
 // 工具函数模块
 
 (function(global) {

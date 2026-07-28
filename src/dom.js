@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom.js v1.2.2
+// JD-Auction-Search/src/dom.js v1.2.5
 // DOM观察和处理模块
 
 (function(global) {
@@ -146,6 +146,20 @@
       return document.querySelectorAll(
         '[class*="auction-item"], [class*="product-item"], [class*="goods-item"], [class*="item"]'
       );
+    },
+
+    /**
+     * 隐藏原生商品列表 — 多页面搜索模式下，结果由扩展结果面板渲染
+     */
+    hideNativeProducts() {
+      this._getProductContainers().forEach(el => { el.style.display = 'none'; });
+    },
+
+    /**
+     * 恢复原生商品列表显示
+     */
+    showNativeProducts() {
+      this._getProductContainers().forEach(el => { el.style.display = ''; });
     },
 
     /**

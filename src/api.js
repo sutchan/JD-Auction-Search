@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api.js v1.2.2
+// JD-Auction-Search/src/api.js v1.2.5
 // API管理模块
 
 (function(global) {
@@ -110,6 +110,48 @@
       }
 
       return resp.json();
+    },
+
+    /**
+     * 分页加载全部商品（多页面搜索）— 顺序翻页直到末页或达到上限
+     * @param {Object} params - 额外查询参数
+     * @param {number} maxPages - 最大翻页次数（防护）
+     * @returns {Promise<Array>}
+     */
+    async loadAllProducts(params = {}, maxPages = 30) {
+      const all = [];
+      const seen = new Set();
+      for (let page = 1; page <= maxPages; page++) {
+        const searchParams = new URLSearchParams({
+          page,
+          pageSize: 50,
+          tab: 'all',
+          ...params
+        });
+        const url = `${API_BASE_URL}${API_LIST_ENDPOINT}?${searchParams.toString()}`;
+        const resp = await fetch(url, {
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Referer': 'https://1paipai.jd.com/auction-list/'
+          }
+        });
+        if (!resp.ok) throw new Error(`API请求失败: ${resp.status}`);
+        const data = await resp.json();
+        const items = global.JDSUtils.extractProductsFromResponse(data);
+        if (!items.length) break;
+        let added = 0;
+        for (const it of items) {
+          const id = global.JDSUtils.getProductId(it);
+          if (id && seen.has(id)) continue;
+          if (id) seen.add(id);
+          all.push(it);
+          added++;
+        }
+        // 整页都是重复项，或不足一页，视为已到末页
+        if (added === 0 || items.length < 50) break;
+      }
+      return all;
     }
   };
 

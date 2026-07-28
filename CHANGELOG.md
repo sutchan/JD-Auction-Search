@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.2.5
+
+### Features
+- 支持多页面搜索：分页聚合 `1paipai.jd.com/auction-list/` 全部商品，搜索/筛选结果跨页生效
+
+### Improvements
+- 新增独立结果面板（Shadow DOM 宿主挂在 body，fixed 定位在嵌入工具栏下方），搜索态展示跨页结果、隐藏京东原生列表
+- 浏览态（无筛选）恢复京东原生列表与 DOM 实时过滤，降级路径（API 失败时从 DOM 提取当前页）保留
+- 观察器增加 searchMode 守卫，搜索态下跳过原生列表显示重建
+
+## v1.2.4
+
+### Fixes
+- 修正挂载容器选择器：真实页头为 `div.auction_head`（class 带下划线），原 `[class*="auctionHead"]` 无法匹配导致回退浮动条；现以 `div.auction_head` 为首选匹配
+
+## v1.2.3
+
+### Features
+- 扩展工具栏嵌入夺宝岛页面 `auction_head` 容器（优先挂载，缺失时回退为浮动条）
+
+### Improvements
+- 精简嵌入态样式：去除浮动偏移、底栏与重阴影，改为贴合页头的静态内联卡片
+- 移除商品网格为浮动条让位的 `margin-top` 偏移 hack
+- 空状态浮层改为居中显示，不再依赖浮动条高度
+
 ## v1.2.2
 
 ### Features

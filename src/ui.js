@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui.js v1.2.2
+// JD-Auction-Search/src/ui.js v1.2.5
 // UI渲染和事件绑定模块 — shadcn 设计语言 · Shadow DOM 隔离
 
 (function(global) {
@@ -20,13 +20,13 @@
     renderSearchUI(state, handlers) {
       const wrapper = document.createElement('div');
       wrapper.id = 'jds-search-wrapper';
-      document.body.appendChild(wrapper);
 
       this.shadowRoot = wrapper.attachShadow({ mode: 'closed' });
 
       // 设计令牌 + 组件样式全部内联到 Shadow DOM，确保样式隔离且可生效
       const style = document.createElement('style');
-      style.textContent = this._getInlineStyles();
+      // 默认按浮动条生成，挂载到 auction_head 后再切换为嵌入态样式（避免页面延迟渲染 header 时样式错位）
+      style.textContent = this._getInlineStyles(false);
       this.shadowRoot.appendChild(style);
 
       // 工具栏容器
@@ -38,7 +38,60 @@
       this.gridElement = container.querySelector('.jds-product-grid');
       this._bindEvents(container, state, handlers);
 
+      // 挂载：优先嵌入夺宝岛页面的 auction_head 容器，页面 header 可能延迟渲染则重试，最终回退为浮动条
+      this._mountWithRetry(wrapper, style, 0);
+
       return container;
+    },
+
+    /**
+     * 获取工具栏挂载容器 — 优先夺宝岛页面的 auction_head 容器
+     * @private
+     * @returns {HTMLElement|null}
+     */
+    _getMountContainer() {
+      // 夺宝岛页面 (1paipai.jd.com/auction-list/) 的页头容器为 class="auction_head"（下划线）
+      const selectors = [
+        'div.auction_head',
+        '[class*="auction_head" i]',
+        '#auction_head',
+        '[id*="auction_head" i]',
+        '[class*="auction-head" i]',
+        '[class*="auctionHead" i]',
+        '[data-module="auction_head"]'
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      }
+      return null;
+    },
+
+    /**
+     * 带重试的挂载逻辑 — 先尝试嵌入 auction_head，超时则回退为 body 浮动条
+     * @private
+     * @param {HTMLElement} wrapper - Shadow DOM 宿主
+     * @param {HTMLStyleElement} styleEl - 内联样式节点（用于切换嵌入/浮动样式）
+     * @param {number} attempt - 当前尝试次数
+     */
+    _mountWithRetry(wrapper, styleEl, attempt) {
+      const target = this._getMountContainer();
+      if (target) {
+        wrapper.classList.add('jds-embedded');
+        target.appendChild(wrapper);
+        // 切换为嵌入态样式：静态内联卡片，去除浮动条偏移
+        styleEl.textContent = this._getInlineStyles(true);
+        console.log('[JD-Auction-Search] 已嵌入 auction_head 容器');
+        return;
+      }
+      if (attempt < 8) {
+        setTimeout(() => this._mountWithRetry(wrapper, styleEl, attempt + 1), 200);
+        return;
+      }
+      // 回退：浮动条挂载到 body
+      wrapper.classList.add('jds-floating');
+      document.body.appendChild(wrapper);
+      console.log('[JD-Auction-Search] 未找到 auction_head，回退为浮动条');
     },
 
     /**
@@ -83,7 +136,41 @@
      * @private
      * @returns {string}
      */
-    _getInlineStyles() {
+    _getInlineStyles(embedded) {
+      // 工具栏布局：嵌入 auction_head 时为静态内联卡片（去浮动/去底栏/去重影）；
+      // 回退浮动条时恢复 fixed + 底部分隔 + 阴影，保持与原行为一致
+      const toolbarCss = embedded ? `
+        .jds-toolbar {
+          position: static;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          padding: 10px 16px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-xs);
+          transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
+        }
+      ` : `
+        .jds-toolbar {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          z-index: 999999;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          padding: 12px 24px;
+          background: var(--card);
+          border-bottom: 1px solid var(--border);
+          box-shadow: var(--shadow-sm);
+          transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
+        }
+      `;
+
       return `
         /* ===== DESIGN TOKENS (shadcn-inspired, zinc + JD red) ===== */
         :host {
@@ -135,20 +222,7 @@
         }
 
         /* ===== TOOLBAR ===== */
-        .jds-toolbar {
-          position: fixed;
-          top: 0; left: 0; right: 0;
-          z-index: 999999;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-wrap: wrap;
-          padding: 12px 24px;
-          background: var(--card);
-          border-bottom: 1px solid var(--border);
-          box-shadow: var(--shadow-sm);
-          transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);
-        }
+        ${toolbarCss}
         .jds-toolbar.is-disabled {
           opacity: 0.45;
           filter: grayscale(0.7);
@@ -264,7 +338,6 @@
           gap: 12px; padding: 16px;
           background: var(--muted);
           min-height: 420px;
-          margin-top: 57px;
         }
 
         /* Product card */
@@ -326,8 +399,8 @@
         /* Empty state overlay — 对齐原型空状态设计 */
         .jds-empty-overlay {
           position: fixed;
-          top: 72px; left: 50%;
-          transform: translateX(-50%);
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
           background: var(--card);
           border: 1px solid var(--border);
           border-radius: var(--radius-lg);
@@ -338,8 +411,8 @@
           animation: jds-fadeIn 0.3s var(--ease-out);
         }
         @keyframes jds-fadeIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+          from { opacity: 0; transform: translate(-50%, -50%) translateY(-8px); }
+          to { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
         }
         .jds-empty-icon {
           width: 56px; height: 56px; border-radius: var(--radius-full);
@@ -383,7 +456,6 @@
           .jds-product-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px; padding: 12px;
-            margin-top: 96px;
           }
         }
 
@@ -566,11 +638,106 @@
     },
 
     /**
+     * 初始化结果面板宿主 — 独立 Shadow DOM 挂在 body，避免被嵌入的页头裁剪
+     * 面板以 fixed 定位在嵌入工具栏下方，覆盖内容区展示跨页搜索结果
+     * @private
+     */
+    _initResultsHost() {
+      if (this.resultsHost) return;
+      const host = document.createElement('div');
+      host.id = 'jds-results-host';
+      document.body.appendChild(host);
+      this.resultsHost = host;
+
+      this.resultsRoot = host.attachShadow({ mode: 'closed' });
+      const style = document.createElement('style');
+      style.textContent = this._getInlineStyles(true);
+      this.resultsRoot.appendChild(style);
+
+      // 面板定位样式（独立追加，避免污染工具栏宿主）
+      const panelStyle = document.createElement('style');
+      panelStyle.textContent = `
+        .jds-results-panel {
+          position: fixed; left: 0; right: 0; bottom: 0; top: 0;
+          overflow-y: auto; background: var(--muted);
+          z-index: 999990; padding: 16px 24px 32px;
+          display: none;
+        }
+        .jds-results-panel.is-visible { display: block; }
+        .jds-results-panel .jds-product-grid { margin-top: 0; }
+      `;
+      this.resultsRoot.appendChild(panelStyle);
+
+      const panel = document.createElement('div');
+      panel.className = 'jds-results-panel';
+      panel.setAttribute('role', 'region');
+      panel.setAttribute('aria-label', '跨页搜索结果');
+      panel.innerHTML = '<div class="jds-product-grid" aria-live="polite" aria-busy="true"></div>';
+      this.resultsRoot.appendChild(panel);
+
+      this.gridElement = panel.querySelector('.jds-product-grid');
+      this._positionResultsPanel();
+      this._bindResultsPosition();
+    },
+
+    /**
+     * 根据嵌入工具栏底部位置定位结果面板顶部
+     * @private
+     */
+    _positionResultsPanel() {
+      if (!this.resultsRoot) return;
+      const panel = this.resultsRoot.querySelector('.jds-results-panel');
+      if (!panel) return;
+      const wrapper = document.getElementById('jds-search-wrapper');
+      let top = 0;
+      if (wrapper) {
+        const rect = wrapper.getBoundingClientRect();
+        top = Math.max(0, Math.round(rect.bottom));
+      }
+      panel.style.top = top + 'px';
+    },
+
+    /**
+     * 绑定面板定位刷新（滚动/缩放时跟随嵌入工具栏）
+     * @private
+     */
+    _bindResultsPosition() {
+      if (this._positionBound) return;
+      this._positionBound = true;
+      const update = () => this._positionResultsPanel();
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+    },
+
+    /**
+     * 展示跨页搜索结果（渲染到结果面板）
+     * @param {Array} products - 过滤后的商品
+     */
+    showResults(products) {
+      this._initResultsHost();
+      const panel = this.resultsRoot.querySelector('.jds-results-panel');
+      panel.classList.add('is-visible');
+      this._positionResultsPanel();
+      this.renderProducts(products);
+    },
+
+    /**
+     * 隐藏结果面板
+     */
+    hideResults() {
+      if (!this.resultsRoot) return;
+      const panel = this.resultsRoot.querySelector('.jds-results-panel');
+      if (panel) panel.classList.remove('is-visible');
+      this.hideEmptyState();
+    },
+
+    /**
      * 显示空状态浮层 — 对齐原型空状态设计（图标 + 标题 + 描述）
      * 浮层渲染在 Shadow DOM 内，样式隔离
      */
     showEmptyState() {
-      if (!this.shadowRoot) return;
+      const root = this.resultsRoot || this.shadowRoot;
+      if (!root) return;
       if (!this.emptyElement) {
         this.emptyElement = document.createElement('div');
         this.emptyElement.className = 'jds-empty-overlay';
@@ -581,7 +748,7 @@
           </div>
           <div class="jds-empty-title">${getMessage('emptyTitle')}</div>
           <div class="jds-empty-desc">${getMessage('emptyDesc')}</div>`;
-        this.shadowRoot.appendChild(this.emptyElement);
+        root.appendChild(this.emptyElement);
       }
       this.emptyElement.style.display = '';
     },
@@ -601,7 +768,10 @@
     destroy() {
       const wrapper = document.getElementById('jds-search-wrapper');
       if (wrapper) wrapper.remove();
+      if (this.resultsHost) this.resultsHost.remove();
       this.shadowRoot = null;
+      this.resultsRoot = null;
+      this.resultsHost = null;
       this.gridElement = null;
       if (this.emptyElement) {
         this.emptyElement.remove();
