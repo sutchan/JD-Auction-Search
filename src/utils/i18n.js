@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/i18n.js v1.3.0
+// JD-Auction-Search/src/utils/i18n.js v1.3.1
 // 国际化：优先使用 chrome.i18n API，回退到硬编码简繁中文
 
 (function(global) {
@@ -36,6 +36,7 @@
     }
 
     // 回退到硬编码翻译（仅保留扩展仍在使用的键；已移除 Tab/启停/计数等废弃键）
+    // 同时提供简体(zh-CN)与繁体(zh-TW)兜底，确保 chrome.i18n 不可用时仍双语文案可用
     const translations = {
       'zh-CN': {
         'searchPlaceholder': '输入商品关键词搜索...',
@@ -45,6 +46,15 @@
         'toastEnabled': '插件已启用',
         'toastDisabled': '插件已禁用',
         'toastApiFailed': 'API加载失败，将依赖页面内容'
+      },
+      'zh-TW': {
+        'searchPlaceholder': '輸入商品關鍵詞搜索...',
+        'searchButton': '搜索',
+        'emptyTitle': '未找到匹配商品',
+        'emptyDesc': '試試其他關鍵詞，或清除篩選條件',
+        'toastEnabled': '插件已啟用',
+        'toastDisabled': '插件已禁用',
+        'toastApiFailed': 'API加載失敗，將依賴頁面內容'
       }
     };
 

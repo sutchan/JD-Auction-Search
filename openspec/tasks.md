@@ -2,6 +2,14 @@
 
 ## 已完成任务
 
+### v1.3.1
+- [x] 代码审查修复：拆分 styles.js(285行)→tokens.js + components.js + styles.js 聚合器，results.js(360行)→results.js(面板生命周期) + products.js(商品渲染) + skeleton.js(骨架屏)，manifest content_scripts 同步引入新模块
+- [x] 安全修复：移除 fallback 卡片内联 `onerror` 事件处理器，改为属性绑定（`img.onerror`），规避 MV3 默认 CSP 对 `on*` 内联属性的拦截
+- [x] 国际化修复：i18n 兜底字典补充 zh_TW 繁体翻译，确保 chrome.i18n 不可用时简繁中文仍全覆盖
+- [x] 规范清理：移除扩展源码中全部调试 `console.log` / `console.warn`（background/content/toolbar/results）
+- [x] 版本统一升至 v1.3.1（manifest / metadata / package / 各文件头 / prototype 徽标 / README 打包名）
+- [x] 文档同步：README / README_EN 项目结构与说明对齐拆分后的模块，spec.md 目录树同步
+
 ### v1.3.0
 - [x] 源码模块化拆分：utils/api/ui/dom 四个超 200 行单体文件拆分为 17 个子模块（index 引导 + 职责子模块），manifest content_scripts 同步更新，运行时行为不变
 - [x] 修复 CSS 语法错误：ui 内联样式中 `:host(.jds-inline)` 被错误嵌套在 `:host {}` 内导致内联定位失效，调整为独立兄弟规则

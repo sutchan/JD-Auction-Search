@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.3.0
+// JD-Auction-Search/src/ui/toolbar.js v1.3.1
 // 工具栏：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）、事件绑定
 
 (function(global) {
@@ -78,12 +78,10 @@
         wrapper.classList.add('jds-embedded', 'jds-inline');
         target.insertBefore(wrapper, rightEl);
         styleEl.textContent = this._getInlineStyles(true, true);
-        console.log('[JD-Auction-Search] 已嵌入 auction_head 容器（位于 auction_head_right 左侧）');
       } else {
         wrapper.classList.add('jds-embedded');
         target.appendChild(wrapper);
         styleEl.textContent = this._getInlineStyles(true, false);
-        console.log('[JD-Auction-Search] 已嵌入 auction_head 容器');
       }
       return;
     }
@@ -94,7 +92,6 @@
     // 回退：浮动条挂载到 body
     wrapper.classList.add('jds-floating');
     document.body.appendChild(wrapper);
-    console.log('[JD-Auction-Search] 未找到 auction_head，回退为浮动条');
   };
 
   /**

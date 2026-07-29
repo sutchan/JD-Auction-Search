@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.1
+
+### Refactor
+- 进一步拆分超 200 行模块：`styles.js`(285) → `tokens.js`(设计令牌) + `components.js`(组件样式) + `styles.js`(聚合)；`results.js`(360) → `results.js`(面板生命周期) + `products.js`(商品渲染) + `skeleton.js`(骨架屏)。`manifest.json` content_scripts 同步引入新模块，运行时行为不变
+
+### Security
+- 修复 MV3 CSP 兼容问题：移除 fallback 卡片 `innerHTML` 中的内联 `onerror` 事件处理器，改为 `img.onerror` 属性绑定，避免默认扩展 CSP 拦截内联脚本导致主图错误回退失效
+
+### Fixes
+- 国际化兜底补充 zh_TW 繁体中文翻译，确保 `chrome.i18n` 不可用时简繁中文文案仍全覆盖、多语言切换正常
+- 清理扩展源码中全部调试 `console.log` / `console.warn`，符合项目规范（构建脚本日志保留）
+
+### Docs
+- README / README_EN 项目结构与打包文件名对齐拆分模块；prototype 版本徽标同步；openspec spec 目录树同步
+
 ## v1.3.0
 
 ### Refactor

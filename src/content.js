@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.3.0
+// JD-Auction-Search/src/content.js v1.3.1
 // 主模块：整合所有功能
 
 (function() {
@@ -17,8 +17,6 @@
      * 初始化应用
      */
     init() {
-      console.log('[JD-Auction-Search] 插件初始化中...');
-
       // 注入样式
       JDSUtils.injectStyles('src/styles.css');
 
@@ -41,8 +39,6 @@
 
       // 自动加载商品
       setTimeout(() => this._autoLoadProducts(), 2000);
-
-      console.log('[JD-Auction-Search] 插件已初始化');
     },
 
     /**
@@ -58,7 +54,6 @@
           ...products
         ]);
         this._applyFilterAndUpdate();
-        console.log(`[JD-Auction-Search] 已缓存 ${this.state.products.length} 个商品`);
       }
     },
 
@@ -124,11 +119,10 @@
         if (products && products.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(products);
           this._applyFilterAndUpdate();
-          console.log(`[JD-Auction-Search] 已聚合 ${this.state.products.length} 个商品（跨页）`);
           return;
         }
       } catch (e) {
-        console.warn('[JD-Auction-Search] 跨页API加载失败，准备降级:', e && e.message);
+        // 跨页API加载失败，进入下方降级逻辑（DOM 提取兜底）
       }
 
       // 降级策略：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取

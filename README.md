@@ -77,9 +77,13 @@ JD-Auction-Search/
 │   │   └── paginator.js   # 分页重放聚合全部分页商品
 │   ├── ui/                # UI 渲染（shadcn · Shadow DOM 内联样式）
 │   │   ├── index.js       # 命名空间引导 + 共享状态
-│   │   ├── styles.js      # 内联设计令牌与组件样式
+│   │   ├── tokens.js      # 设计令牌（语义令牌 CSS，注入 :host）
+│   │   ├── components.js   # 组件样式（SearchBar/Grid/Card/Badge/Empty/Skeleton）
+│   │   ├── styles.js      # 内联样式聚合（令牌 + 工具栏 + 组件）
 │   │   ├── toolbar.js     # 工具栏挂载与事件
-│   │   └── results.js     # 结果面板 / 克隆卡片 / 空状态
+│   │   ├── results.js     # 结果面板生命周期（挂载/定位/空状态/销毁）
+│   │   ├── products.js    # 商品渲染（克隆卡片 / 填充 / 回退卡片）
+│   │   └── skeleton.js    # 骨架屏（网格容器 / shimmer 占位）
 │   ├── dom/               # DOM 观察与处理
 │   │   ├── index.js       # 命名空间引导 + 共享状态
 │   │   ├── observer.js    # MutationObserver 监听
@@ -139,7 +143,7 @@ npm install
 npm run build
 ```
 
-这将在项目根目录下生成 `jd-auction-search-v1.3.0.zip` 文件，可直接用于发布。
+这将在项目根目录下生成 `jd-auction-search-v1.3.1.zip` 文件，可直接用于发布。
 
 ## 核心实现原理
 
