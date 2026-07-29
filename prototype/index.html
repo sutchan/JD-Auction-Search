@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +8,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    /* Set theme before first paint to avoid flash */
+    (function () {
+      try {
+        var saved = localStorage.getItem('jd-theme');
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', saved || (dark ? 'dark' : 'light'));
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
   <style>
     /* ============================================================
        DESIGN TOKENS — shadcn-inspired semantic system
        Zinc neutral palette · JD red as single chromatic accent
+       Light & dark themes share one token contract.
        ============================================================ */
     :root {
-      /* Semantic surfaces (shadcn convention) */
+      /* Semantic surfaces */
       --background: #ffffff;
       --foreground: #18181b;            /* zinc-900 */
       --card: #ffffff;
@@ -80,12 +91,67 @@
       --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
       --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
 
-      /* Motion */
-      --ease-out: cubic-bezier(0, 0, 0.2, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --dur-fast: 0.15s;
-      --dur-base: 0.2s;
-      --dur-slow: 0.4s;
+      /* Motion — exponential easing for considered state changes */
+      --ease-out: cubic-bezier(0.25, 1, 0.5, 1);        /* ease-out-quart */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);   /* ease-out-expo */
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* soft spring (controls only) */
+      --dur-fast: 0.18s;
+      --dur-base: 0.3s;
+      --dur-slow: 0.6s;
+
+      /* Theme-tinted texture */
+      --grid-line: rgb(24 24 27 / 0.022);
+      --glow: rgb(225 37 27 / 0.06);
+    }
+
+    /* ============================================================
+       DARK THEME — same token contract, zinc-950 grounded
+       ============================================================ */
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --background: #09090b;            /* zinc-950 */
+      --foreground: #fafafa;            /* zinc-50 */
+      --card: #18181b;                  /* zinc-900 */
+      --card-foreground: #fafafa;
+      --popover: #18181b;
+      --popover-foreground: #fafafa;
+
+      --primary: #ef4b3f;
+      --primary-hover: #f46358;
+      --primary-foreground: #ffffff;
+      --primary-subtle: #2a1414;
+      --primary-muted: #3a1a1a;
+
+      --secondary: #27272a;             /* zinc-800 */
+      --secondary-foreground: #fafafa;
+      --muted: #131316;
+      --muted-foreground: #a1a1aa;      /* zinc-400 */
+      --subtle-foreground: #71717a;     /* zinc-500 */
+      --accent: #27272a;
+      --accent-foreground: #fafafa;
+
+      --success: #4ade80;
+      --success-subtle: #0e2a18;
+      --warning: #fbbf24;
+      --warning-subtle: #2a1f0e;
+      --destructive: #f87171;
+      --destructive-foreground: #ffffff;
+      --info: #60a5fa;
+      --info-subtle: #0e1f33;
+
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --input: #27272a;
+      --ring: #ef4b3f;
+
+      --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+      --shadow-lg: 0 10px 30px -6px rgb(0 0 0 / 0.7), 0 4px 10px -4px rgb(0 0 0 / 0.5);
+      --shadow-ring: 0 0 0 3px rgb(239 75 63 / 0.28);
+
+      --grid-line: rgb(250 250 250 / 0.024);
+      --glow: rgb(239 75 63 / 0.10);
     }
 
     /* ============================================================
@@ -100,6 +166,7 @@
       line-height: 1.6;
       font-feature-settings: "cv11", "ss01";
       overflow-x: hidden;
+      transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
     }
     ::selection { background: var(--primary); color: #fff; }
     ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -107,7 +174,7 @@
     ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-full); border: 2px solid var(--muted); }
     ::-webkit-scrollbar-thumb:hover { background: var(--subtle-foreground); }
 
-    /* Subtle grid texture for the page background — refined, not loud */
+    /* Subtle grid texture — theme-tinted, fades toward the edges */
     body::before {
       content: '';
       position: fixed;
@@ -115,8 +182,8 @@
       pointer-events: none;
       z-index: -1;
       background-image:
-        linear-gradient(to right, rgb(24 24 27 / 0.018) 1px, transparent 1px),
-        linear-gradient(to bottom, rgb(24 24 27 / 0.018) 1px, transparent 1px);
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
       background-size: 64px 64px;
       mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
     }
@@ -151,7 +218,7 @@
     }
     .display em { font-style: italic; color: var(--primary); }
 
-    .h2 { font-size: clamp(30px, 4.5vw, 48px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .h2 { font-size: clamp(30px, 1.6rem + 2.4vw, 48px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
     .h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
     .lead { font-size: 17px; color: var(--muted-foreground); line-height: 1.7; max-width: 56ch; }
     .muted { color: var(--muted-foreground); }
@@ -166,9 +233,9 @@
     .nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       backdrop-filter: blur(12px) saturate(180%);
-      background: rgb(255 255 255 / 0.72);
+      background: color-mix(in srgb, var(--background) 72%, transparent);
       border-bottom: 1px solid transparent;
-      transition: border-color var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out);
+      transition: border-color var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
     }
     .nav.scrolled { border-bottom-color: var(--border); }
     .nav-inner {
@@ -184,7 +251,9 @@
       display: grid; place-items: center;
       font-family: var(--font-display); font-size: 16px; font-weight: 500;
       box-shadow: 0 2px 8px rgb(225 37 27 / 0.3);
+      transition: transform var(--dur-fast) var(--ease-spring);
     }
+    .brand:hover .brand-mark { transform: rotate(-6deg) scale(1.04); }
     .brand-name { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
     .brand-name span { color: var(--primary); }
 
@@ -196,11 +265,26 @@
     }
     .nav-links a:hover { color: var(--foreground); background: var(--secondary); }
 
+    .nav-right { display: flex; align-items: center; gap: var(--space-3); }
     .nav-version {
       font-family: var(--font-mono); font-size: 11px; font-weight: 500;
       color: var(--muted-foreground); padding: var(--space-1) var(--space-3);
       border: 1px solid var(--border); border-radius: var(--radius-full);
     }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--background); color: var(--muted-foreground); cursor: pointer;
+      transition: all var(--dur-fast) var(--ease-out);
+    }
+    .theme-toggle:hover { color: var(--foreground); border-color: var(--border-strong); background: var(--secondary); }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
     /* ============================================================
        BUTTONS (shadcn variants)
@@ -209,21 +293,22 @@
       display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
       padding: var(--space-2) var(--space-4); font-size: 13px; font-weight: 500;
       border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer;
-      transition: all var(--dur-base) var(--ease-out); white-space: nowrap; line-height: 1.4;
+      transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+      white-space: nowrap; line-height: 1.4;
     }
     .btn svg { width: 15px; height: 15px; }
     .btn-default { background: var(--foreground); color: var(--background); }
-    .btn-default:hover { background: #27272a; }
-    .btn-primary { background: var(--primary); color: var(--primary-foreground); }
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-default:hover { background: #27272a; transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); box-shadow: var(--shadow-xs); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
     .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
-    .btn-secondary:hover { background: var(--accent); }
+    .btn-secondary:hover { background: var(--accent); transform: translateY(-1px); }
     .btn-outline { background: transparent; border-color: var(--border); color: var(--foreground); }
-    .btn-outline:hover { background: var(--secondary); }
+    .btn-outline:hover { background: var(--secondary); border-color: var(--border-strong); }
     .btn-ghost { background: transparent; color: var(--foreground); }
     .btn-ghost:hover { background: var(--secondary); }
     .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
-    .btn-destructive:hover { background: #b91c1c; }
+    .btn-destructive:hover { background: #b91c1c; transform: translateY(-1px); }
     .btn-sm { padding: var(--space-1) var(--space-3); font-size: 12px; height: 28px; }
     .btn-lg { padding: var(--space-3) var(--space-6); font-size: 14px; height: 44px; }
     .btn:disabled { opacity: 0.5; pointer-events: none; }
@@ -233,9 +318,17 @@
        HERO
        ============================================================ */
     .hero { padding: var(--space-24) 0 var(--space-20); position: relative; overflow: hidden; }
+    .hero-glow {
+      position: absolute; top: -10%; right: -5%; width: 60vw; height: 60vw; max-width: 720px; max-height: 720px;
+      background: radial-gradient(circle at center, var(--glow), transparent 70%);
+      pointer-events: none; z-index: -1;
+    }
     .hero-grid {
-      display: grid; grid-template-columns: 1fr; gap: var(--space-10);
+      display: grid; grid-template-columns: 1fr; gap: var(--space-12);
       max-width: 1200px; margin: 0 auto; padding: 0 var(--space-8);
+    }
+    @media (min-width: 900px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr) 268px; align-items: end; }
     }
     .hero-tag {
       display: inline-flex; align-items: center; gap: var(--space-2);
@@ -251,14 +344,14 @@
     }
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(48px, 8vw, 96px); font-weight: 400;
+      font-size: clamp(48px, 2rem + 7vw, 96px); font-weight: 400;
       letter-spacing: -0.02em; line-height: 1.02; margin-top: var(--space-6);
     }
     .hero-title em { font-style: italic; color: var(--primary); position: relative; }
     .hero-title em::after {
       content: ''; position: absolute; left: 0; right: 0; bottom: 0.08em; height: 2px;
       background: var(--primary); transform: scaleX(0); transform-origin: left;
-      animation: drawUnderline 1s var(--ease-out) 0.8s forwards;
+      animation: drawUnderline 0.9s var(--ease-out-expo) 0.6s forwards;
     }
     @keyframes drawUnderline { to { transform: scaleX(1); } }
 
@@ -269,14 +362,17 @@
     .hero-actions { display: flex; gap: var(--space-3); margin-top: var(--space-8); flex-wrap: wrap; }
 
     .hero-meta {
-      display: flex; gap: var(--space-12); margin-top: var(--space-16);
-      padding-top: var(--space-8); border-top: 1px solid var(--border);
-      flex-wrap: wrap;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      overflow: hidden;
     }
-    .hero-meta-item { display: flex; flex-direction: column; gap: var(--space-1); }
+    .hero-meta-item {
+      display: flex; flex-direction: column; gap: var(--space-1);
+      padding: var(--space-5) var(--space-4); background: var(--background);
+    }
     .hero-meta-value {
       font-family: var(--font-display); font-size: 32px; font-weight: 400;
-      letter-spacing: -0.02em; line-height: 1;
+      letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums;
     }
     .hero-meta-value span { color: var(--primary); }
     .hero-meta-label {
@@ -290,6 +386,7 @@
     .demo-frame {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl);
       overflow: hidden; box-shadow: var(--shadow-lg);
+      container-type: inline-size; container-name: demo;
     }
     .demo-bar {
       display: flex; align-items: center; gap: var(--space-3);
@@ -333,7 +430,7 @@
       flex: 1; min-width: 200px; max-width: 420px; display: flex; align-items: center;
       gap: var(--space-2); padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
       background: var(--background); border: 1px solid var(--border);
-      border-radius: var(--radius-md); transition: all var(--dur-base) var(--ease-out);
+      border-radius: var(--radius-md); transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
     }
     .ext-search:focus-within { border-color: var(--primary); box-shadow: var(--shadow-ring); }
     .ext-search svg { width: 15px; height: 15px; color: var(--muted-foreground); flex-shrink: 0; }
@@ -358,39 +455,11 @@
     }
     .ext-search-btn:hover { background: var(--primary-hover); }
 
-    .ext-tabs {
-      display: inline-flex; gap: 2px; padding: 3px; background: var(--secondary);
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-    }
-    .ext-tab {
-      padding: var(--space-2) var(--space-3); border: none; background: transparent;
-      color: var(--muted-foreground); font-family: var(--font-sans); font-size: 12px; font-weight: 500;
-      border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
-      transition: all var(--dur-fast) var(--ease-out);
-    }
-    .ext-tab:hover { color: var(--foreground); }
-    .ext-tab.is-active {
-      background: var(--background); color: var(--foreground); font-weight: 600;
-      box-shadow: var(--shadow-xs);
-    }
-
     .ext-count {
       font-family: var(--font-mono); font-size: 12px; color: var(--muted-foreground); white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
     .ext-count strong { color: var(--primary); font-weight: 600; }
-
-    .ext-toggle {
-      display: inline-flex; align-items: center; gap: var(--space-2);
-      padding: var(--space-2) var(--space-3); border: 1px solid var(--border);
-      border-radius: var(--radius-md); background: var(--background); cursor: pointer;
-      font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-      text-transform: uppercase; color: var(--muted-foreground);
-      transition: all var(--dur-base) var(--ease-out);
-    }
-    .ext-toggle:hover { border-color: var(--border-strong); }
-    .ext-toggle.is-on { border-color: var(--primary); color: var(--primary); background: var(--primary-subtle); }
-    .ext-toggle-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--subtle-foreground); transition: all var(--dur-fast) var(--ease-out); }
-    .ext-toggle.is-on .ext-toggle-dot { background: var(--primary); box-shadow: 0 0 0 3px rgb(225 37 27 / 0.18); }
 
     /* Product grid */
     .product-grid {
@@ -399,18 +468,19 @@
     }
     .product-card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      overflow: hidden; cursor: pointer; transition: all var(--dur-base) var(--ease-out);
-      animation: cardIn 0.4s var(--ease-out) backwards;
+      overflow: hidden; cursor: pointer;
+      transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+      animation: cardIn 0.5s var(--ease-out-expo) backwards;
     }
-    .product-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .product-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .product-img {
       height: 120px; display: grid; place-items: center; font-size: 40px;
       background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
       position: relative; overflow: hidden;
     }
     .product-img span { transition: transform var(--dur-base) var(--ease-spring); }
-    .product-card:hover .product-img span { transform: scale(1.1); }
+    .product-card:hover .product-img span { transform: scale(1.12); }
     .product-body { padding: var(--space-3); }
     .product-name {
       font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
@@ -420,6 +490,7 @@
     .product-price {
       font-family: var(--font-display); font-size: 18px; font-weight: 400;
       color: var(--primary); letter-spacing: -0.01em; margin-bottom: var(--space-2);
+      font-variant-numeric: tabular-nums;
     }
     .product-price small { font-size: 11px; color: var(--muted-foreground); }
     .product-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
@@ -443,7 +514,7 @@
     .badge-destructive::before { background: var(--destructive); }
     .badge-ongoing::before { animation: pulse 1.6s var(--ease-out) infinite; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
-    .countdown { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); font-weight: 500; }
+    .countdown { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); font-weight: 500; font-variant-numeric: tabular-nums; }
 
     /* Empty state */
     .empty-state {
@@ -520,26 +591,12 @@
     .input {
       width: 100%; padding: var(--space-2) var(--space-3); font-family: var(--font-sans); font-size: 13px;
       border: 1px solid var(--input); border-radius: var(--radius-md); background: var(--background);
-      color: var(--foreground); outline: none; transition: all var(--dur-base) var(--ease-out);
+      color: var(--foreground); outline: none; transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
     }
     .input:focus { border-color: var(--primary); box-shadow: var(--shadow-ring); }
     .input::placeholder { color: var(--subtle-foreground); }
     .input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Switch */
-    .switch { position: relative; display: inline-flex; width: 36px; height: 20px; flex-shrink: 0; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .switch-track {
-      position: absolute; inset: 0; cursor: pointer; background: var(--border-strong);
-      border-radius: var(--radius-full); transition: background var(--dur-base) var(--ease-out);
-    }
-    .switch-track::before {
-      content: ''; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px;
-      background: #fff; border-radius: 50%; transition: transform var(--dur-base) var(--ease-spring);
-      box-shadow: var(--shadow-sm);
-    }
-    .switch input:checked + .switch-track { background: var(--primary); }
-    .switch input:checked + .switch-track::before { transform: translateX(16px); }
 
     /* Separator */
     .separator { height: 1px; background: var(--border); width: 100%; }
@@ -590,19 +647,15 @@
     .phone-search input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 12px; padding: var(--space-2) 0; color: var(--foreground); }
     .phone-search input::placeholder { color: var(--subtle-foreground); }
     .phone-search-btn { border: none; background: var(--primary); color: #fff; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; }
-    .phone-tabs { display: flex; gap: 2px; padding: 3px; background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
-    .phone-tab { flex: 1; padding: var(--space-1) var(--space-2); border: none; background: transparent; color: var(--muted-foreground); font-size: 11px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; text-align: center; }
-    .phone-tab.is-active { background: var(--background); color: var(--foreground); font-weight: 600; box-shadow: var(--shadow-xs); }
     .phone-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
-    .phone-count { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); }
+    .phone-count { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
     .phone-count strong { color: var(--primary); }
-    .phone-toggle { font-family: var(--font-mono); font-size: 10px; padding: 2px var(--space-2); border: 1px solid var(--primary); border-radius: var(--radius-sm); color: var(--primary); background: var(--primary-subtle); font-weight: 600; }
     .phone-products { display: flex; flex-direction: column; gap: var(--space-2); }
     .phone-product { display: flex; gap: var(--space-2); padding: var(--space-2); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
     .phone-product-img { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--secondary); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
     .phone-product-info { flex: 1; min-width: 0; }
     .phone-product-name { font-size: 11px; color: var(--foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
-    .phone-product-price { font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--primary); }
+    .phone-product-price { font-family: var(--font-display); font-size: 14px; font-weight: 400; color: var(--primary); font-variant-numeric: tabular-nums; }
 
     /* ============================================================
        TOAST (sonner-style)
@@ -633,11 +686,23 @@
     /* ============================================================
        SCROLL REVEAL
        ============================================================ */
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo); }
     .reveal.is-visible { opacity: 1; transform: translateY(0); }
     .reveal-d1 { transition-delay: 0.08s; }
     .reveal-d2 { transition-delay: 0.16s; }
     .reveal-d3 { transition-delay: 0.24s; }
+
+    /* ============================================================
+       CONTAINER QUERIES — demo frame adapts to its own width
+       ============================================================ */
+    @container demo (max-width: 540px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); padding: var(--space-3); }
+    }
+    @container demo (max-width: 460px) {
+      .ext-toolbar { flex-direction: column; align-items: stretch; }
+      .ext-search { max-width: none; width: 100%; }
+      .ext-count { width: 100%; justify-content: center; }
+    }
 
     /* ============================================================
        RESPONSIVE
@@ -654,17 +719,15 @@
       .hero { padding: var(--space-20) 0 var(--space-12); }
       .ext-logo { display: none; }
       .ext-search { order: 1; max-width: none; width: 100%; }
-      .ext-tabs { order: 2; }
-      .ext-count { order: 3; }
-      .ext-toggle { order: 4; }
+      .ext-count { order: 2; }
       .product-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); padding: var(--space-3); }
-      .hero-meta { gap: var(--space-6); }
+      .hero-meta { gap: 1px; }
       .footer-inner { flex-direction: column; align-items: flex-start; }
       .footer-meta { text-align: left; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
       html { scroll-behavior: auto; }
     }
   </style>
@@ -685,20 +748,27 @@
         <li><a href="#patterns">Patterns</a></li>
         <li><a href="#mobile">Mobile</a></li>
       </ul>
-      <span class="nav-version">v1.2.7</span>
+      <div class="nav-right">
+        <span class="nav-version">v1.2.14</span>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换深色模式">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
     </div>
   </nav>
 
   <!-- Hero -->
   <header class="hero" id="top">
+    <div class="hero-glow" aria-hidden="true"></div>
     <div class="hero-grid">
-      <div>
+      <div class="hero-main">
         <div class="hero-tag reveal"><span class="dot"></span>Chrome Extension · Manifest V3</div>
         <h1 class="hero-title reveal reveal-d1">
           Auction<br>search, <em>refined</em>.
         </h1>
         <p class="hero-lead reveal reveal-d2">
-          为京东夺宝页面注入实时搜索、分类筛选与数据缓存。Shadow DOM 隔离、11 种语言、无障碍优先——
+          为京东夺宝页面注入实时搜索与数据缓存。Shadow DOM 隔离、简繁中文双语、无障碍优先——
           以克制的视觉语言，承载高效的功能体验。
         </p>
         <div class="hero-actions reveal reveal-d3">
@@ -710,9 +780,9 @@
         </div>
       </div>
 
-      <div class="hero-meta reveal reveal-d3">
+      <aside class="hero-meta reveal reveal-d3">
         <div class="hero-meta-item">
-          <div class="hero-meta-value">11<span>+</span></div>
+          <div class="hero-meta-value">2</div>
           <div class="hero-meta-label">Languages</div>
         </div>
         <div class="hero-meta-item">
@@ -727,7 +797,7 @@
           <div class="hero-meta-value">26<span>KB</span></div>
           <div class="hero-meta-label">Bundle Size</div>
         </div>
-      </div>
+      </aside>
     </div>
   </header>
 
@@ -737,7 +807,7 @@
       <div class="section-head reveal">
         <span class="eyebrow accent">01 — Interactive Demo</span>
         <h2 class="h2 display" style="margin-top: var(--space-4);">在真实页面中 <em>实时搜索</em></h2>
-        <p class="lead">下方是扩展注入京东夺宝页面的完整模拟。搜索框输入、Tab 切换、启停开关、骨架加载、空状态——所有交互均已接通真实数据。</p>
+        <p class="lead">下方是扩展注入京东夺宝页面的完整模拟。搜索框输入、骨架加载、空状态、实时结果——所有交互均已接通真实数据。</p>
       </div>
 
       <div class="demo-frame reveal reveal-d1">
@@ -767,16 +837,7 @@
             </button>
             <button class="ext-search-btn" id="searchBtn">搜索</button>
           </div>
-          <div class="ext-tabs" role="tablist" aria-label="商品分类">
-            <button class="ext-tab is-active" data-tab="all" role="tab" aria-selected="true">全部</button>
-            <button class="ext-tab" data-tab="ongoing" role="tab" aria-selected="false">正在夺宝</button>
-            <button class="ext-tab" data-tab="upcoming" role="tab" aria-selected="false">即将开始</button>
-          </div>
           <div class="ext-count">共 <strong id="resultCount">0</strong> 件</div>
-          <button class="ext-toggle is-on" id="toggleBtn" aria-pressed="true" aria-label="启用或停用扩展">
-            <span class="ext-toggle-dot"></span>
-            <span id="toggleText">已启用</span>
-          </button>
         </div>
 
         <!-- Product grid -->
@@ -791,7 +852,7 @@
       <div class="section-head reveal">
         <span class="eyebrow accent">02 — Design System</span>
         <h2 class="h2 display" style="margin-top: var(--space-4);">令牌驱动的 <em>设计语言</em></h2>
-        <p class="lead">采用 shadcn 语义令牌体系：中性 zinc 灰阶 + 京东红作为唯一强调色。所有视觉决策源于同一套 CSS 自定义属性。</p>
+        <p class="lead">采用 shadcn 语义令牌体系：中性 zinc 灰阶 + 京东红作为唯一强调色。所有视觉决策源于同一套 CSS 自定义属性，浅色为默认、深色由令牌契约衍生（原型预演，扩展实装待排期）。</p>
       </div>
 
       <div class="ds-grid">
@@ -875,7 +936,7 @@
 
       <!-- Basic components -->
       <div class="comp-section reveal">
-        <div class="comp-section-title"><h3>基础组件</h3><span class="count">/ Atoms · 8</span></div>
+        <div class="comp-section-title"><h3>基础组件</h3><span class="count">/ Atoms · 6</span></div>
         <div class="comp-row">
           <div class="comp-meta"><h4>Button</h4><p>6 种变体 · 3 种尺寸</p><code>variant, size, disabled</code></div>
           <div class="comp-preview">
@@ -907,21 +968,6 @@
             <span class="badge badge-primary badge-ongoing">进行中</span>
           </div>
           <div class="comp-spec">dot + label<br>ongoing: pulse animation<br>5 variants</div>
-        </div>
-        <div class="comp-row">
-          <div class="comp-meta"><h4>Switch</h4><p>开关切换</p><code>checked, onChange</code></div>
-          <div class="comp-preview">
-            <label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>
-            <label class="switch"><input type="checkbox"><span class="switch-track"></span></label>
-          </div>
-          <div class="comp-spec">spring transition<br>track: --border-strong → --primary<br>knob translateX 16px</div>
-        </div>
-        <div class="comp-row">
-          <div class="comp-meta"><h4>Tabs</h4><p>分类切换 · pill 容器</p><code>value, onValueChange</code></div>
-          <div class="comp-preview">
-            <div class="ext-tabs"><button class="ext-tab is-active">全部</button><button class="ext-tab">进行中</button><button class="ext-tab">即将开始</button></div>
-          </div>
-          <div class="comp-spec">container: --secondary<br>active: --background + shadow-xs<br>role="tablist"</div>
         </div>
         <div class="comp-row">
           <div class="comp-meta"><h4>Separator</h4><p>分隔线</p><code>orientation</code></div>
@@ -1003,9 +1049,9 @@
 
       <!-- Business components -->
       <div class="comp-section reveal">
-        <div class="comp-section-title"><h3>业务组件</h3><span class="count">/ Organisms · 3</span></div>
+        <div class="comp-section-title"><h3>业务组件</h3><span class="count">/ Organisms · 2</span></div>
         <div class="comp-row">
-          <div class="comp-meta"><h4>AuctionToolbar</h4><p>扩展注入的顶部工具栏</p><code>Logo + Search + Tabs + Toggle</code></div>
+          <div class="comp-meta"><h4>AuctionToolbar</h4><p>扩展注入的顶部工具栏</p><code>Search + 实时结果面板</code></div>
           <div class="comp-preview" style="flex: 1;">
             <div style="background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
               <span style="font-size: 12px; font-weight: 700; color: var(--primary);">夺宝搜索</span>
@@ -1024,17 +1070,6 @@
             </div>
           </div>
           <div class="comp-spec">auto-fill minmax(200px, 1fr)<br>card hover lift + shadow<br>staggered cardIn animation</div>
-        </div>
-        <div class="comp-row">
-          <div class="comp-meta"><h4>FilterTabs</h4><p>分类筛选标签</p><code>tabs, active, onChange</code></div>
-          <div class="comp-preview">
-            <div class="ext-tabs" role="tablist">
-              <button class="ext-tab is-active" role="tab">全部</button>
-              <button class="ext-tab" role="tab">正在夺宝</button>
-              <button class="ext-tab" role="tab">即将开始</button>
-            </div>
-          </div>
-          <div class="comp-spec">all / ongoing / upcoming<br>aria-selected sync<br>shadow-xs on active</div>
         </div>
       </div>
     </div>
@@ -1100,7 +1135,7 @@
         <div class="reveal">
           <span class="eyebrow accent">05 — Mobile</span>
           <h2 class="h2 display" style="margin-top: var(--space-4); margin-bottom: var(--space-4);">移动端 <em>同样克制</em></h2>
-          <p class="lead" style="margin-bottom: var(--space-6);">响应式断点自动适配。768px 以下切换为垂直堆叠：搜索框全宽置顶、Tab 横向排布、Logo 隐藏以节省空间。</p>
+          <p class="lead" style="margin-bottom: var(--space-6);">响应式断点 + 容器查询自动适配。窄屏下搜索框全宽置顶、Tab 横向排布、Logo 隐藏以节省空间；演示框自身收窄时工具栏亦会重排。</p>
           <div style="display: flex; flex-direction: column; gap: var(--space-4);">
             <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
               <span class="badge badge-primary" style="flex-shrink: 0; margin-top: 2px;">断点</span>
@@ -1112,7 +1147,7 @@
             </div>
             <div style="display: flex; gap: var(--space-3); align-items: flex-start;">
               <span class="badge badge-warning" style="flex-shrink: 0; margin-top: 2px;">无障碍</span>
-              <div><div style="font-size: 13px; font-weight: 600;">ARIA + 键盘导航</div><div style="font-size: 12px; color: var(--muted-foreground);">prefers-reduced-motion 适配</div></div>
+              <div><div style="font-size: 13px; font-weight: 600;">ARIA + 键盘导航</div><div style="font-size: 12px; color: var(--muted-foreground);">prefers-reduced-motion 适配 · 深色模式</div></div>
             </div>
           </div>
         </div>
@@ -1131,14 +1166,8 @@
                     <input placeholder="搜索商品...">
                     <button class="phone-search-btn">搜索</button>
                   </div>
-                  <div class="phone-tabs">
-                    <button class="phone-tab is-active">全部</button>
-                    <button class="phone-tab">进行中</button>
-                    <button class="phone-tab">即将开始</button>
-                  </div>
                   <div class="phone-stats">
                     <span class="phone-count">共 <strong>128</strong> 件</span>
-                    <span class="phone-toggle">已启用</span>
                   </div>
                   <div class="phone-products">
                     <div class="phone-product"><div class="phone-product-img">📱</div><div class="phone-product-info"><div class="phone-product-name">iPhone 15 Pro Max</div><div class="phone-product-price">¥8,999</div></div></div>
@@ -1162,8 +1191,9 @@
         <div class="footer-mark">JD<span>.</span>Auction<span>.</span>Search</div>
       </div>
       <div class="footer-meta">
-        Design System v1.2.7<br>
+        Design System v1.2.14<br>
         Refined Minimalism · shadcn-inspired<br>
+        Light &amp; Dark · Container Queries<br>
         Built with precision · 2026
       </div>
     </div>
@@ -1173,6 +1203,27 @@
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
   <script>
+    // ============================================================
+    // THEME TOGGLE — system-aware, persisted
+    // ============================================================
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      const dark = t === 'dark';
+      themeToggle.setAttribute('aria-pressed', dark);
+      themeToggle.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+    }
+    applyTheme(root.getAttribute('data-theme') || 'light');
+
+    themeToggle.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('jd-theme', next); } catch (e) {}
+      applyTheme(next);
+      showToast(next === 'dark' ? '已切换深色模式' : '已切换浅色模式', 'info');
+    });
+
     // ============================================================
     // MOCK PRODUCT DATA — realistic auction items
     // ============================================================
@@ -1192,7 +1243,7 @@
     ];
 
     const STATUS_LABELS = { ongoing: '进行中', upcoming: '即将开始', ending: '即将结束' };
-    const state = { keyword: '', tab: 'all', enabled: true };
+    const state = { keyword: '' };
 
     // ============================================================
     // NAV SCROLL
@@ -1262,7 +1313,6 @@
 
     function renderProducts() {
       let filtered = PRODUCTS;
-      if (state.tab !== 'all') filtered = filtered.filter(p => p.status === state.tab);
       if (state.keyword) {
         const kw = state.keyword.toLowerCase();
         filtered = filtered.filter(p => p.name.toLowerCase().includes(kw));
@@ -1334,64 +1384,6 @@
       } else {
         showToast('请输入搜索关键词', 'error');
         searchInput.focus();
-      }
-    });
-
-    document.querySelectorAll('.ext-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.ext-tab').forEach(t => {
-          t.classList.remove('is-active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        tab.classList.add('is-active');
-        tab.setAttribute('aria-selected', 'true');
-        state.tab = tab.dataset.tab;
-        renderProducts();
-        showToast(`筛选：${tab.textContent}`, 'info');
-      });
-    });
-
-    const toggleBtn = document.getElementById('toggleBtn');
-    const toggleText = document.getElementById('toggleText');
-    const extToolbar = document.getElementById('extToolbar');
-
-    toggleBtn.addEventListener('click', () => {
-      state.enabled = !state.enabled;
-      toggleBtn.classList.toggle('is-on', state.enabled);
-      toggleBtn.setAttribute('aria-pressed', state.enabled);
-      toggleText.textContent = state.enabled ? '已启用' : '已停用';
-      extToolbar.classList.toggle('is-disabled', !state.enabled);
-
-      if (state.enabled) {
-        showToast('扩展已启用 · 搜索功能恢复', 'success');
-        renderProducts();
-      } else {
-        showToast('扩展已停用', 'error');
-        grid.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></div>
-            <div class="empty-title">扩展已停用</div>
-            <div class="empty-desc">点击右上角"已停用"按钮重新启用</div>
-          </div>`;
-        document.getElementById('resultCount').textContent = '0';
-      }
-    });
-
-    // Mobile tabs (static demo)
-    document.querySelectorAll('.phone-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.phone-tab').forEach(t => t.classList.remove('is-active'));
-        tab.classList.add('is-active');
-      });
-    });
-
-    // Component library demo tabs
-    document.querySelectorAll('#components .ext-tab').forEach(tab => {
-      if (!tab.dataset.tab) {
-        tab.addEventListener('click', () => {
-          tab.parentElement.querySelectorAll('.ext-tab').forEach(t => t.classList.remove('is-active'));
-          tab.classList.add('is-active');
-        });
       }
     });
 

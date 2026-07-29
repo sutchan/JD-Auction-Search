@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui.js v1.2.7
+// JD-Auction-Search/src/ui.js v1.2.14
 // UI渲染和事件绑定模块 — shadcn 设计语言 · Shadow DOM 隔离
 
 (function(global) {
@@ -77,11 +77,19 @@
     _mountWithRetry(wrapper, styleEl, attempt) {
       const target = this._getMountContainer();
       if (target) {
-        wrapper.classList.add('jds-embedded');
-        target.appendChild(wrapper);
-        // 切换为嵌入态样式：静态内联卡片，去除浮动条偏移
-        styleEl.textContent = this._getInlineStyles(true);
-        console.log('[JD-Auction-Search] 已嵌入 auction_head 容器');
+        // 找到页头右侧区（auction_head_right），将工具栏插入到它的左侧（内联），更贴合页面布局
+        const rightEl = target.querySelector('[class*="auction_head_right" i], [id*="auction_head_right" i]');
+        if (rightEl) {
+          wrapper.classList.add('jds-embedded', 'jds-inline');
+          target.insertBefore(wrapper, rightEl);
+          styleEl.textContent = this._getInlineStyles(true, true);
+          console.log('[JD-Auction-Search] 已嵌入 auction_head 容器（位于 auction_head_right 左侧）');
+        } else {
+          wrapper.classList.add('jds-embedded');
+          target.appendChild(wrapper);
+          styleEl.textContent = this._getInlineStyles(true, false);
+          console.log('[JD-Auction-Search] 已嵌入 auction_head 容器');
+        }
         return;
       }
       if (attempt < 8) {
@@ -111,9 +119,6 @@
             </button>
             <button class="jds-search-btn">${getMessage('searchButton')}</button>
           </div>
-          <div class="jds-tabs" role="tablist" aria-label="商品分类">
-            <button class="jds-tab is-active" data-tab="all" role="tab" aria-selected="true">${getMessage('tabAll')}</button>
-          </div>
         </div>
       `;
     },
@@ -121,15 +126,17 @@
     /**
      * 获取内联样式 — shadcn 语义令牌 + 组件样式，全部注入 Shadow DOM
      * @private
+     * @param {boolean} embedded - 是否嵌入 auction_head（false 时回退为浮动条）
+     * @param {boolean} inline - 是否内联在 auction_head_right 左侧（true 时不占满整行）
      * @returns {string}
      */
-    _getInlineStyles(embedded) {
+    _getInlineStyles(embedded, inline = false) {
       // 工具栏布局：嵌入 auction_head 时为静态内联卡片（去浮动/去底栏/去重影）；
       // 回退浮动条时恢复 fixed + 底部分隔 + 阴影，保持与原行为一致
       const toolbarCss = embedded ? `
         .jds-toolbar {
           position: static;
-          width: 100%;
+          ${inline ? 'width: auto; flex: 0 1 auto; align-self: center;' : 'width: 100%;'}
           display: flex;
           align-items: center;
           gap: 12px;
@@ -187,6 +194,16 @@
           --radius-full: 9999px;
           --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
           --shadow-sm: 0 1px 3px 0 rgb(24 24 27 / 0.06), 0 1px 2px -1px rgb(24 24 27 / 0.05);
+
+        /* 内联定位：置于 auction_head_right 左侧，作为页头 flex 子项，不占满整行 */
+        :host(.jds-inline) {
+          display: inline-flex;
+          flex: 0 1 auto;
+          align-self: center;
+          margin-right: 12px;
+          width: auto;
+          max-width: 100%;
+        }
           --shadow-md: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
           --shadow-ring: 0 0 0 3px rgb(225 37 27 / 0.12);
           --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -246,26 +263,6 @@
           transition: background var(--dur-fast) var(--ease-out);
         }
         .jds-search-btn:hover { background: var(--primary-hover); }
-
-        /* Tabs */
-        .jds-tabs {
-          display: inline-flex; gap: 2px; padding: 3px;
-          background: var(--secondary);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-md);
-        }
-        .jds-tab {
-          padding: 8px 12px; border: none; background: transparent;
-          color: var(--muted-foreground); font-family: var(--font-sans);
-          font-size: 12px; font-weight: 500;
-          border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
-          transition: all var(--dur-fast) var(--ease-out);
-        }
-        .jds-tab:hover { color: var(--foreground); }
-        .jds-tab.is-active {
-          background: var(--background); color: var(--foreground);
-          font-weight: 600; box-shadow: var(--shadow-xs);
-        }
 
         /* ===== PRODUCT GRID (optional, for renderProducts API) ===== */
         .jds-product-grid {
@@ -387,7 +384,6 @@
         @media (max-width: 768px) {
           .jds-toolbar { padding: 10px 12px; gap: 10px; }
           .jds-search { order: 1; max-width: none; width: 100%; }
-          .jds-tabs { order: 2; }
           .jds-product-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 8px; padding: 12px;
@@ -414,7 +410,6 @@
       const input = container.querySelector('.jds-search-input');
       const clearBtn = container.querySelector('.jds-clear');
       const searchBtn = container.querySelector('.jds-search-btn');
-      const tabs = container.querySelectorAll('.jds-tab');
 
       // 搜索框输入 — 实时过滤 + 清除按钮显隐
       input.addEventListener('input', (e) => {
@@ -440,20 +435,6 @@
 
       // 搜索按钮
       searchBtn.addEventListener('click', () => handlers.onSearch());
-
-      // Tab 切换 — 同步 ARIA 状态
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => {
-            t.classList.remove('is-active');
-            t.setAttribute('aria-selected', 'false');
-          });
-          tab.classList.add('is-active');
-          tab.setAttribute('aria-selected', 'true');
-          state.currentTab = tab.dataset.tab;
-          handlers.onTabChange();
-        });
-      });
     },
 
     /**
@@ -474,29 +455,16 @@
     },
 
     /**
-     * 确保商品网格容器存在（按需创建）
-     * @private
-     */
-    _ensureGrid() {
-      if (this.gridElement || !this.shadowRoot) return;
-      const root = this.shadowRoot.querySelector('.jds-root');
-      if (!root) return;
-      const grid = document.createElement('div');
-      grid.className = 'jds-product-grid';
-      grid.setAttribute('aria-live', 'polite');
-      grid.setAttribute('aria-busy', 'true');
-      root.appendChild(grid);
-      this.gridElement = grid;
-    },
-
-    /**
-     * 渲染商品列表到网格
+     * 渲染商品列表到结果面板
+     * 优先克隆页面上的京东原生商品卡片（含其 grid 容器），使搜索结果外观与原始页面完全一致；
+     * 仅当页面无原生卡片模板时，回退为扩展自带卡片。
      * @param {Array} products - 商品数组
      */
     renderProducts(products) {
-      this._ensureGrid();
-      if (!this.gridElement) return;
-      this.gridElement.setAttribute('aria-busy', 'false');
+      const panel = this.resultsRoot && this.resultsRoot.querySelector('.jds-results-panel');
+      if (!panel) return;
+      this.gridElement = null;
+      panel.innerHTML = '';
 
       if (!products || products.length === 0) {
         this.showEmptyState();
@@ -504,50 +472,123 @@
       }
       this.hideEmptyState();
 
-      this.gridElement.innerHTML = '';
-      products.forEach((p, i) => {
-        const name = global.JDSUtils.escapeHtml(global.JDSUtils.getProductName(p));
-        const priceText = global.JDSUtils.formatPrice(global.JDSUtils.getProductPrice(p));
-        const image = global.JDSUtils.getProductImage(p);
-        const isOngoing = global.JDSUtils.isOngoing(p);
-        const statusLabel = isOngoing ? getMessage('tabOngoing') : getMessage('tabUpcoming');
-        const countdown = global.JDSUtils.escapeHtml(p.countdown || p.remainTime || '');
+      const template = global.JDSDom.getFirstProductCard();
+      if (template) {
+        // 克隆京东原生列表容器（保留其 grid 布局类名，使卡片样式与原始页面一致）
+        // 关键：显式强制为可见 grid 布局，避免继承京东“未展开/懒加载”状态导致的整片 display:none 不显示
+        const listWrapper = template.parentElement;
+        const grid = listWrapper ? listWrapper.cloneNode(false) : document.createElement('div');
+        grid.removeAttribute('id');
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+        grid.style.gap = '12px';
+        grid.style.padding = '16px 24px 40px';
+        grid.innerHTML = '';
+        products.forEach((p) => {
+          try {
+            const card = template.cloneNode(true);
+            // 关键修复：克隆体会继承 hideNativeProducts 设置的内联 display:none，
+            // 必须显式清除，否则卡片本身不可见（grid 容器可见但子卡片整片空白，表现为“搜索不显示结果”）
+            card.style.display = '';
+            this._fillNativeCard(card, p);
+            grid.appendChild(card);
+          } catch (e) {
+            console.warn('[JD-Auction-Search] 渲染单张原生卡片失败，已跳过:', e);
+          }
+        });
+        panel.appendChild(grid);
+      } else {
+        // 回退：页面无原生卡片模板时，使用扩展自带卡片（内联样式，避免依赖 Shadow CSS）
+        const grid = document.createElement('div');
+        grid.className = 'jds-product-grid';
+        grid.setAttribute('aria-live', 'polite');
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
+        grid.style.gap = '12px';
+        grid.style.padding = '16px 24px 40px';
+        panel.appendChild(grid);
+        this.gridElement = grid;
+        this._renderFallbackCards(products);
+      }
+    },
 
-        // 有主图则渲染 <img>（加载失败回退图标），无主图直接显示图标
-        const imgHtml = image
-          ? `<img class="jds-product-img-el" src="${global.JDSUtils.escapeHtml(image)}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" /><span class="jds-product-img-fallback">📦</span>`
-          : `<span class="jds-product-img-fallback" style="display:grid">📦</span>`;
+    /**
+     * 用商品数据填充克隆的京东原生卡片（主图 / 标题 / 价格 / 链接），并清理模板残留的动态信息
+     * @private
+     */
+    _fillNativeCard(card, p) {
+      const U = global.JDSUtils;
+      const name = U.getProductName(p);
+      const price = U.getProductPrice(p);
+      const image = U.getProductImage(p);
+      const url = U.getProductUrl(p);
+
+      // 强制可见：避免继承京东"懒加载/入场动画"导致的 opacity:0 或 display:none
+      card.style.opacity = '1';
+      card.style.visibility = 'visible';
+      card.style.display = ''; // 清除 hideNativeProducts 设置的内联 display:none，确保克隆卡片可见
+      card.removeAttribute('hidden');
+      card.removeAttribute('id');
+
+      const img = card.querySelector('img');
+      if (img) {
+        if (image) {
+          img.src = image;
+          img.removeAttribute('srcset');
+          img.loading = 'lazy';
+          img.alt = name;
+          img.onerror = () => { img.style.visibility = 'hidden'; };
+        }
+      }
+
+      const title = card.querySelector('[class*="name" i], [class*="title" i], h3, h4');
+      if (title) title.textContent = name;
+      card.setAttribute('title', name);
+
+      const priceEl = card.querySelector('[class*="price" i]');
+      if (priceEl) priceEl.textContent = '¥' + U.formatPrice(price);
+
+      const a = card.closest('a') || card.querySelector('a');
+      if (a && url) {
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+
+      // 清除克隆模板残留的倒计时/剩余时间等动态信息，避免显示错误数据
+      card.querySelectorAll('[class*="countdown" i], [class*="remain" i], [class*="time" i], [class*="timer" i]')
+        .forEach(el => { el.textContent = ''; el.style.display = 'none'; });
+    },
+
+    /**
+     * 回退渲染：页面无原生卡片模板时，使用扩展自带卡片（内联样式，独立于 Shadow CSS）
+     * @private
+     */
+    _renderFallbackCards(products) {
+      products.forEach((p) => {
+        const U = global.JDSUtils;
+        const name = U.escapeHtml(U.getProductName(p));
+        const priceText = U.formatPrice(U.getProductPrice(p));
+        const image = U.getProductImage(p);
 
         const card = document.createElement('div');
-        card.className = 'jds-product-card';
-        card.style.animationDelay = `${i * 0.03}s`;
+        card.style.cssText = 'display:inline-block;width:180px;margin:8px;vertical-align:top;border:1px solid #e4e4e7;border-radius:10px;overflow:hidden;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;';
+        const imgHtml = image
+          ? `<img src="${U.escapeHtml(image)}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:120px;object-fit:cover;display:block" onerror="this.style.visibility='hidden'" />`
+          : `<div style="width:100%;height:120px;display:grid;place-items:center;background:#f4f4f5;font-size:40px">📦</div>`;
         card.innerHTML = `
-          <div class="jds-product-img">${imgHtml}</div>
-          <div class="jds-product-body">
-            <div class="jds-product-name">${name}</div>
-            <div class="jds-product-price"><small>¥ </small>${priceText}</div>
-            <div class="jds-product-meta">
-              <span class="jds-badge jds-badge-${isOngoing ? 'primary' : 'warning'} ${isOngoing ? 'jds-badge-ongoing' : ''}">${statusLabel}</span>
-              ${countdown ? `<span class="jds-countdown">${countdown}</span>` : ''}
-            </div>
+          ${imgHtml}
+          <div style="padding:10px">
+            <div style="font-size:13px;color:#18181b;line-height:1.4;max-height:36px;overflow:hidden">${name}</div>
+            <div style="margin-top:6px;color:#e1251b;font-weight:600;font-size:15px">¥${priceText}</div>
           </div>`;
         this.gridElement.appendChild(card);
-      });
-
-      // 主图加载失败时回退为图标
-      this.gridElement.querySelectorAll('.jds-product-img-el').forEach(img => {
-        const fail = () => {
-          img.style.display = 'none';
-          const fb = img.parentElement.querySelector('.jds-product-img-fallback');
-          if (fb) fb.style.display = 'grid';
-        };
-        if (img.complete && img.naturalWidth === 0) fail();
-        else img.addEventListener('error', fail);
       });
     },
 
     /**
-     * 初始化结果面板宿主 — 独立 Shadow DOM 挂在 body，避免被嵌入的页头裁剪
+     * 初始化结果面板宿主 — 真实 DOM（非 Shadow）挂在 body
+     * 用真实 DOM 承载，克隆的京东原生卡片才能继承页面全局样式，外观与原始列表一致
      * 面板以 fixed 定位在嵌入工具栏下方，覆盖内容区展示跨页搜索结果
      * @private
      */
@@ -557,34 +598,42 @@
       host.id = 'jds-results-host';
       document.body.appendChild(host);
       this.resultsHost = host;
+      this.resultsRoot = host;
 
-      this.resultsRoot = host.attachShadow({ mode: 'closed' });
-      const style = document.createElement('style');
-      style.textContent = this._getInlineStyles(true);
-      this.resultsRoot.appendChild(style);
-
-      // 面板定位样式（独立追加，避免污染工具栏宿主）
-      const panelStyle = document.createElement('style');
-      panelStyle.textContent = `
-        .jds-results-panel {
-          position: fixed; left: 0; right: 0; bottom: 0; top: 0;
-          overflow-y: auto; background: var(--muted);
-          z-index: 999990; padding: 16px 24px 32px;
-          display: none;
-        }
-        .jds-results-panel.is-visible { display: block; }
-        .jds-results-panel .jds-product-grid { margin-top: 0; }
-      `;
-      this.resultsRoot.appendChild(panelStyle);
+      // 仅作用于覆盖层外壳的样式；卡片本身由京东全局 CSS 渲染
+      if (!document.getElementById('jds-results-style')) {
+        const style = document.createElement('style');
+        style.id = 'jds-results-style';
+        style.textContent = `
+          #jds-results-host {
+            position: fixed; left: 0; right: 0; top: 0; bottom: 0;
+            z-index: 999990;
+          }
+          #jds-results-host .jds-results-panel {
+            position: absolute; inset: 0; overflow-y: auto;
+            background: #fff; padding: 16px 0 40px;
+            display: none;
+          }
+          #jds-results-host .jds-results-panel.is-visible { display: block; }
+          #jds-results-host .jds-empty-overlay {
+            position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            color: #71717a; text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+          }
+          #jds-results-host .jds-empty-icon svg { width: 48px; height: 48px; color: #d4d4d8; }
+          #jds-results-host .jds-empty-title { font-size: 15px; font-weight: 600; color: #18181b; }
+          #jds-results-host .jds-empty-desc { font-size: 13px; }
+        `;
+        document.head.appendChild(style);
+      }
 
       const panel = document.createElement('div');
       panel.className = 'jds-results-panel';
       panel.setAttribute('role', 'region');
-      panel.setAttribute('aria-label', '跨页搜索结果');
-      panel.innerHTML = '<div class="jds-product-grid" aria-live="polite" aria-busy="true"></div>';
-      this.resultsRoot.appendChild(panel);
+      panel.setAttribute('aria-label', '搜索结果');
+      host.appendChild(panel);
 
-      this.gridElement = panel.querySelector('.jds-product-grid');
       this._positionResultsPanel();
       this._bindResultsPosition();
     },

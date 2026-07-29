@@ -1,5 +1,45 @@
 # Changelog
 
+## v1.2.14
+
+### Fixes
+- 修复商品名称提取脏数据（测试发现）：`dom.extractProductsFromDOM` 的标题选择器含 `a[title]`，而包裹整张卡片的 `<a>` 在文档顺序上早于内部 `.name`，querySelector 命中外层 `<a>` 并取走整卡文本（含价格/倒计时），导致搜索匹配与克隆卡片标题区重复显示价格/倒计时。改为优先取 class 化名称元素，仅当取不到时回退 `<a>` 的 `title` 属性（取属性而非整段文本）
+
+## v1.2.13
+
+### Fixes
+- 修复搜索不显示结果（核心根因）：搜索态下 `hideNativeProducts` 将原生卡片设为 `display:none`，克隆模板的 `cloneNode(true)` 继承了该内联样式，而 `_fillNativeCard` 仅恢复 opacity/visibility 未清除 `display`，导致克隆卡片整片不可见。现于克隆后立即 `card.style.display = ''` 并在 `_fillNativeCard` 内统一清除，结果面板必定渲染可见卡片
+- 精确化商品卡片选择器（审查高优 #1）：`dom._getProductContainers` 改用「列表容器内优先 + 排除导航/分页等非商品项」策略，避免 `[class*="item"]` 过宽误匹配 `nav-item`/`page-item` 导致取错模板或误伤原生元素
+- 增强 DOM 提取兜底：`extractProductsFromDOM` 现从真实商品卡片提取完整字段（id/name/price/image/url），API 拦截失败时搜索兜底也能渲染真实主图/价格/链接，而非仅文本
+
+## v1.2.12
+
+### Fixes
+- 修复搜索结果不显示：克隆京东原生列表容器时显式强制为可见 grid 布局，避免继承京东「未展开/懒加载」状态导致的整片 `display:none`
+- 兜底增强：搜索时若尚未聚合到商品数据，先尝试从当前 DOM 提取当前页商品，确保有结果可搜、搜索结果面板必定渲染
+
+## v1.2.11
+
+### Fixes
+- 修复「API加载失败」提示：不再硬编码猜测列表端点，改为拦截页面真实请求并作为模板做分页重放（仅替换 `page` 参数），彻底规避端点/参数不匹配导致的请求失败
+- 放宽 API 拦截匹配（覆盖 `paimai.jd.com` / `api.m.jd.com` 等真实列表接口），并按“像不像列表接口”打分挑选最佳模板
+- 优化降级逻辑：拦截器已捕获到首页数据时不再误弹错误 Toast，仅当无任何商品数据时才提示并回退 DOM 提取
+
+## v1.2.10
+
+### Fixes
+- 搜索结果与原始页面一致：结果面板改为真实 DOM（非 Shadow），克隆京东原生商品卡片（含其 grid 容器）并填充主图/标题/价格/链接，外观与 `auction-list` 原始卡片完全一致
+
+## v1.2.9
+
+### Improvements
+- 移除 `jds-tabs` 容器与「全部」按钮：分类筛选不再需要，搜索框独立工作
+
+## v1.2.8
+
+### Improvements
+- 工具栏定位优化：嵌入页头时若检测到 `auction_head_right`，将 `jds-search-wrapper` 插入到其**左侧**（内联），而非占满整行
+
 ## v1.2.7
 
 ### Improvements

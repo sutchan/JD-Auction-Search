@@ -1,4 +1,4 @@
-// JD-Auction-Search/background.js v1.2.7
+// JD-Auction-Search/background.js v1.2.14
 // 后台脚本：管理扩展状态和跨标签通信
 
 const state = {
@@ -52,5 +52,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[JD-Auction-Search] 插件已安装 v1.2.7');
+  console.log('[JD-Auction-Search] 插件已安装 v1.2.14');
 });

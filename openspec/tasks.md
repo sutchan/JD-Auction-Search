@@ -2,6 +2,34 @@
 
 ## 已完成任务
 
+### v1.2.12
+- [x] 修复搜索结果不显示：ui.js renderProducts 克隆京东列表容器时显式强制可见 grid 布局（覆盖 display:none 懒加载态）；content.js _applyFilterAndUpdate 搜索时若 products 为空先 DOM 提取兜底
+- [x] 版本升至 v1.2.12，同步 manifest/metadata/package、各文件头、README、prototype、CHANGELOG/spec/tasks
+
+### v1.2.13
+- [x] 修复搜索不显示结果核心根因：克隆原生卡片继承的 display:none 未清除，于 cloneNode 后及 _fillNativeCard 内统一 `card.style.display=''`，结果卡片必定可见
+- [x] 精确化商品卡片选择器（审查高优 #1）：列表容器内优先查找商品卡片类，全局回退排除 nav/menu/page 等非商品项，避免误匹配
+- [x] 增强 DOM 提取兜底：extractProductsFromDOM 提取完整字段（id/name/price/image/url），API 失败时搜索仍能渲染真实主图/价格/链接
+- [x] 版本升至 v1.2.13，同步 manifest/metadata/package、各文件头、README、prototype、CHANGELOG/spec/tasks
+
+### v1.2.14
+- [x] 修复商品名称提取脏数据：extractProductsFromDOM 标题选择器去掉 `a[title]` 整段文本命中，优先取 class 化名称元素，仅回退 `<a>` 的 title 属性
+- [x] Playwright 功能测试覆盖：工具栏内联挂载 / API 降级 Toast / 搜索渲染克隆卡片 / 清除恢复 / 无匹配空态 / API 拦截逻辑，7/7 通过，0 个运行期异常
+- [x] 版本升至 v1.2.14，同步 manifest/metadata/package、各文件头、README、prototype、CHANGELOG/spec/tasks
+
+### v1.2.11
+- [x] 修复「API加载失败」：api.js 拦截页面真实列表请求作模板（_captureRequestTemplate + _listScore 选优）、分页重放（_findPageParam/_buildPageRequest）；放宽 _isAuctionUrl；content.js 降级逻辑不再误弹 Toast
+- [x] 版本升至 v1.2.11，同步 manifest/metadata/package、各文件头、README、prototype、CHANGELOG/spec/tasks
+
+### v1.2.10
+- [x] 搜索结果视觉一致：结果面板改为 light DOM，克隆京东原生卡片（含 grid 容器）并填主图/标题/价格/链接；新增 utils.getProductUrl、dom.getFirstProductCard、ui._fillNativeCard/_renderFallbackCards
+
+### v1.2.9
+- [x] 移除 jds-tabs 容器与「全部」按钮；清理 currentTab 字段、onTabChange 处理、tab 过滤 switch 及 tabs CSS/事件
+
+### v1.2.8
+- [x] 工具栏定位优化：检测到 auction_head_right 时，将 jds-search-wrapper 内联到其左侧
+
 ### v1.2.7
 - [x] 移除中文以外的国际化语言（保留 zh_CN/zh_TW），清理英文回退翻译
 - [x] 去除 jds-toolbar 边框

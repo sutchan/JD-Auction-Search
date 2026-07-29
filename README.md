@@ -18,7 +18,7 @@
 
 ## 设计系统
 
-本项目采用 **shadcn 设计语言**（浅色极简风），以 zinc 中性灰阶 + 京东红作为唯一强调色，建立语义化令牌体系确保 UI 一致性。
+本项目采用 **shadcn 设计语言**（浅色 / 深色双主题），以 zinc 中性灰阶 + 京东红作为唯一强调色，建立语义化令牌体系确保 UI 一致性；并通过容器查询（@container）实现演示框自适应的响应式布局。
 
 ### 语义令牌（Semantic Tokens）
 
@@ -49,7 +49,7 @@
 - **错误**：Alert 内联提示 + 降级策略（API→DOM 提取）
 - **空状态**：EmptyState（图标 + 标题 + 描述 + 建议）
 
-详见 [prototype/index.html](prototype/index.html) 高保真可交互原型（含设计系统、组件库、交互标准完整展示）。
+详见 [prototype/index.html](prototype/index.html) 高保真可交互原型（含设计系统、组件库、交互标准完整展示，支持浅色 / 深色主题切换与容器查询响应式）。
 
 ## 项目结构
 
@@ -134,7 +134,7 @@ npm install
 npm run build
 ```
 
-这将在项目根目录下生成 `jd-auction-search-v1.2.7.zip` 文件，可直接用于发布。
+这将在项目根目录下生成 `jd-auction-search-v1.2.14.zip` 文件，可直接用于发布。
 
 ## 核心实现原理
 

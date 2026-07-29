@@ -1,6 +1,6 @@
 {
   "name": "jd-auction-search",
-  "version": "1.2.7",
+  "version": "1.2.14",
   "description": "京东夺宝搜索增强插件 - 为京东夺宝页面增加商品关键词搜索和分类过滤功能",
   "main": "background.js",
   "scripts": {

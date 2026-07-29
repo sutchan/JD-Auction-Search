@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.2.7
+// JD-Auction-Search/src/content.js v1.2.14
 // 主模块：整合所有功能
 
 (function() {
@@ -8,7 +8,6 @@
     state: {
       products: [],
       filteredProducts: [],
-      currentTab: 'all',
       keyword: '',
       isLoading: false,
       searchMode: false
@@ -27,8 +26,7 @@
       JDSUI.renderSearchUI(this.state, {
         onInput: () => this._applyFilterAndUpdate(),
         onSearch: () => this._applyFilterAndUpdate(),
-        onClear: () => this._applyFilterAndUpdate(),
-        onTabChange: () => this._applyFilterAndUpdate()
+        onClear: () => this._applyFilterAndUpdate()
       });
 
       // 拦截API
@@ -72,11 +70,19 @@
      * @private
      */
     _applyFilterAndUpdate() {
+      // 兜底：搜索时若尚无商品数据，先尝试从当前 DOM 提取，确保有结果可搜
+      if (this.state.products.length === 0) {
+        const domProducts = JDSDom.extractProductsFromDOM();
+        if (domProducts.length) {
+          this.state.products = JDSUtils.deduplicateProducts(domProducts);
+        }
+      }
+
       this._applyFilter();
       const filtered = this.state.filteredProducts;
 
-      // 是否处于筛选态（关键词或分类 Tab 任一生效）
-      const hasFilter = !!this.state.keyword || this.state.currentTab !== 'all';
+      // 是否处于筛选态（有搜索关键词即进入搜索模式）
+      const hasFilter = !!this.state.keyword;
 
       if (hasFilter) {
         // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
@@ -107,15 +113,6 @@
         });
       }
 
-      switch (this.state.currentTab) {
-        case 'ongoing':
-          filtered = filtered.filter(p => JDSUtils.isOngoing(p));
-          break;
-        case 'upcoming':
-          filtered = filtered.filter(p => JDSUtils.isUpcoming(p));
-          break;
-      }
-
       this.state.filteredProducts = filtered;
     },
 
@@ -125,24 +122,27 @@
      */
     async _autoLoadProducts() {
       try {
-        // 分页加载全部商品（多页面搜索的数据基础）
+        // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
         const products = await JDSApi.loadAllProducts();
         if (products && products.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(products);
           this._applyFilterAndUpdate();
           console.log(`[JD-Auction-Search] 已聚合 ${this.state.products.length} 个商品（跨页）`);
-        } else {
-          throw new Error('empty');
+          return;
         }
       } catch (e) {
+        console.warn('[JD-Auction-Search] 跨页API加载失败，准备降级:', e && e.message);
+      }
+
+      // 降级策略：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
+      if (this.state.products.length === 0) {
         JDSUtils.showToast('toastApiFailed');
-        let domProducts = JDSDom.extractProductsFromDOM();
+        const domProducts = JDSDom.extractProductsFromDOM();
         if (domProducts.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(domProducts);
-          this._applyFilterAndUpdate();
-          console.log('[JD-Auction-Search] 从DOM提取了 ' + domProducts.length + ' 个商品');
         }
       }
+      this._applyFilterAndUpdate();
     },
 
     /**

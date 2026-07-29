@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils.js v1.2.7
+// JD-Auction-Search/src/utils.js v1.2.14
 // 工具函数模块
 
 (function(global) {
@@ -163,6 +163,28 @@
         if (n !== null && n >= 0) return n;
       }
       return 0;
+    },
+
+    /**
+     * 从多个可能字段中获取商品详情链接，并做协议白名单校验
+     * 无显式链接时按京东拍卖惯例回退为 https://paimai.jd.com/{id}.html
+     * @param {Object} product - 商品对象
+     * @returns {string|null}
+     */
+    getProductUrl(product) {
+      if (!product || typeof product !== 'object') return null;
+      const candidates = [
+        product.url, product.link, product.detailUrl, product.href,
+        product.productUrl, product.itemUrl, product.jumpUrl
+      ];
+      const safe = (v) => typeof v === 'string' && /^(https?:|\/\/|\/)/i.test(v.trim()) ? v.trim() : null;
+      for (const c of candidates) {
+        const u = safe(c);
+        if (u) return u;
+      }
+      const id = this.getProductId(product);
+      if (id) return `https://paimai.jd.com/${encodeURIComponent(String(id))}.html`;
+      return null;
     },
 
     /**
