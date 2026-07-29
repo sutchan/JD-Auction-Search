@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/index.js v1.3.3
+// JD-Auction-Search/src/utils/index.js v1.3.5
 // 工具模块命名空间引导：聚合下方子模块（i18n/extract/format/transform/ui-shared）
 
 (function(global) {

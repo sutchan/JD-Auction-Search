@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/index.js v1.3.3
+// JD-Auction-Search/src/api/index.js v1.3.5
 // API 模块命名空间引导：聚合 interceptor（拦截器）与 paginator（分页重放）
 
 (function(global) {

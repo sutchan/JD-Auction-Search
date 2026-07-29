@@ -1,7 +1,7 @@
-// JD-Auction-Search/src/ui/products.js v1.3.3
-// 商品渲染：优先克隆原生卡片渲染搜索结果（视觉一致），并对克隆卡片做实测可见性兜底，
-// 当京东 class 级 CSS 导致克隆卡片 display:none 或零高度（虚拟列表/懒加载）时，
-// 自动回退为扩展自带的内联样式卡片，确保搜索结果始终可见。
+// JD-Auction-Search/src/ui/products.js v1.3.5
+// 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
+// 保证跨页搜索结果在任意京东页面都稳定可见（此前克隆原生卡片在真实页面常因京东 class 级 CSS
+// 表现为“尺寸正常却整片不可见”，难以可靠检测）。
 // 面板生命周期见 results.js，骨架屏见 skeleton.js
 
 (function(global) {
@@ -11,8 +11,8 @@
 
   /**
    * 渲染商品列表到结果面板
-   * 优先克隆页面上的京东原生商品卡片（视觉一致）；对每张克隆卡片做实测可见性校验，
-   * 不可见时回退为扩展自带卡片。仅当页面无原生卡片模板时，统一使用扩展自带卡片。
+   * 始终使用扩展自带的内联样式卡片（_buildOwnCard），不依赖京东原生卡片克隆，
+   * 避免京东页面 CSS 导致克隆卡片在结果面板中不可见（显示空白）。
    * @param {Array} products - 商品数组
    */
   JDSUI.renderProducts = function renderProducts(products) {
@@ -27,7 +27,7 @@
     }
     this.hideEmptyState();
 
-    // 统一用扩展自带网格容器（内联样式，避免继承京东列表容器的 flex/!important 等布局干扰）
+    // 扩展自带网格容器（内联样式，完全独立于京东列表布局）
     const grid = document.createElement('div');
     grid.className = 'jds-product-grid';
     grid.setAttribute('aria-live', 'polite');
@@ -35,117 +35,13 @@
     panel.appendChild(grid);
     this.gridElement = grid;
 
-    const template = global.JDSDom.getFirstProductCard();
-    const U = global.JDSUtils;
-
     products.forEach((p) => {
-      let card = null;
-
-      // 首选：克隆京东原生卡片（视觉一致），但需实测确认其真正可见
-      if (template) {
-        try {
-          const cloned = template.cloneNode(true);
-          // 清除 hideNativeProducts 写入的内联 display:none（克隆体会继承），还原为卡片类本身定义的可见状态
-          cloned.style.display = '';
-          this._fillNativeCard(cloned, p);
-          // 先挂载再实测：克隆卡片可能因京东 class 级 CSS（display:none 或零高度/虚拟列表）
-          // 在结果面板中不可见，此时回退为扩展自带卡片
-          grid.appendChild(cloned);
-          let visible = true;
-          try {
-            if (global.getComputedStyle && global.getComputedStyle(cloned).display === 'none') visible = false;
-            const rect = cloned.getBoundingClientRect();
-            if (!rect || rect.height === 0) visible = false;
-          } catch (e) {}
-          if (visible) {
-            card = cloned;
-          } else {
-            const own = this._buildOwnCard(p);
-            grid.replaceChild(own, cloned);
-            card = own;
-          }
-        } catch (e) {
-          // 单张卡片克隆失败，回退扩展自带卡片
-          card = this._buildOwnCard(p);
-        }
-      } else {
-        card = this._buildOwnCard(p);
-      }
-
-      if (card && card !== grid.lastChild) grid.appendChild(card);
+      grid.appendChild(this._buildOwnCard(p));
     });
   };
 
   /**
-   * 用商品数据填充克隆的京东原生卡片（主图 / 标题 / 价格 / 链接），并清理模板残留的动态信息
-   * @private
-   */
-  JDSUI._fillNativeCard = function _fillNativeCard(card, p) {
-    const U = global.JDSUtils;
-    const name = U.getProductName(p);
-    const price = U.getProductPrice(p);
-    const image = U.getProductImage(p);
-    const url = U.getProductUrl(p);
-
-    // 强制可见：移除京东"入场动画/懒加载"隐藏类（如 lazy-enter），
-    // 该类不仅把卡片 opacity 设为 0，还会把子级图片容器 .p-img 设为 display:none，
-    // 仅靠卡片内联 opacity:1 无法解除子级隐藏 —— 这是搜索结果"主图空白/不显示"的根因之一
-    card.classList.remove('lazy-enter', 'lazy-img', 'lazyload', 'lazy-loaded', 'J-lazy', 'J-lazyload', 'not-visible', 'hidden-item');
-    card.style.opacity = '1';
-    card.style.visibility = 'visible';
-    card.style.display = ''; // 清除 hideNativeProducts 设置的内联 display:none，确保克隆卡片可见
-    card.removeAttribute('hidden');
-    card.removeAttribute('id');
-
-    const img = card.querySelector('img');
-    if (img) {
-      // 强制图片容器与图片本身可见（解除父级/懒加载隐藏）
-      const pImg = img.parentElement;
-      if (pImg) {
-        pImg.style.display = '';
-        pImg.style.visibility = 'visible';
-        pImg.style.opacity = '1';
-      }
-      img.style.display = 'block';
-      img.style.visibility = 'visible';
-      img.style.opacity = '1';
-      // 优先用数据中的真实图；克隆卡片已脱离京东视口观察器，若原生 img 仅依赖
-      // data-lazy/data-src 懒加载且 src 为空，必须回退填充，否则主图永远不显示
-      const lazySrc = img.getAttribute('data-lazy') || img.getAttribute('data-src') || img.getAttribute('data-original');
-      if (image) {
-        img.src = image;
-      } else if (lazySrc && !img.getAttribute('src')) {
-        img.src = lazySrc;
-      }
-      img.removeAttribute('srcset');
-      img.loading = 'lazy';
-      img.alt = name;
-      // 注意：使用属性方式绑定错误回退（非内联事件处理器），规避 MV3 CSP 对 on* 属性的拦截
-      img.onerror = () => { img.style.visibility = 'hidden'; };
-    }
-
-    const title = card.querySelector('[class*="name" i], [class*="title" i], h3, h4');
-    if (title) title.textContent = name;
-    card.setAttribute('title', name);
-
-    const priceEl = card.querySelector('[class*="price" i]');
-    if (priceEl) priceEl.textContent = '¥' + U.formatPrice(price);
-
-    const a = card.closest('a') || card.querySelector('a');
-    if (a && url) {
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-    }
-
-    // 清除克隆模板残留的倒计时/剩余时间等动态信息，避免显示错误数据
-    card.querySelectorAll('[class*="countdown" i], [class*="remain" i], [class*="time" i], [class*="timer" i]')
-      .forEach(el => { el.textContent = ''; el.style.display = 'none'; });
-  };
-
-  /**
    * 构建扩展自带商品卡片（内联样式，独立于京东 CSS，保证在任何页面都可见）
-   * 作为克隆卡片不可见时的兜底渲染，并用于页面无原生卡片模板的场景
    * @private
    * @returns {HTMLElement}
    */

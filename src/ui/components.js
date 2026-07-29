@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/components.js v1.3.3
+// JD-Auction-Search/src/ui/components.js v1.3.5
 // 组件样式：SearchBar / ProductGrid / Card / Badge / EmptyState / Skeleton 等
 // 由 ui/styles.js 的 _getInlineStyles 组合注入 Shadow DOM（工具栏样式由 _getInlineStyles 动态拼入）
 

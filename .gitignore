@@ -25,3 +25,4 @@ replay_pid*
 .workbuddy/
 /node_modules
 *_test*.js
+.codebuddy/

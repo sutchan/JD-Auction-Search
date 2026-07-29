@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.3.3
+// JD-Auction-Search/src/ui/results.js v1.3.5
 // 结果面板生命周期：宿主挂载、面板定位、展示/隐藏、空状态、销毁
 // 商品渲染见 products.js，骨架屏见 skeleton.js
 
@@ -13,11 +13,15 @@
     #jds-results-host {
       position: fixed; left: 0; right: 0; top: 0; bottom: 0;
       z-index: 999990;
+      /* 透明覆盖层不拦截指针事件：否则搜索激活时会盖住嵌入态工具栏（页面级 z-index 低于本层），
+         导致清空/搜索按钮点击失效；清空后宿主仍在 DOM 中，亦会持续拦截整页点击 */
+      pointer-events: none;
     }
     #jds-results-host .jds-results-panel {
       position: absolute; inset: 0; overflow-y: auto;
       background: #fff; padding: 16px 0 40px;
       display: none;
+      pointer-events: auto;
     }
     #jds-results-host .jds-results-panel.is-visible { display: block; }
     #jds-results-host .jds-empty-overlay {
@@ -27,6 +31,7 @@
       background: #fff; border: 1px solid #e4e4e7; border-radius: 10px;
       padding: 48px 64px; box-shadow: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      pointer-events: auto;
     }
     #jds-results-host .jds-empty-icon svg { width: 48px; height: 48px; color: #d4d4d8; }
     #jds-results-host .jds-empty-title { font-size: 15px; font-weight: 600; color: #18181b; }

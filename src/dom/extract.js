@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.3.3
+// JD-Auction-Search/src/dom/extract.js v1.3.5
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url），以及原生卡片模板获取与显隐
 
 (function(global) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.5
+
+### Fixes
+- 修复“清空搜索按钮失效”：结果面板宿主 `#jds-results-host` 是 `position:fixed; inset:0; z-index:999990` 的全屏透明覆盖层，但未设 `pointer-events`，搜索激活时会盖住嵌入在 `auction_head` 中（页面级 z-index 低于本层）的工具栏，导致清空/搜索按钮点击被拦截；清空后宿主仍在 DOM 中，亦持续拦截整页点击。现给宿主加 `pointer-events:none`、结果面板与空状态加 `pointer-events:auto`，工具栏与页面恢复可交互，结果卡片仍可点击
+
+## v1.3.4
+
+### Fixes
+- 彻底修复“搜索结果不显示”：经 jsdom 全链路复现确认，此前克隆的京东原生卡片在真实页面中表现为“`display:block` 且计算高度 > 0（实测可见）却整片空白”，原 `getComputedStyle`/`getBoundingClientRect` 兜底无法识别这种“尺寸正常却不可见”的状态，导致克隆卡片被保留而结果面板呈空白。现**彻底放弃克隆京东原生卡片**，统一使用扩展自带的内联样式卡片（图片+标题+价格，京东红主色，主图失败回退占位、新窗口打开、悬停阴影），完全脱离京东 DOM/CSS 依赖，保证跨页搜索结果在任意京东页面稳定可见
+
 ## v1.3.3
 
 ### Fixes
