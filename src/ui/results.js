@@ -95,7 +95,11 @@
       const listWrapper = template.parentElement;
       const grid = listWrapper ? listWrapper.cloneNode(false) : document.createElement('div');
       grid.removeAttribute('id');
+      // 移除容器级懒加载/隐藏类，强制可见
+      grid.classList.remove('lazy-enter', 'lazyload', 'hidden', 'not-visible');
       grid.style.display = 'grid';
+      grid.style.opacity = '1';
+      grid.style.visibility = 'visible';
       grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
       grid.style.gap = '12px';
       grid.style.padding = '16px 24px 40px';
@@ -139,7 +143,10 @@
     const image = U.getProductImage(p);
     const url = U.getProductUrl(p);
 
-    // 强制可见：避免继承京东"懒加载/入场动画"导致的 opacity:0 或 display:none
+    // 强制可见：移除京东"入场动画/懒加载"隐藏类（如 lazy-enter），
+    // 该类不仅把卡片 opacity 设为 0，还会把子级图片容器 .p-img 设为 display:none，
+    // 仅靠卡片内联 opacity:1 无法解除子级隐藏 —— 这是搜索结果"主图空白/不显示"的根因之一
+    card.classList.remove('lazy-enter', 'lazy-img', 'lazyload', 'lazy-loaded', 'J-lazy', 'J-lazyload', 'not-visible', 'hidden-item');
     card.style.opacity = '1';
     card.style.visibility = 'visible';
     card.style.display = ''; // 清除 hideNativeProducts 设置的内联 display:none，确保克隆卡片可见
@@ -148,13 +155,28 @@
 
     const img = card.querySelector('img');
     if (img) {
+      // 强制图片容器与图片本身可见（解除父级/懒加载隐藏）
+      const pImg = img.parentElement;
+      if (pImg) {
+        pImg.style.display = '';
+        pImg.style.visibility = 'visible';
+        pImg.style.opacity = '1';
+      }
+      img.style.display = 'block';
+      img.style.visibility = 'visible';
+      img.style.opacity = '1';
+      // 优先用数据中的真实图；克隆卡片已脱离京东视口观察器，若原生 img 仅依赖
+      // data-lazy/data-src 懒加载且 src 为空，必须回退填充，否则主图永远不显示
+      const lazySrc = img.getAttribute('data-lazy') || img.getAttribute('data-src') || img.getAttribute('data-original');
       if (image) {
         img.src = image;
-        img.removeAttribute('srcset');
-        img.loading = 'lazy';
-        img.alt = name;
-        img.onerror = () => { img.style.visibility = 'hidden'; };
+      } else if (lazySrc && !img.getAttribute('src')) {
+        img.src = lazySrc;
       }
+      img.removeAttribute('srcset');
+      img.loading = 'lazy';
+      img.alt = name;
+      img.onerror = () => { img.style.visibility = 'hidden'; };
     }
 
     const title = card.querySelector('[class*="name" i], [class*="title" i], h3, h4');
