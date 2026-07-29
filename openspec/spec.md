@@ -6,7 +6,7 @@
 **版本**: 1.2.14  
 **类型**: 浏览器扩展插件
 
-为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索和分类过滤功能。
+为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
 
 ## 目录结构
 
@@ -29,18 +29,9 @@ JD-Auction-Search/
 │   ├── dom.js             # DOM处理
 │   ├── content.js         # 主内容脚本
 │   └── styles.css         # Toast全局样式（Shadow DOM外）
-├── _locales/              # 国际化文件
-│   ├── en/messages.json
+├── _locales/              # 国际化文件（v1.2.7 起仅保留简繁中文）
 │   ├── zh_CN/messages.json
-│   ├── zh_TW/messages.json
-│   ├── es/messages.json
-│   ├── ar/messages.json
-│   ├── fr/messages.json
-│   ├── pt_BR/messages.json
-│   ├── de/messages.json
-│   ├── ja/messages.json
-│   ├── ko/messages.json
-│   └── ru/messages.json
+│   └── zh_TW/messages.json
 ├── README.md              # 中文说明（默认）
 ├── README_EN.md           # 英文说明
 └── icons/                 # 插件图标目录（可选）
@@ -63,7 +54,7 @@ JD-Auction-Search/
 
 ## 设计系统
 
-采用 shadcn 设计语言（浅色极简风），以 zinc 中性灰阶 + 京东红作为唯一强调色。
+采用 shadcn 设计语言（浅色极简风），以 zinc 中性灰阶 + 京东红作为唯一强调色。原型（prototype/index.html）已预演深色模式、容器查询响应式与指数缓动等增强，可作为后续扩展实装的参考（扩展当前仅浅色）。
 
 ### 语义令牌（Semantic Tokens）
 
@@ -80,9 +71,9 @@ JD-Auction-Search/
 
 | 层级 | 组件 | 数量 |
 |------|------|------|
-| 基础（Atoms） | Button, Input, Badge, Switch, Tabs, Separator, Skeleton, Toast | 8 |
+| 基础（Atoms） | Button, Input, Badge, Separator, Skeleton, Toast | 6 |
 | 复合（Molecules） | SearchBar, Card, Alert, EmptyState | 4 |
-| 业务（Organisms） | AuctionToolbar, ProductGrid, FilterTabs | 3 |
+| 业务（Organisms） | AuctionToolbar, ProductGrid | 2 |
 
 ### 交互标准
 
@@ -93,8 +84,8 @@ JD-Auction-Search/
 
 ### 无障碍
 
-- ARIA 角色：`role="tablist"`, `role="tab"`, `role="region"`, `role="status"`
-- ARIA 状态：`aria-selected`, `aria-pressed`, `aria-live`, `aria-busy`, `aria-hidden`
+- ARIA 角色：`role="region"`, `role="status"`
+- ARIA 状态：`aria-live`, `aria-busy`, `aria-hidden`
 - 键盘导航：Enter 搜索、Tab 切换焦点
 - `prefers-reduced-motion` 适配
 
@@ -103,11 +94,11 @@ JD-Auction-Search/
 | 功能模块 | 功能描述 | 状态 |
 |---------|---------|------|
 | 关键词搜索 | 输入商品名称/ID实时过滤 | ✅ |
-| Tab分类筛选 | 全部/正在夺宝/即将开始 | ✅ |
+| Tab分类筛选 | 全部/正在夺宝/即将开始 | 已移除（v1.2.9 简化 UI，仅保留关键词搜索） | ❌ |
 | API拦截缓存 | 自动拦截并缓存API响应 | ✅ |
 | DOM提取数据 | API不可用时从DOM提取 | ✅ |
 | 一键启停 | 已移除（简化 UI，默认常驻启用） | ❌ |
-| 国际化支持 | 多语言界面（11种语言） | ✅ |
+| 国际化支持 | 简繁中文界面（zh_CN / zh_TW） | ✅ |
 | 构建打包 | 支持一键打包发布 | ✅ |
 
 ## 代码规范
@@ -135,6 +126,14 @@ JD-Auction-Search/
 - 函数必须有注释
 
 ## 版本历史
+
+### v1.2.14
+- 修复商品名称提取脏数据：`extractProductsFromDOM` 标题选择器误命中包裹整卡的 `<a>`，改为优先取 class 化名称元素，仅回退取 `<a>` 的 title 属性
+
+### v1.2.13
+- 修复搜索不显示结果核心根因：克隆原生卡片继承的 display:none 未清除，于 cloneNode 后及 _fillNativeCard 内统一 `card.style.display=''`，结果卡片必定可见
+- 精确化商品卡片选择器：列表容器内优先查找商品卡片类，全局回退排除 nav/menu/page 等非商品项
+- 增强 DOM 提取兜底：API 失败时搜索也能渲染真实主图/价格/链接
 
 ### v1.2.12
 - 修复搜索结果不显示：克隆京东原生列表容器时显式强制可见 grid 布局，规避继承「未展开/懒加载」状态导致的整片 display:none；搜索时若尚无商品数据则先从 DOM 提取当前页，确保结果面板必定渲染

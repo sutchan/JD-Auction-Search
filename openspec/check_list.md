@@ -13,7 +13,7 @@
 
 - [x] shadcn 语义令牌体系（--background/--foreground/--primary 等）
 - [x] zinc 中性灰阶 + 京东红强调色
-- [x] 组件库三层架构（Atoms 8 / Molecules 4 / Organisms 3）
+- [x] 组件库三层架构（Atoms 6 / Molecules 4 / Organisms 2）
 - [x] 交互标准统一（反馈/加载/错误/空状态）
 - [x] Shadow DOM 样式内联（修复注入问题）
 - [x] 原型与源码设计令牌一致
@@ -22,8 +22,8 @@
 
 ## 无障碍检查
 
-- [x] ARIA 角色（role="tablist"/"tab"/"region"/"status"）
-- [x] ARIA 状态（aria-selected/aria-pressed/aria-live/aria-busy）
+- [x] ARIA 角色（role="region"/"status"）
+- [x] ARIA 状态（aria-live/aria-busy/aria-hidden）
 - [x] 键盘导航（Enter 搜索）
 - [x] prefers-reduced-motion 适配
 - [x] 语义化 HTML
@@ -31,10 +31,10 @@
 ## 功能检查
 
 - [x] 关键词搜索能正常工作
-- [x] Tab分类筛选有效
+- [x] Tab分类筛选已移除（v1.2.9，仅保留关键词搜索）
 - [x] API拦截功能正常
 - [x] DOM提取数据功能正常
-- [x] 插件启停功能正常
+- [x] 启停开关已移除（v1.2.6，默认常驻启用）
 - [x] 空状态提示正确显示
 - [x] 响应式布局在移动端正常
 
@@ -57,9 +57,9 @@
 
 ## 国际化检查
 
-- [x] 英文翻译完整
-- [x] 中文翻译完整
-- [x] 多语言切换正常
+- [x] 简体中文（zh_CN）文案完整
+- [x] 繁体中文（zh_TW）文案完整
+- [x] zh_CN / zh_TW 双语文案可用
 - [x] 无硬编码文本
 
 ## 构建和发布检查
