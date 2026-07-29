@@ -3,7 +3,7 @@
 ## 项目概述
 
 **项目名称**: JD-Auction-Search  
-**版本**: 1.2.14  
+**版本**: 1.3.0  
 **类型**: 浏览器扩展插件
 
 为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
@@ -23,11 +23,28 @@ JD-Auction-Search/
 │   ├── check_list.md      # 检查清单
 │   └── tasks.md           # 任务列表
 ├── src/
-│   ├── utils.js           # 工具函数
-│   ├── api.js             # API管理
-│   ├── ui.js              # UI渲染（shadcn设计语言 · Shadow DOM内联样式）
-│   ├── dom.js             # DOM处理
-│   ├── content.js         # 主内容脚本
+│   ├── utils/             # 工具函数（i18n/字段提取/格式化/响应转换/UI共享）
+│   │   ├── index.js       # 命名空间引导
+│   │   ├── i18n.js        # 国际化 getMessage（简繁中文兜底）
+│   │   ├── extract.js     # 商品字段提取（id/name/主图/价格/链接）
+│   │   ├── format.js      # escapeHtml / formatPrice
+│   │   ├── transform.js   # 响应提取 / 去重
+│   │   └── ui-shared.js   # Toast / 样式注入 / Shadow 查询
+│   ├── api/               # API 拦截与分页重放
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── interceptor.js # fetch/XHR 拦截、请求模板捕获、列表打分
+│   │   └── paginator.js   # 分页重放聚合全部分页商品
+│   ├── ui/                # UI 渲染（shadcn · Shadow DOM 内联样式）
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── styles.js      # 内联设计令牌与组件样式
+│   │   ├── toolbar.js     # 工具栏挂载与事件
+│   │   └── results.js     # 结果面板 / 克隆卡片 / 空状态
+│   ├── dom/               # DOM 观察与处理
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── observer.js    # MutationObserver 监听
+│   │   ├── extract.js     # 从 DOM 提取商品
+│   │   └── filter.js      # 原生列表过滤与卡片定位
+│   ├── content.js         # 主内容脚本（整合调度）
 │   └── styles.css         # Toast全局样式（Shadow DOM外）
 ├── _locales/              # 国际化文件（v1.2.7 起仅保留简繁中文）
 │   ├── zh_CN/messages.json

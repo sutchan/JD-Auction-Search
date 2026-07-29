@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.2.14
+// JD-Auction-Search/src/content.js v1.3.0
 // 主模块：整合所有功能
 
 (function() {
@@ -38,9 +38,6 @@
         if (this.state.searchMode) return;
         JDSDom.updateProductDisplay(this.state);
       });
-
-      // 监听扩展消息
-      this._setupMessageListener();
 
       // 自动加载商品
       setTimeout(() => this._autoLoadProducts(), 2000);
@@ -143,21 +140,6 @@
         }
       }
       this._applyFilterAndUpdate();
-    },
-
-    /**
-     * 设置消息监听
-     * @private
-     */
-    _setupMessageListener() {
-      chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        switch (request.type) {
-          case 'PRODUCTS_UPDATE':
-            this.state.products = request.products || [];
-            this._applyFilterAndUpdate();
-            break;
-        }
-      });
     },
 
     /**

@@ -1,18 +1,16 @@
 # JD Auction Search Enhanced
 
-> A browser extension that adds product keyword search and category filtering for JD Auction pages (`1paipai.jd.com/auction-list/`).
+> A browser extension that adds product keyword search for JD Auction pages (`1paipai.jd.com/auction-list/`).
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Keyword Search** | Real-time filtering of auction items by product name/ID |
-| **Tab Categories** | Switch between All / Ongoing / Upcoming statuses |
-| **API Interception Cache** | Automatically intercept JD Auction API responses and cache complete product list |
-| **DOM Extraction** | Automatically extract product data from page DOM when API is unavailable |
+| **Keyword Search** | Real-time filtering of auction items by product name/ID (cross-page aggregation) |
+| **API Interception + Pagination Replay** | Automatically intercept the page's real list requests as templates and aggregate all paginated products; search/filter works across pages |
+| **DOM Extraction Fallback** | Automatically extract product data (image/price/link) from page DOM when API is unavailable |
 | **Shadow DOM Isolation** | UI components rendered with Shadow DOM for complete style isolation |
-| **One-click Toggle** | Enable/disable the extension anytime from the top toolbar |
-| **Internationalization** | Multi-language support (11 languages: Chinese, English, Spanish, Arabic, French, Portuguese, German, Japanese, Korean, Russian, Traditional Chinese) |
+| **Internationalization** | Simplified / Traditional Chinese (zh_CN / zh_TW) |
 | **Accessibility** | ARIA labels, keyboard navigation, semantic HTML |
 | **Animation Optimization** | Supports prefers-reduced-motion for reduced animations |
 
@@ -38,9 +36,9 @@ This project adopts the **shadcn design language** (light minimalist), using zin
 
 ### Component Library (3-Layer Architecture)
 
-**Atoms (8)**: Button, Input, Badge, Switch, Tabs, Separator, Skeleton, Toast
+**Atoms (6)**: Button, Input, Badge, Separator, Skeleton, Toast
 **Molecules (4)**: SearchBar, Card, Alert, EmptyState
-**Organisms (3)**: AuctionToolbar, ProductGrid, FilterTabs
+**Organisms (2)**: AuctionToolbar, ProductGrid
 
 ### Interaction Standards
 
@@ -56,7 +54,7 @@ See [prototype/index.html](prototype/index.html) for the high-fidelity interacti
 ```
 JD-Auction-Search/
 ├── manifest.json          # Extension configuration (Manifest V3)
-├── background.js          # Background script (state management)
+├── background.js          # Background script (lifecycle hook)
 ├── metadata.json          # Project metadata
 ├── CHANGELOG.md           # Change log
 ├── openspec/              # Specification documents
@@ -66,24 +64,32 @@ JD-Auction-Search/
 ├── prototype/             # Design prototype directory
 │   └── index.html         # High-fidelity prototype (design system + components + patterns)
 ├── src/
-│   ├── utils.js           # Utility functions
-│   ├── api.js             # API management
-│   ├── ui.js              # UI rendering (shadcn design language · Shadow DOM inline styles)
-│   ├── dom.js             # DOM handling
-│   ├── content.js         # Main content script
+│   ├── utils/             # Utility functions (i18n / field extraction / formatting / response transform / UI shared)
+│   │   ├── index.js       # Namespace bootstrap
+│   │   ├── i18n.js        # Internationalization getMessage (zh_CN / zh_TW fallback)
+│   │   ├── extract.js     # Product field extraction (id/name/image/price/url)
+│   │   ├── format.js      # escapeHtml / formatPrice
+│   │   ├── transform.js   # Response extraction / deduplication
+│   │   └── ui-shared.js   # Toast / style injection / Shadow query
+│   ├── api/               # API interception and pagination replay
+│   │   ├── index.js       # Namespace bootstrap + shared state
+│   │   ├── interceptor.js # fetch/XHR interception, request template capture, list scoring
+│   │   └── paginator.js   # Pagination replay aggregates all paged products
+│   ├── ui/                # UI rendering (shadcn · Shadow DOM inline styles)
+│   │   ├── index.js       # Namespace bootstrap + shared state
+│   │   ├── styles.js      # Inline design tokens and component styles
+│   │   ├── toolbar.js     # Toolbar mount and events
+│   │   └── results.js     # Result panel / cloned cards / empty state
+│   ├── dom/               # DOM observation and handling
+│   │   ├── index.js       # Namespace bootstrap + shared state
+│   │   ├── observer.js    # MutationObserver listener
+│   │   ├── extract.js     # Extract products from DOM
+│   │   └── filter.js      # Native list filtering and card location
+│   ├── content.js         # Main content script (orchestration)
 │   └── styles.css         # Toast global styles (outside Shadow DOM)
-├── _locales/              # Internationalization files
-│   ├── en/messages.json
+├── _locales/              # Internationalization files (Simplified / Traditional Chinese)
 │   ├── zh_CN/messages.json
-│   ├── zh_TW/messages.json
-│   ├── es/messages.json
-│   ├── ar/messages.json
-│   ├── fr/messages.json
-│   ├── pt_BR/messages.json
-│   ├── de/messages.json
-│   ├── ja/messages.json
-│   ├── ko/messages.json
-│   └── ru/messages.json
+│   └── zh_TW/messages.json
 ├── package.json           # Project configuration (build scripts)
 ├── build.js               # Build script
 └── icons/                 # Extension icons directory (optional)
@@ -123,7 +129,6 @@ Can be generated using [Favicon Generator](https://favicon.io/) or any icon tool
 1. Visit [JD Auction](https://1paipai.jd.com/auction-list/)
 2. A red search bar will automatically appear at the top of the page
 3. Enter keywords, click "Search" or press Enter
-4. Support tab switching for category filtering
 
 ## Build and Package
 
@@ -134,7 +139,7 @@ npm install
 npm run build
 ```
 
-This will generate a `jd-auction-search-v1.2.14.zip` file in the project root directory, ready for release.
+This will generate a `jd-auction-search-v1.3.0.zip` file in the project root directory, ready for release.
 
 ## Core Implementation
 
@@ -192,11 +197,11 @@ Status values:
 
 ## Security Features
 
-- **Message Validation**: All chrome.runtime.onMessage verifies sender origin
-- **URL Whitelist**: Only allows access to jd.com domains
+- **Least Privilege**: Only declares `host_permissions` (jd.com); no unrelated permissions such as storage / activeTab
+- **URL Whitelist**: Only allows access to jd.com domains; protocol whitelist validation for product image/link
 - **HTTPS Enforcement**: All API requests use HTTPS
-- **Parameter Filtering**: API parameters filtered by whitelist
-- **Input Validation**: Product data validation prevents abnormal input
+- **Parameter Filtering**: Pagination replay only replaces whitelisted pagination parameters
+- **Input Validation**: Product field extraction and HTML escaping prevent XSS / invalid scheme injection
 
 ## Tech Stack
 

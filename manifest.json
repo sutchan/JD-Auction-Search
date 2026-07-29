@@ -1,13 +1,10 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.2.14",
+  "version": "1.3.0",
   "description": "__MSG_extensionDescription__",
   "default_locale": "zh_CN",
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
+  "permissions": [],
   "host_permissions": [
     "*://1paipai.jd.com/*",
     "*://*.jd.com/*"
@@ -19,10 +16,23 @@
     {
       "matches": ["*://1paipai.jd.com/*"],
       "js": [
-        "src/utils.js",
-        "src/api.js",
-        "src/ui.js",
-        "src/dom.js",
+        "src/utils/index.js",
+        "src/utils/i18n.js",
+        "src/utils/extract.js",
+        "src/utils/format.js",
+        "src/utils/transform.js",
+        "src/utils/ui-shared.js",
+        "src/api/index.js",
+        "src/api/interceptor.js",
+        "src/api/paginator.js",
+        "src/ui/index.js",
+        "src/ui/styles.js",
+        "src/ui/toolbar.js",
+        "src/ui/results.js",
+        "src/dom/index.js",
+        "src/dom/observer.js",
+        "src/dom/extract.js",
+        "src/dom/filter.js",
         "src/content.js"
       ],
       "css": [],

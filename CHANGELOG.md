@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.3.0
+
+### Refactor
+- 源码模块化拆分：将 utils/api/ui/dom 四个超过 200 行的单体文件拆分为按职责划分子模块（共 17 个文件），保持 content_scripts 经典脚本顺序加载与 window 命名空间挂载，运行时行为不变
+- 各模块以 `index.js` 引导命名空间，子模块自挂载到 `JDSUtils` / `JDSApi` / `JDSUI` / `JDSDom`，manifest 同步更新脚本清单
+
+### Fixes
+- 修复 `_getInlineStyles` 中 `:host(.jds-inline)` 规则被错误嵌套在 `:host {}` 声明块内部、导致内联定位样式失效的 CSS 语法错误（现为独立兄弟规则）
+- 修复 `ui.renderSkeletons` 调用未定义的 `_ensureGrid` 导致的潜在 TypeError，补全该方法
+
+### Cleanup
+- 清理死代码：api.js 的 `API_BASE_URL` / `API_LIST_ENDPOINT` / `loadProductList`；utils.js 的 9 个废弃 i18n 键（logoText / tabAll / tabOngoing / tabUpcoming / resultCount / loading / enabled / disabled / enabledLocal）；background.js 的 `UPDATE_CACHE` / `GET_CACHE` 消息处理；content.js 无发送方的 `PRODUCTS_UPDATE` 监听；manifest 未使用的 `storage` / `activeTab` 权限
+- 对齐文档与原型：README/README_EN 功能与结构说明同步当前模块结构；prototype 移除已废弃开关的死样式并同步版本徽标
+
 ## v1.2.14
 
 ### Fixes

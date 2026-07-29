@@ -1,24 +1,22 @@
 # 京东夺宝搜索增强
 
-> 为京东夺宝页面 (`1paipai.jd.com/auction-list/`) 增加商品关键词搜索和分类过滤功能的浏览器插件。
+> 为京东夺宝页面 (`1paipai.jd.com/auction-list/`) 增加商品关键词搜索功能的浏览器插件。
 
 ## 功能特性
 
 | 功能 | 说明 |
 |------|------|
-| **关键词搜索** | 输入商品名称/ID 实时过滤夺宝商品 |
-| **Tab 分类** | 全部 / 正在夺宝 / 即将开始 三种状态切换 |
-| **API 拦截缓存** | 自动拦截京东夺宝 API 响应，缓存完整商品列表 |
-| **DOM 提取** | API 不可用时自动从页面 DOM 提取商品数据 |
+| **关键词搜索** | 输入商品名称/ID 实时过滤夺宝商品（跨页聚合） |
+| **API 拦截 + 分页重放** | 自动拦截页面真实列表请求作模板，跨页聚合全部商品，搜索/筛选结果跨页生效 |
+| **DOM 提取兜底** | API 不可用时自动从页面 DOM 提取商品数据（主图/价格/链接） |
 | **Shadow DOM 隔离** | UI 组件使用 Shadow DOM 渲染，完全隔离样式 |
-| **一键启停** | 顶部工具栏可随时启用/禁用插件 |
-| **多语言支持** | 支持 11 种语言（中文、英文、西班牙文、阿拉伯文、法文、葡萄牙文、德文、日文、韩文、俄文、繁体中文） |
+| **多语言支持** | 简体中文 / 繁体中文（zh_CN / zh_TW） |
 | **无障碍支持** | ARIA 标签、键盘导航、语义化 HTML |
 | **动画优化** | 支持 prefers-reduced-motion 减少动画 |
 
 ## 设计系统
 
-本项目采用 **shadcn 设计语言**（浅色 / 深色双主题），以 zinc 中性灰阶 + 京东红作为唯一强调色，建立语义化令牌体系确保 UI 一致性；并通过容器查询（@container）实现演示框自适应的响应式布局。
+本项目采用 **shadcn 设计语言**（扩展当前为浅色主题），以 zinc 中性灰阶 + 京东红作为唯一强调色，建立语义化令牌体系确保 UI 一致性；原型 (`prototype/index.html`) 额外预演深色模式与容器查询响应式，可作为后续实装的参考。
 
 ### 语义令牌（Semantic Tokens）
 
@@ -38,9 +36,9 @@
 
 ### 组件库（三层架构）
 
-**基础组件（Atoms · 8）**：Button、Input、Badge、Switch、Tabs、Separator、Skeleton、Toast
+**基础组件（Atoms · 6）**：Button、Input、Badge、Separator、Skeleton、Toast
 **复合组件（Molecules · 4）**：SearchBar、Card、Alert、EmptyState
-**业务组件（Organisms · 3）**：AuctionToolbar、ProductGrid、FilterTabs
+**业务组件（Organisms · 2）**：AuctionToolbar、ProductGrid
 
 ### 交互标准
 
@@ -56,7 +54,7 @@
 ```
 JD-Auction-Search/
 ├── manifest.json          # 扩展配置 (Manifest V3)
-├── background.js          # 后台脚本（状态管理）
+├── background.js          # 后台脚本（生命周期钩子）
 ├── metadata.json          # 项目元数据
 ├── CHANGELOG.md           # 变更日志
 ├── openspec/              # 规范文档目录
@@ -66,24 +64,32 @@ JD-Auction-Search/
 ├── prototype/             # 设计原型目录
 │   └── index.html         # 高保真可交互原型（含设计系统+组件库+交互标准）
 ├── src/
-│   ├── utils.js           # 工具函数
-│   ├── api.js             # API 管理
-│   ├── ui.js              # UI 渲染（shadcn 设计语言 · Shadow DOM 内联样式）
-│   ├── dom.js             # DOM 处理
-│   ├── content.js         # 主内容脚本
+│   ├── utils/             # 工具函数（i18n / 字段提取 / 格式化 / 响应转换 / UI 共享）
+│   │   ├── index.js       # 命名空间引导
+│   │   ├── i18n.js        # 国际化 getMessage（简繁中文兜底）
+│   │   ├── extract.js     # 商品字段提取（id/name/主图/价格/链接）
+│   │   ├── format.js      # escapeHtml / formatPrice
+│   │   ├── transform.js   # 响应提取 / 去重
+│   │   └── ui-shared.js   # Toast / 样式注入 / Shadow 查询
+│   ├── api/               # API 拦截与分页重放
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── interceptor.js # fetch/XHR 拦截、请求模板捕获、列表打分
+│   │   └── paginator.js   # 分页重放聚合全部分页商品
+│   ├── ui/                # UI 渲染（shadcn · Shadow DOM 内联样式）
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── styles.js      # 内联设计令牌与组件样式
+│   │   ├── toolbar.js     # 工具栏挂载与事件
+│   │   └── results.js     # 结果面板 / 克隆卡片 / 空状态
+│   ├── dom/               # DOM 观察与处理
+│   │   ├── index.js       # 命名空间引导 + 共享状态
+│   │   ├── observer.js    # MutationObserver 监听
+│   │   ├── extract.js     # 从 DOM 提取商品
+│   │   └── filter.js      # 原生列表过滤与卡片定位
+│   ├── content.js         # 主内容脚本（整合调度）
 │   └── styles.css         # Toast 全局样式（Shadow DOM 外）
-├── _locales/              # 国际化文件目录
-│   ├── en/messages.json
+├── _locales/              # 国际化文件目录（简体 / 繁体中文）
 │   ├── zh_CN/messages.json
-│   ├── zh_TW/messages.json
-│   ├── es/messages.json
-│   ├── ar/messages.json
-│   ├── fr/messages.json
-│   ├── pt_BR/messages.json
-│   ├── de/messages.json
-│   ├── ja/messages.json
-│   ├── ko/messages.json
-│   └── ru/messages.json
+│   └── zh_TW/messages.json
 ├── package.json           # 项目配置（构建脚本）
 ├── build.js               # 构建脚本
 └── icons/                 # 插件图标目录（可选）
@@ -123,7 +129,6 @@ JD-Auction-Search/
 1. 访问 [京东夺宝](https://1paipai.jd.com/auction-list/)
 2. 页面顶部自动出现红色搜索栏
 3. 输入关键词，点击"搜索"或按 Enter
-4. 支持 Tab 切换分类筛选
 
 ## 构建打包
 
@@ -134,7 +139,7 @@ npm install
 npm run build
 ```
 
-这将在项目根目录下生成 `jd-auction-search-v1.2.14.zip` 文件，可直接用于发布。
+这将在项目根目录下生成 `jd-auction-search-v1.3.0.zip` 文件，可直接用于发布。
 
 ## 核心实现原理
 
@@ -192,11 +197,11 @@ observer.observe(container, { childList: true, subtree: true });
 
 ## 安全特性
 
-- **消息验证**: 所有 chrome.runtime.onMessage 验证发送者来源
-- **URL 白名单**: 仅允许访问 jd.com 域名
+- **最小权限**: 仅声明 `host_permissions`（jd.com），不申请 storage / activeTab 等无关权限
+- **URL 白名单**: 仅允许访问 jd.com 域名，并对商品主图/链接做协议白名单校验
 - **HTTPS 强制**: 所有 API 请求使用 HTTPS
-- **参数过滤**: API 参数经过白名单过滤
-- **输入验证**: 商品数据验证防止异常输入
+- **参数过滤**: API 分页重放仅替换白名单内的分页参数
+- **输入验证**: 商品字段提取与 HTML 转义，防止 XSS / 非法 scheme 注入
 
 ## 技术栈
 
