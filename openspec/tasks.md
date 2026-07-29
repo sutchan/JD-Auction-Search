@@ -2,6 +2,14 @@
 
 ## 已完成任务
 
+### v1.3.0
+- [x] 源码模块化拆分：utils/api/ui/dom 四个超 200 行单体文件拆分为 17 个子模块（index 引导 + 职责子模块），manifest content_scripts 同步更新，运行时行为不变
+- [x] 修复 CSS 语法错误：ui 内联样式中 `:host(.jds-inline)` 被错误嵌套在 `:host {}` 内导致内联定位失效，调整为独立兄弟规则
+- [x] 修复潜在 TypeError：补全 `ui._ensureGrid`（renderSkeletons 此前引用未定义方法）
+- [x] 清理死代码：api 的 API_BASE_URL/API_LIST_ENDPOINT/loadProductList、utils 的 9 个废弃 i18n 键、background 的 UPDATE_CACHE/GET_CACHE 处理、content 的 PRODUCTS_UPDATE 无发送方监听、manifest 未使用的 storage/activeTab 权限
+- [x] 对齐文档与原型：README/README_EN 功能/结构/安全说明同步；prototype 移除废弃开关死样式并同步版本徽标
+- [x] 功能回归测试：逻辑级注入测试 7/7 通过，0 运行期异常
+
 ### v1.2.12
 - [x] 修复搜索结果不显示：ui.js renderProducts 克隆京东列表容器时显式强制可见 grid 布局（覆盖 display:none 懒加载态）；content.js _applyFilterAndUpdate 搜索时若 products 为空先 DOM 提取兜底
 - [x] 版本升至 v1.2.12，同步 manifest/metadata/package、各文件头、README、prototype、CHANGELOG/spec/tasks
