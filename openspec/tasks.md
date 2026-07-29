@@ -2,6 +2,13 @@
 
 ## 已完成任务
 
+### v1.3.3
+- [x] 彻底修复“搜索结果不显示”：克隆卡片在真实页面除类级 display:none 外，京东虚拟列表还会把克隆卡片内容高度压为 0（display 非 none），v1.3.2 兜底无法覆盖；现统一扩展自带网格容器 + 实测可见性校验（display:none 或 height===0 时）自动回退内联样式自带卡片，确保跨页结果稳定可见
+
+### v1.3.2
+- [x] 修复“搜索后显示空白”：克隆原生卡片仅清除了内联 display:none，类级隐藏（京东 CSS 懒加载/隐藏态变体）未被覆盖；现挂载后用 getComputedStyle 检测，确为 none 时兜底为 block
+- [x] 增强空状态可见性：浅色 DOM 浮层补充背景/边框/内边距/阴影
+
 ### v1.3.1
 - [x] 代码审查修复：拆分 styles.js(285行)→tokens.js + components.js + styles.js 聚合器，results.js(360行)→results.js(面板生命周期) + products.js(商品渲染) + skeleton.js(骨架屏)，manifest content_scripts 同步引入新模块
 - [x] 安全修复：移除 fallback 卡片内联 `onerror` 事件处理器，改为属性绑定（`img.onerror`），规避 MV3 默认 CSP 对 `on*` 内联属性的拦截

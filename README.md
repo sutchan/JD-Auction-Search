@@ -143,7 +143,7 @@ npm install
 npm run build
 ```
 
-这将在项目根目录下生成 `jd-auction-search-v1.3.1.zip` 文件，可直接用于发布。
+这将在项目根目录下生成 `jd-auction-search-v1.3.3.zip` 文件，可直接用于发布。
 
 ## 核心实现原理
 

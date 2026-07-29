@@ -1,5 +1,7 @@
-// JD-Auction-Search/src/ui/products.js v1.3.1
-// 商品渲染：克隆原生卡片渲染搜索结果、克隆填充、回退自带卡片
+// JD-Auction-Search/src/ui/products.js v1.3.3
+// 商品渲染：优先克隆原生卡片渲染搜索结果（视觉一致），并对克隆卡片做实测可见性兜底，
+// 当京东 class 级 CSS 导致克隆卡片 display:none 或零高度（虚拟列表/懒加载）时，
+// 自动回退为扩展自带的内联样式卡片，确保搜索结果始终可见。
 // 面板生命周期见 results.js，骨架屏见 skeleton.js
 
 (function(global) {
@@ -9,8 +11,8 @@
 
   /**
    * 渲染商品列表到结果面板
-   * 优先克隆页面上的京东原生商品卡片（含其 grid 容器），使搜索结果外观与原始页面完全一致；
-   * 仅当页面无原生卡片模板时，回退为扩展自带卡片。
+   * 优先克隆页面上的京东原生商品卡片（视觉一致）；对每张克隆卡片做实测可见性校验，
+   * 不可见时回退为扩展自带卡片。仅当页面无原生卡片模板时，统一使用扩展自带卡片。
    * @param {Array} products - 商品数组
    */
   JDSUI.renderProducts = function renderProducts(products) {
@@ -25,48 +27,53 @@
     }
     this.hideEmptyState();
 
+    // 统一用扩展自带网格容器（内联样式，避免继承京东列表容器的 flex/!important 等布局干扰）
+    const grid = document.createElement('div');
+    grid.className = 'jds-product-grid';
+    grid.setAttribute('aria-live', 'polite');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:16px 24px 40px;';
+    panel.appendChild(grid);
+    this.gridElement = grid;
+
     const template = global.JDSDom.getFirstProductCard();
-    if (template) {
-      // 克隆京东原生列表容器（保留其 grid 布局类名，使卡片样式与原始页面一致）
-      // 关键：显式强制为可见 grid 布局，避免继承京东"未展开/懒加载"状态导致的整片 display:none 不显示
-      const listWrapper = template.parentElement;
-      const grid = listWrapper ? listWrapper.cloneNode(false) : document.createElement('div');
-      grid.removeAttribute('id');
-      // 移除容器级懒加载/隐藏类，强制可见
-      grid.classList.remove('lazy-enter', 'lazyload', 'hidden', 'not-visible');
-      grid.style.display = 'grid';
-      grid.style.opacity = '1';
-      grid.style.visibility = 'visible';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
-      grid.style.gap = '12px';
-      grid.style.padding = '16px 24px 40px';
-      grid.innerHTML = '';
-      products.forEach((p) => {
+    const U = global.JDSUtils;
+
+    products.forEach((p) => {
+      let card = null;
+
+      // 首选：克隆京东原生卡片（视觉一致），但需实测确认其真正可见
+      if (template) {
         try {
-          const card = template.cloneNode(true);
-          // 关键修复：克隆体会继承 hideNativeProducts 设置的内联 display:none，
-          // 必须显式清除，否则卡片本身不可见（grid 容器可见但子卡片整片空白，表现为"搜索不显示结果"）
-          card.style.display = '';
-          this._fillNativeCard(card, p);
-          grid.appendChild(card);
+          const cloned = template.cloneNode(true);
+          // 清除 hideNativeProducts 写入的内联 display:none（克隆体会继承），还原为卡片类本身定义的可见状态
+          cloned.style.display = '';
+          this._fillNativeCard(cloned, p);
+          // 先挂载再实测：克隆卡片可能因京东 class 级 CSS（display:none 或零高度/虚拟列表）
+          // 在结果面板中不可见，此时回退为扩展自带卡片
+          grid.appendChild(cloned);
+          let visible = true;
+          try {
+            if (global.getComputedStyle && global.getComputedStyle(cloned).display === 'none') visible = false;
+            const rect = cloned.getBoundingClientRect();
+            if (!rect || rect.height === 0) visible = false;
+          } catch (e) {}
+          if (visible) {
+            card = cloned;
+          } else {
+            const own = this._buildOwnCard(p);
+            grid.replaceChild(own, cloned);
+            card = own;
+          }
         } catch (e) {
-          // 单张卡片渲染失败不影响整体结果列表
+          // 单张卡片克隆失败，回退扩展自带卡片
+          card = this._buildOwnCard(p);
         }
-      });
-      panel.appendChild(grid);
-    } else {
-      // 回退：页面无原生卡片模板时，使用扩展自带卡片（内联样式，避免依赖 Shadow CSS）
-      const grid = document.createElement('div');
-      grid.className = 'jds-product-grid';
-      grid.setAttribute('aria-live', 'polite');
-      grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
-      grid.style.gap = '12px';
-      grid.style.padding = '16px 24px 40px';
-      panel.appendChild(grid);
-      this.gridElement = grid;
-      this._renderFallbackCards(products);
-    }
+      } else {
+        card = this._buildOwnCard(p);
+      }
+
+      if (card && card !== grid.lastChild) grid.appendChild(card);
+    });
   };
 
   /**
@@ -137,31 +144,62 @@
   };
 
   /**
-   * 回退渲染：页面无原生卡片模板时，使用扩展自带卡片（内联样式，独立于 Shadow CSS）
+   * 构建扩展自带商品卡片（内联样式，独立于京东 CSS，保证在任何页面都可见）
+   * 作为克隆卡片不可见时的兜底渲染，并用于页面无原生卡片模板的场景
    * @private
+   * @returns {HTMLElement}
    */
-  JDSUI._renderFallbackCards = function _renderFallbackCards(products) {
-    products.forEach((p) => {
-      const U = global.JDSUtils;
-      const name = U.escapeHtml(U.getProductName(p));
-      const priceText = U.formatPrice(U.getProductPrice(p));
-      const image = U.getProductImage(p);
+  JDSUI._buildOwnCard = function _buildOwnCard(p) {
+    const U = global.JDSUtils;
+    const name = U.escapeHtml(U.getProductName(p) || '');
+    const price = U.formatPrice(U.getProductPrice(p));
+    const image = U.getProductImage(p);
+    const url = U.getProductUrl(p);
 
-      const card = document.createElement('div');
-      card.style.cssText = 'display:inline-block;width:180px;margin:8px;vertical-align:top;border:1px solid #e4e4e7;border-radius:10px;overflow:hidden;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;';
-      const imgHtml = image
-        ? `<img src="${U.escapeHtml(image)}" alt="${name}" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:120px;object-fit:cover;display:block" />`
-        : `<div style="width:100%;height:120px;display:grid;place-items:center;background:#f4f4f5;font-size:40px">📦</div>`;
-      card.innerHTML = `
-        ${imgHtml}
-        <div style="padding:10px">
-          <div style="font-size:13px;color:#18181b;line-height:1.4;max-height:36px;overflow:hidden">${name}</div>
-          <div style="margin-top:6px;color:#e1251b;font-weight:600;font-size:15px">¥${priceText}</div>
-        </div>`;
-      // MV3 CSP 禁止内联 on* 事件处理器，改为属性绑定错误回退
-      const imgEl = card.querySelector('img');
-      if (imgEl) imgEl.onerror = () => { imgEl.style.visibility = 'hidden'; };
-      this.gridElement.appendChild(card);
-    });
+    const card = document.createElement('a');
+    card.className = 'jds-result-card';
+    card.href = url || 'javascript:void(0)';
+    if (url) {
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+    }
+    card.style.cssText = 'display:flex;flex-direction:column;text-decoration:none;color:#18181b;' +
+      'background:#fff;border:1px solid #e4e4e7;border-radius:12px;overflow:hidden;' +
+      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;' +
+      'transition:box-shadow .15s ease,transform .15s ease;';
+    card.addEventListener('mouseenter', () => { card.style.boxShadow = '0 8px 24px -8px rgba(24,24,27,.18)'; });
+    card.addEventListener('mouseleave', () => { card.style.boxShadow = ''; });
+
+    const imgWrap = document.createElement('div');
+    imgWrap.style.cssText = 'width:100%;height:180px;background:#f4f4f5;display:flex;align-items:center;' +
+      'justify-content:center;overflow:hidden;font-size:40px;color:#d4d4d8;';
+    if (image) {
+      const img = document.createElement('img');
+      img.src = image;
+      img.alt = name;
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      // 属性方式绑定错误回退，规避 MV3 CSP 对 on* 属性的拦截
+      img.onerror = () => { imgWrap.textContent = '\u{1F4E6}'; };
+      imgWrap.appendChild(img);
+    } else {
+      imgWrap.textContent = '\u{1F4E6}';
+    }
+    card.appendChild(imgWrap);
+
+    const body = document.createElement('div');
+    body.style.cssText = 'padding:12px;display:flex;flex-direction:column;gap:6px;';
+    const titleEl = document.createElement('div');
+    titleEl.style.cssText = 'font-size:13px;line-height:1.4;color:#18181b;max-height:36px;overflow:hidden;';
+    titleEl.textContent = name;
+    const priceEl = document.createElement('div');
+    priceEl.style.cssText = 'color:#e1251b;font-weight:600;font-size:16px;';
+    priceEl.textContent = '¥' + price;
+    body.appendChild(titleEl);
+    body.appendChild(priceEl);
+    card.appendChild(body);
+
+    return card;
   };
 })(window);

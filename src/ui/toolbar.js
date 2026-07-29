@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.3.1
+// JD-Auction-Search/src/ui/toolbar.js v1.3.3
 // 工具栏：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）、事件绑定
 
 (function(global) {

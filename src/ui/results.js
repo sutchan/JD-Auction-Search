@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.3.1
+// JD-Auction-Search/src/ui/results.js v1.3.3
 // 结果面板生命周期：宿主挂载、面板定位、展示/隐藏、空状态、销毁
 // 商品渲染见 products.js，骨架屏见 skeleton.js
 
@@ -24,6 +24,8 @@
       position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%);
       display: flex; flex-direction: column; align-items: center; gap: 12px;
       color: #71717a; text-align: center;
+      background: #fff; border: 1px solid #e4e4e7; border-radius: 10px;
+      padding: 48px 64px; box-shadow: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     }
     #jds-results-host .jds-empty-icon svg { width: 48px; height: 48px; color: #d4d4d8; }
