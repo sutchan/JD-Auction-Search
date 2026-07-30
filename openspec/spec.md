@@ -3,7 +3,7 @@
 ## 项目概述
 
 **项目名称**: JD-Auction-Search  
-**版本**: 1.3.5  
+**版本**: 1.4.0 
 **类型**: 浏览器扩展插件
 
 为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
@@ -40,7 +40,9 @@ JD-Auction-Search/
 │   │   ├── components.js   # 组件样式（SearchBar/Grid/Card/Badge/Empty/Skeleton）
 │   │   ├── styles.js      # 内联样式聚合（令牌 + 工具栏 + 组件）
 │   │   ├── toolbar.js     # 工具栏挂载与事件
-│   │   ├── results.js     # 结果面板生命周期（挂载/定位/空状态/销毁）
+│   │   ├── results/           # 结果面板
+│   │   │   ├── host.js        # 宿主挂载/面板定位/网格容器
+│   │   │   └── results.js     # 公开 API（展示/隐藏/骨架/空状态/销毁）
 │   │   ├── products.js    # 商品渲染（克隆卡片 / 填充 / 回退卡片）
 │   │   └── skeleton.js    # 骨架屏（网格容器 / shimmer 占位）
 │   ├── dom/               # DOM 观察与处理
@@ -48,7 +50,10 @@ JD-Auction-Search/
 │   │   ├── observer.js    # MutationObserver 监听
 │   │   ├── extract.js     # 从 DOM 提取商品
 │   │   └── filter.js      # 原生列表过滤与卡片定位
-│   ├── content.js         # 主内容脚本（整合调度）
+│   ├── content/            # 主内容脚本（拆分后）
+│   │   ├── enhancer.js     # 增强器：状态/初始化/生命周期/页面类型
+│   │   ├── search.js       # 搜索编排：响应处理/过滤/跨页加载
+│   │   └── content.js      # 入口：引导增强器初始化
 │   └── styles.css         # Toast全局样式（Shadow DOM外）
 ├── _locales/              # 国际化文件（v1.2.7 起仅保留简繁中文）
 │   ├── zh_CN/messages.json
@@ -148,14 +153,16 @@ JD-Auction-Search/
 
 ## 版本历史
 
-### 待发布改进（2026-07-30，未升版）
-- 修复跨页搜索失效（critical）：`paginator.js` 末页判定硬编码 50 条阈值，京东拍卖每页仅 20~30 条，导致第 1 页抓取后立刻停止翻页、跨页搜索失效；改为以首页实际条数 `pageSize` 为基准，仅「非首页且条数 < pageSize（真正末页）」或「整页重复」时停止
-- 优化结果面板宽度对齐原生列表：新增 `dom.getProductListContainer`；`results._positionResultsPanel` 测量原生容器设 `left`/`width` 与原始页一致，滚动/缩放时重算
-- 详情页搜索保持全局一致：`content._isDetailPage()` 仅非详情页走 DOM 兜底，详情页只用全局聚合 `state.products`，避免只搜当前详情页
-- `transform.extractProductsFromResponse` 有界递归（深度 4）取「元素最多」的商品数组，兼容 `{data:{list}}` 等嵌套响应，排除面包屑/分类误判
-- `toolbar` 搜索输入 120ms 防抖，减少全量重渲染
-- `products.renderProducts` 单次渲染上限 200 条，超出显示「已显示前 N 条，共 M 条」提示
-- 骨架屏接线：新增 `JDSUI.showLoading()`，`init` 提前置 `isLoading`，搜索态无结果且加载中显示骨架屏
+### v1.4.0
+- 拆分超 200 行模块：`content.js`(218) 拆分为 `content.js`(入口) + `content/enhancer.js`(增强器) + `content/search.js`(搜索编排)；`results.js`(230) 拆分为 `results.js`(公开 API) + `results/host.js`(宿主/定位/网格)，`manifest` content_scripts 同步
+- 国际化修复：补齐 `toastNetworkError`/`toastRequestError` 翻译键并清除语言包死键（logoText/tabAll/tabOngoing 等），扩展可翻译 Toast 键集合，chrome.i18n 不可用时简繁中文文案仍全覆盖
+- 构建增强：`build.js` 新增构建产物预览、zh-TW 本地化输出（`--tw`）、Firefox 字符串转义（`--firefox`），统一 `path` 跨平台路径处理
+- 修复跨页搜索失效（critical）：`paginator.js` 末页判定以首页实际 `pageSize` 为基准，仅「非首页且条数 < pageSize（真正末页）」或「整页重复」时停止
+- 优化结果面板宽度对齐原生列表：新增 `dom.getProductListContainer`，滚动/缩放时重算
+- 详情页搜索保持全局一致：仅非详情页走 DOM 兜底，详情页只用全局聚合 `state.products`
+- `transform.extractProductsFromResponse` 有界递归（深度 4）取「元素最多」数组，兼容嵌套响应
+- `toolbar` 搜索输入 120ms 防抖；`products.renderProducts` 单次渲染上限 200 条
+- 骨架屏接线：新增 `JDSUI.showLoading()`，搜索态加载中显示骨架屏
 - `ui-shared` Toast 文案经 `escapeHtml` 转义后注入，纵深防御 XSS
 
 ### v1.3.5
