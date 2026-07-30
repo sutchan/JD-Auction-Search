@@ -57,7 +57,6 @@
   JDSUI._buildOwnCard = function _buildOwnCard(p) {
     const U = global.JDSUtils;
     const name = U.escapeHtml(U.getProductName(p) || '');
-    const price = U.formatPrice(U.getProductPrice(p));
     const image = U.getProductImage(p);
     const url = U.getProductUrl(p);
 
@@ -95,22 +94,40 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 价格行：现价（红色衬线大字）+ 原价（高于现价时内联划线展示，避免与出价人数混在同一行）
+    // 价格行：有出价显示「现价」(currentPrice)，未开拍显示「起拍价」(startPrice)，
+    // 两者显式标注前缀，避免把起拍价与封顶价(cappedPrice)误混为同一类价格
+    const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
+    const isStarting = !(rawCurrent != null && rawCurrent > 0);
+    const current = isStarting ? U.getProductPrice(p) : rawCurrent;
+
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
+    if (isStarting) {
+      const tag = document.createElement('small');
+      tag.className = 'jds-price-tag';
+      tag.textContent = '起拍';
+      priceEl.appendChild(tag);
+    }
     const yen = document.createElement('small');
     yen.textContent = '¥';
     const amount = document.createElement('span');
-    amount.textContent = price;
+    amount.textContent = U.formatPrice(current);
     priceEl.appendChild(yen);
     priceEl.appendChild(document.createTextNode(' '));
     priceEl.appendChild(amount);
 
-    const original = U.getProductOriginalPrice(p);
-    if (original && original > Number(price)) {
+    // 封顶价(cappedPrice)：有出价时作「原价」划线参考；未开拍时标「封顶」且不划线，
+    // 明确它是价格上限而非折扣原价，与起拍价区分开
+    const capped = U.getProductOriginalPrice(p);
+    if (capped && capped > current) {
       const origEl = document.createElement('span');
       origEl.className = 'jds-product-orig';
-      origEl.textContent = '¥' + U.formatPrice(original);
+      if (isStarting) {
+        origEl.textContent = '封顶 ¥' + U.formatPrice(capped);
+        origEl.classList.add('jds-product-cap');
+      } else {
+        origEl.textContent = '¥' + U.formatPrice(capped);
+      }
       priceEl.appendChild(origEl);
     }
     body.appendChild(priceEl);

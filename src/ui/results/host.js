@@ -103,10 +103,12 @@
       font-variant-numeric: tabular-nums;
     }
     #jds-results-host .jds-product-price small { font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
+    #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
     #jds-results-host .jds-product-price .jds-product-orig {
       margin-left: 8px; font-size: 12px; color: var(--muted-foreground);
       text-decoration: line-through; vertical-align: middle;
     }
+    #jds-results-host .jds-product-price .jds-product-cap { text-decoration: none; }
     #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; }
     #jds-results-host .jds-product-bid {
       display: inline-flex; align-items: center; padding: 2px 8px;

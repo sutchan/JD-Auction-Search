@@ -38,6 +38,14 @@ function makeEl() {
     attachShadow: () => makeEl(),
     querySelector: () => null
   };
+  // textContent 支持：叶子节点直接存文本；容器节点聚合子节点文本
+  Object.defineProperty(el, 'textContent', {
+    get() {
+      if (!this.childNodes || this.childNodes.length === 0) return this._text || '';
+      return this.childNodes.map(c => (c && c.textContent != null) ? c.textContent : '').join('');
+    },
+    set(v) { this._text = String(v); this.childNodes = []; }
+  });
   return el;
 }
 sandbox.document = {
@@ -155,6 +163,14 @@ ok('详情链接=夺宝岛 auction-detail', U.getProductUrl(sample) ===
 ok('现价 null→起拍价', U.getProductPrice({ currentPrice: null, startPrice: 1.0 }) === 1);
 // 无 cappedPrice 时兼容回退 maxPrice
 ok('无 cappedPrice→maxPrice', U.getProductOriginalPrice({ maxPrice: 199, currentPrice: 50 }) === 199);
+
+console.log('\n[product card] 起拍价/封顶价标注');
+const cardBid = UI._buildOwnCard({ id: 1, name: 'x', currentPrice: 46, cappedPrice: 238, recordCount: 2 });
+ok('有出价：现价不含"起拍"标签', !/起拍/.test(cardBid.textContent));
+ok('有出价：原价含封顶价238', /238/.test(cardBid.textContent));
+const cardStart = UI._buildOwnCard({ id: 2, name: 'y', currentPrice: null, startPrice: 1, cappedPrice: 238 });
+ok('未开拍：标注"起拍"', /起拍/.test(cardStart.textContent));
+ok('未开拍：标注"封顶"(不误混为原价)', /封顶/.test(cardStart.textContent));
 
 console.log('\n[paginator] 跨页聚合');
 (async () => {

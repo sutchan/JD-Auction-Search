@@ -7,6 +7,7 @@
 - 修复跨页搜索失效（`paginator.js` 末页判定基准改为首页实际 `pageSize`）
 - 修复搜索结果价格显示错误：字段名对齐京东拍拍 `auction.list` 真实接口——现价 `currentPrice`（未开拍回退 `startPrice`）、原价 `cappedPrice`（页面 `origin-price`）、出价人数 `recordCount`、主图 `primaryPic` 拼 `m.360buyimg.com` CDN、详情链接 `1paipai.jd.com/auction-detail/{id}`；DOM 兜底同步匹配 `origin-price`
 - 优化搜索结果价格布局：将「现价 + 原价」聚合在同一价格行（红色现价 + 灰色删除线原价），「出价人数」独立为 badge/pill，避免三者视觉混排
+- 修复起拍价/封顶价混淆：未开拍商品(currentPrice 为 null)此前被当成「现价」显示，与封顶价(cappedPrice)并排造成误混。现未开拍时显式标注「起拍」前缀、封顶价标注「封顶」且不划线，有出价时仍显示现价 + 划线原价
 - 优化结果面板宽度对齐原生列表、详情页全局搜索一致性、`transform` 有界递归、`toolbar` 防抖、`products` 渲染上限、骨架屏接线、Toast `escapeHtml` 转义
 
 ## v1.3.5
