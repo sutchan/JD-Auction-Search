@@ -2,7 +2,10 @@
 
 ## 已完成任务
 
-### 待发布改进（2026-07-30，未升版）
+### v1.4.0
+- [x] 拆分超 200 行模块：`content.js`(218)→`content.js`+`content/enhancer.js`+`content/search.js`；`results.js`(230)→`results.js`+`results/host.js`，manifest content_scripts 同步
+- [x] 国际化修复：补齐 `toastNetworkError`/`toastRequestError` 翻译键并清除语言包死键（logoText/tabAll 等），扩展可翻译 Toast 键集合，chrome.i18n 不可用时简繁文案仍全覆盖
+- [x] 构建增强：`build.js` 新增产物预览、zh-TW 本地化输出（`--tw`）、Firefox 字符串转义（`--firefox`），统一 `path` 跨平台路径
 - [x] 修复跨页搜索失效（critical）：`paginator.js` 末页判定硬编码 50 条阈值，京东每页仅 20~30 条导致第 1 页后停止翻页；改为以首页 `pageSize` 为基准，仅真正末页或整页重复时停止
 - [x] 结果面板宽度对齐原生列表：新增 `dom.getProductListContainer`，`results._positionResultsPanel` 测量原生容器设 `left`/`width` 与原始页一致（滚动/缩放重算）
 - [x] 详情页搜索保持全局一致：`content._isDetailPage()` 仅非详情页走 DOM 兜底，详情页只用全局聚合数据
