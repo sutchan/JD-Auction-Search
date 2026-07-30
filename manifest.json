@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.3.5",
+  "version": "1.4.0",
   "description": "__MSG_extensionDescription__",
   "default_locale": "zh_CN",
   "permissions": [],
@@ -32,6 +32,7 @@
         "src/ui/components.js",
         "src/ui/styles.js",
         "src/ui/toolbar.js",
+        "src/ui/results/host.js",
         "src/ui/results.js",
         "src/ui/products.js",
         "src/ui/skeleton.js",
@@ -39,6 +40,8 @@
         "src/dom/observer.js",
         "src/dom/extract.js",
         "src/dom/filter.js",
+        "src/content/enhancer.js",
+        "src/content/search.js",
         "src/content.js"
       ],
       "css": [],

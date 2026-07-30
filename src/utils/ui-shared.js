@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/ui-shared.js v1.3.5
+// JD-Auction-Search/src/utils/ui-shared.js v1.4.0
 // UI 共享能力：Toast 反馈、样式注入、Shadow DOM 查询
 
 (function(global) {

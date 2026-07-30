@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/tokens.js v1.3.5
+// JD-Auction-Search/src/ui/tokens.js v1.4.0
 // 设计令牌：shadcn 语义令牌（zinc 中性灰阶 + 京东红强调），注入 Shadow DOM :host
 // 与 prototype/index.html 设计系统（浅色令牌）保持一致
 

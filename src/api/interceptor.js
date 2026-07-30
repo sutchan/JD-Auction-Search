@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/interceptor.js v1.3.5
+// JD-Auction-Search/src/api/interceptor.js v1.4.0
 // API 拦截器：捕获页面真实列表请求作模板，并按"像不像列表接口"打分选优
 
 (function(global) {
