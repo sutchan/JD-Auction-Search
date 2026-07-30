@@ -26,6 +26,7 @@
 
     const all = [];
     const seen = new Set();
+    let pageSize = 0; // 以首页实际条数作为页大小基准，避免硬编码阈值误判末页
     for (let page = 1; page <= maxPages; page++) {
       const req = this._buildPageRequest(absUrl, tpl, pageParam, page);
       let data;
@@ -42,6 +43,8 @@
       }
       const items = global.JDSUtils.extractProductsFromResponse(data);
       if (!items.length) break;
+      // 首页条数作为页大小基准；后续页以此为据判定是否到达末页
+      if (page === 1) pageSize = items.length;
       let added = 0;
       for (const it of items) {
         const id = global.JDSUtils.getProductId(it);
@@ -50,8 +53,10 @@
         all.push(it);
         added++;
       }
-      // 整页都是重复项，或不足一页，视为已到末页
-      if (added === 0 || items.length < 50) break;
+      // 整页都是重复项：真实末页（服务端忽略分页参数也会在此终止）
+      if (added === 0) break;
+      // 仅当“非首页”且“条数少于首页页大小”时判定为末页，避免每页不足 50 条时漏翻
+      if (page > 1 && pageSize > 0 && items.length < pageSize) break;
     }
     return all;
   };
