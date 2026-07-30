@@ -96,6 +96,13 @@
         // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
         this.state.searchMode = true;
         JDSDom.hideNativeProducts();
+        // 全量数据尚未就绪：先触发一次全量加载（完成后会重新进入本函数渲染），
+        // 避免搜索只命中已加载的首页数据而漏掉后续页
+        if (!this.state._allLoaded && !this.state._loadingAll && (this._loadAttempts || 0) < 2) {
+          JDSUI.showLoading();
+          this._autoLoadProducts();
+          return;
+        }
         if (filtered.length === 0 && this.state.isLoading) {
           // 全局商品仍在加载（如详情页延时抓取），先展示骨架屏而非空态
           JDSUI.showLoading();
@@ -137,11 +144,16 @@
       const isDetail = this._isDetailPage();
       // 标记全局加载中；终点分支负责复位，详情页重试期间保持 true 以展示骨架屏
       this.state.isLoading = true;
+      this.state._loadingAll = true;
+      // 全量重放尝试计数：限制重试次数，避免模板缺失（如 JSONP 接口）时无限重放
+      this._loadAttempts = (this._loadAttempts || 0) + 1;
       try {
         // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
         const products = await JDSApi.loadAllProducts();
         if (products && products.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(products);
+          // 全量加载成功：标记已就绪，后续搜索不再重复触发整页重放
+          this.state._allLoaded = true;
           this.state.isLoading = false;
           this._applyFilterAndUpdate();
           return;
@@ -180,6 +192,9 @@
         // 跨页API加载失败：复位标志并刷新（降级由上方 DOM 提取兜底）
         this.state.isLoading = false;
         this._applyFilterAndUpdate();
+      } finally {
+        // 无论成功/失败/重试，结束本次加载过程（_allLoaded 仅在真正全量成功时置位）
+        this.state._loadingAll = false;
       }
     },
 

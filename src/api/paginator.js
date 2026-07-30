@@ -82,7 +82,7 @@
     try {
       const u = new URL(absUrl);
       for (const key of u.searchParams.keys()) {
-        if (/^page$|pageno|pagenum|pageindex/i.test(key)) {
+        if (/^(page|pageno|pagenum|pageindex|pagenumber|currentpage|curpage)$/i.test(key)) {
           return { where: 'url', key };
         }
       }
@@ -98,14 +98,14 @@
           bodyObj = JSON.parse(tpl.body);
           isJson = true;
         } catch (e) {
-          const m = tpl.body.match(/([?&]?)(\w*page\w*)=([^&]*)/i);
+          const m = tpl.body.match(/([?&]?)(page|pageno|pagenum|pageindex|pagenumber|currentpage|curpage)=([^&]*)/i);
           if (m) return { where: 'body', key: m[2], raw: tpl.body };
         }
       }
     }
     if (bodyObj) {
       for (const key of Object.keys(bodyObj)) {
-        if (/^page$|pageno|pagenum|pageindex/i.test(key)) {
+        if (/^(page|pageno|pagenum|pageindex|pagenumber|currentpage|curpage)$/i.test(key)) {
           return { where: 'body', key, obj: bodyObj, isJson };
         }
       }
