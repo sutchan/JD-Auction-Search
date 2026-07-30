@@ -67,8 +67,57 @@
     #jds-results-host .jds-empty-title { font-size: 18px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
     #jds-results-host .jds-empty-desc { font-size: 13px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
 
+    /* Product Card 商品卡片（对齐 prototype .product-card） */
+    #jds-results-host .jds-product-card {
+      display: flex; flex-direction: column; text-decoration: none; color: var(--foreground);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; cursor: pointer;
+      font-family: var(--font-sans);
+      transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+      animation: jds-cardIn 0.5s var(--ease-out-expo) backwards;
+    }
+    #jds-results-host .jds-product-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+    @keyframes jds-cardIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #jds-results-host .jds-product-img {
+      height: 120px; display: grid; place-items: center; font-size: 40px;
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
+      color: var(--subtle-foreground); position: relative; overflow: hidden;
+    }
+    #jds-results-host .jds-product-img-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #jds-results-host .jds-product-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    #jds-results-host .jds-product-name {
+      font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
+      margin-bottom: 8px; min-height: 34px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    #jds-results-host .jds-product-price {
+      font-family: var(--font-display); font-size: 18px; font-weight: 400;
+      color: var(--primary); letter-spacing: -0.01em; margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    #jds-results-host .jds-product-price small { font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
+    #jds-results-host .jds-product-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #jds-results-host .jds-product-orig { color: var(--muted-foreground); font-size: 12px; text-decoration: line-through; }
+    #jds-results-host .jds-product-bid { color: var(--muted-foreground); font-size: 12px; }
+
     /* Grid 网格兜底（未设置内联样式时） */
     #jds-results-host .jds-product-grid { display: grid; gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #jds-results-host .jds-product-card,
+      #jds-results-host .jds-skel,
+      #jds-results-host .jds-empty-overlay {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   `;
 
   /**

@@ -49,7 +49,8 @@
   };
 
   /**
-   * 构建扩展自带商品卡片（内联样式，独立于京东 CSS，保证在任何页面都可见）
+   * 构建扩展自带商品卡片（类化标记，样式由浅 DOM 的 RESULTS_COMPONENT_CSS 驱动，
+   * 对齐 prototype 的 .product-card 结构与设计令牌，保证跨页一致且不被京东 CSS 覆盖）
    * @private
    * @returns {HTMLElement}
    */
@@ -61,29 +62,23 @@
     const url = U.getProductUrl(p);
 
     const card = document.createElement('a');
-    card.className = 'jds-result-card';
+    card.className = 'jds-product-card';
     card.href = url || 'javascript:void(0)';
     if (url) {
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
     }
-    card.style.cssText = 'display:flex;flex-direction:column;text-decoration:none;color:#18181b;' +
-      'background:#fff;border:1px solid #e4e4e7;border-radius:12px;overflow:hidden;' +
-      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;' +
-      'transition:box-shadow .15s ease,transform .15s ease;';
-    card.addEventListener('mouseenter', () => { card.style.boxShadow = '0 8px 24px -8px rgba(24,24,27,.18)'; });
-    card.addEventListener('mouseleave', () => { card.style.boxShadow = ''; });
 
+    // 图片区：有图用 <img>（referrerPolicy 规避防盗链），无图回退 emoji 占位
     const imgWrap = document.createElement('div');
-    imgWrap.style.cssText = 'width:100%;height:180px;background:#f4f4f5;display:flex;align-items:center;' +
-      'justify-content:center;overflow:hidden;font-size:40px;color:#d4d4d8;';
+    imgWrap.className = 'jds-product-img';
     if (image) {
       const img = document.createElement('img');
+      img.className = 'jds-product-img-el';
       img.src = image;
       img.alt = name;
       img.loading = 'lazy';
       img.referrerPolicy = 'no-referrer';
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
       // 属性方式绑定错误回退，规避 MV3 CSP 对 on* 属性的拦截
       img.onerror = () => { imgWrap.textContent = '\u{1F4E6}'; };
       imgWrap.appendChild(img);
@@ -93,39 +88,45 @@
     card.appendChild(imgWrap);
 
     const body = document.createElement('div');
-    body.style.cssText = 'padding:12px;display:flex;flex-direction:column;gap:6px;';
+    body.className = 'jds-product-body';
+
     const titleEl = document.createElement('div');
-    titleEl.style.cssText = 'font-size:13px;line-height:1.4;color:#18181b;max-height:36px;overflow:hidden;';
+    titleEl.className = 'jds-product-name';
     titleEl.textContent = name;
+    body.appendChild(titleEl);
 
-    // 价格行：现价（红色大字）+ 原价（高于现价时划线展示）
-    const priceRow = document.createElement('div');
-    priceRow.style.cssText = 'display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;';
-    const priceEl = document.createElement('span');
-    priceEl.style.cssText = 'color:#e1251b;font-weight:600;font-size:16px;';
-    priceEl.textContent = '¥' + price;
-    priceRow.appendChild(priceEl);
+    // 价格：现价（红色衬线大字）+ 原价（高于现价时划线展示）
+    const priceEl = document.createElement('div');
+    priceEl.className = 'jds-product-price';
+    const yen = document.createElement('small');
+    yen.textContent = '¥';
+    const amount = document.createElement('span');
+    amount.textContent = price;
+    priceEl.appendChild(yen);
+    priceEl.appendChild(document.createTextNode(' '));
+    priceEl.appendChild(amount);
+    body.appendChild(priceEl);
 
+    // 元信息行：原价 + 出价人数
+    const meta = document.createElement('div');
+    meta.className = 'jds-product-meta';
     const original = U.getProductOriginalPrice(p);
     if (original && original > Number(price)) {
       const origEl = document.createElement('span');
-      origEl.style.cssText = 'color:#a1a1aa;font-size:12px;text-decoration:line-through;';
+      origEl.className = 'jds-product-orig';
       origEl.textContent = '¥' + U.formatPrice(original);
-      priceRow.appendChild(origEl);
+      meta.appendChild(origEl);
     }
-    body.appendChild(titleEl);
-    body.appendChild(priceRow);
-
-    // 出价人数（仅在有值且为正时展示）
     const bidCount = U.getProductBidCount(p);
     if (bidCount > 0) {
-      const bidEl = document.createElement('div');
-      bidEl.style.cssText = 'color:#71717a;font-size:12px;';
+      const bidEl = document.createElement('span');
+      bidEl.className = 'jds-product-bid';
       bidEl.textContent = bidCount + ' 人出价';
-      body.appendChild(bidEl);
+      meta.appendChild(bidEl);
     }
-    card.appendChild(body);
+    if (meta.childNodes.length) body.appendChild(meta);
 
+    card.appendChild(body);
     return card;
   };
 })(window);
