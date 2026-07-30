@@ -12,7 +12,7 @@
    * @param {string} [type='info'] - toast 类型: success | error | info
    */
   JDSUtils.showToast = function showToast(key, type = 'info') {
-    const translationKeys = ['toastApiFailed'];
+    const translationKeys = ['toastApiFailed', 'toastNetworkError', 'toastRequestError'];
     const message = translationKeys.includes(key) ? JDSUtils.getMessage(key) : key;
 
     // success/error/info 对应的 SVG 图标

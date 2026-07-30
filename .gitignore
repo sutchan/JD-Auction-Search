@@ -27,3 +27,4 @@ replay_pid*
 *_test*.js
 .codebuddy/
 *report.md
+.dedup-trash/

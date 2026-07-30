@@ -43,14 +43,18 @@
         'searchButton': '搜索',
         'emptyTitle': '未找到匹配商品',
         'emptyDesc': '试试其他关键词，或清除筛选条件',
-        'toastApiFailed': 'API加载失败，将依赖页面内容'
+        'toastApiFailed': 'API加载失败，将依赖页面内容',
+        'toastNetworkError': '网络异常，请检查网络连接',
+        'toastRequestError': '请求失败，请稍后重试'
       },
       'zh-TW': {
         'searchPlaceholder': '輸入商品關鍵詞搜索...',
         'searchButton': '搜索',
         'emptyTitle': '未找到匹配商品',
         'emptyDesc': '試試其他關鍵詞，或清除篩選條件',
-        'toastApiFailed': 'API加載失敗，將依賴頁面內容'
+        'toastApiFailed': 'API加載失敗，將依賴頁面內容',
+        'toastNetworkError': '網絡異常，請檢查網絡連接',
+        'toastRequestError': '請求失敗，請稍後重試'
       }
     };
 

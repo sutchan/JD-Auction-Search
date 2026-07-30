@@ -15,44 +15,6 @@
     "message": "搜索",
     "description": "搜索按鈕文本"
   },
-  "tabAll": {
-    "message": "全部",
-    "description": "全部標籤"
-  },
-  "tabOngoing": {
-    "message": "正在奪寶",
-    "description": "正在奪寶標籤"
-  },
-  "tabUpcoming": {
-    "message": "即將開始",
-    "description": "即將開始標籤"
-  },
-  "resultCount": {
-    "message": "共 $COUNT$ 件商品",
-    "description": "結果計數文本",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "10"
-      }
-    }
-  },
-  "enabled": {
-    "message": "已啟用",
-    "description": "啟用狀態按鈕文本"
-  },
-  "disabled": {
-    "message": "已禁用",
-    "description": "禁用狀態按鈕文本"
-  },
-  "loading": {
-    "message": "加載中",
-    "description": "加載狀態文本"
-  },
-  "enabledLocal": {
-    "message": "已啟用(本地)",
-    "description": "僅本地數據時的啟用狀態"
-  },
   "emptyTitle": {
     "message": "未找到匹配商品",
     "description": "空狀態標題"
@@ -61,20 +23,16 @@
     "message": "試試其他關鍵詞，或清除篩選條件",
     "description": "空狀態描述"
   },
-  "toastEnabled": {
-    "message": "插件已啟用",
-    "description": "啟用時提示"
-  },
-  "toastDisabled": {
-    "message": "插件已禁用",
-    "description": "禁用時提示"
-  },
   "toastApiFailed": {
     "message": "API加載失敗，將依賴頁面內容",
     "description": "API失敗時提示"
   },
-  "logoText": {
-    "message": "奪寶搜索",
-    "description": "Logo文本"
+  "toastNetworkError": {
+    "message": "網絡異常，請檢查網絡連接",
+    "description": "網絡錯誤時提示"
+  },
+  "toastRequestError": {
+    "message": "請求失敗，請稍後重試",
+    "description": "請求錯誤時提示"
   }
 }
