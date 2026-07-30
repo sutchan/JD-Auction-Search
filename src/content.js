@@ -58,12 +58,24 @@
     },
 
     /**
+     * 是否处于商品详情页（/auction-detail）
+     * 详情页搜索须基于全局聚合数据，禁止回退“当前页 DOM”搜索
+     * @private
+     * @returns {boolean}
+     */
+    _isDetailPage() {
+      return /auction-detail/i.test(location.pathname) || /auction-detail/i.test(location.href);
+    },
+
+    /**
      * 应用过滤器并更新
      * @private
      */
     _applyFilterAndUpdate() {
       // 兜底：搜索时若尚无商品数据，先尝试从当前 DOM 提取，确保有结果可搜
-      if (this.state.products.length === 0) {
+      // 商品详情页（/auction-detail）不做当前页 DOM 兜底，避免“只搜当前页”，
+      // 详情页搜索统一基于全局聚合数据 state.products，保持与列表页一致的全局搜索
+      if (this.state.products.length === 0 && !this._isDetailPage()) {
         const domProducts = JDSDom.extractProductsFromDOM();
         if (domProducts.length) {
           this.state.products = JDSUtils.deduplicateProducts(domProducts);
@@ -113,6 +125,7 @@
      * @private
      */
     async _autoLoadProducts() {
+      const isDetail = this._isDetailPage();
       try {
         // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
         const products = await JDSApi.loadAllProducts();
@@ -125,13 +138,28 @@
         // 跨页API加载失败，进入下方降级逻辑（DOM 提取兜底）
       }
 
-      // 降级策略：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
-      if (this.state.products.length === 0) {
-        JDSUtils.showToast('toastApiFailed');
-        const domProducts = JDSDom.extractProductsFromDOM();
-        if (domProducts.length > 0) {
-          this.state.products = JDSUtils.deduplicateProducts(domProducts);
+      // 已有全局数据（拦截器增量捕获），直接刷新展示
+      if (this.state.products.length > 0) {
+        this._applyFilterAndUpdate();
+        return;
+      }
+
+      if (isDetail) {
+        // 详情页：保持全局一致，严禁回退“搜索当前页”。
+        // 相关拍卖等列表接口可能较晚到达，延时重试一次以拿到全局数据；
+        // 仍无则静默留空（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
+        if (!this._detailRetry) {
+          this._detailRetry = true;
+          setTimeout(() => this._autoLoadProducts(), 1500);
         }
+        return;
+      }
+
+      // 列表页降级：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
+      JDSUtils.showToast('toastApiFailed');
+      const domProducts = JDSDom.extractProductsFromDOM();
+      if (domProducts.length > 0) {
+        this.state.products = JDSUtils.deduplicateProducts(domProducts);
       }
       this._applyFilterAndUpdate();
     },

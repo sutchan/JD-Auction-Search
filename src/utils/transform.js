@@ -18,15 +18,54 @@
       return data;
     }
 
-    const possibleKeys = ['data', 'result', 'list', 'products', 'items', 'auctions', 'goodsList'];
+    if (typeof data !== 'object') return [];
 
+    // 先尝试已知顶层键（保持原行为，零成本）
+    const possibleKeys = ['data', 'result', 'list', 'products', 'items', 'auctions', 'goodsList'];
     for (const key of possibleKeys) {
-      if (data[key] && Array.isArray(data[key])) {
+      if (Array.isArray(data[key])) {
         return data[key];
       }
     }
 
-    return [];
+    // 兜底：有界递归查找首个“商品对象数组”，兼容 {data:{list}} / {result:{list}} / {data:{data:{goodsList}}} 等嵌套结构
+    const found = this._findProductsArray(data, 4);
+    return found || [];
+  };
+
+  /**
+   * 有界递归查找首个“商品对象数组”
+   * 仅接受元素为含名称/id 字段的对象的数组，避免误匹配字符串/数字数组
+   * @private
+   * @param {Object} node - 当前遍历节点
+   * @param {number} depth - 剩余递归深度（防止超大响应栈溢出）
+   * @returns {Array|null}
+   */
+  JDSUtils._findProductsArray = function _findProductsArray(node, depth) {
+    if (depth <= 0 || !node || typeof node !== 'object') return null;
+    for (const key of Object.keys(node)) {
+      const val = node[key];
+      if (Array.isArray(val) && val.length && this._isProductLike(val[0])) {
+        return val;
+      }
+      if (val && typeof val === 'object') {
+        const r = this._findProductsArray(val, depth - 1);
+        if (r) return r;
+      }
+    }
+    return null;
+  };
+
+  /**
+   * 判断是否为“商品对象”（含名称或 id 类字段之一）
+   * @private
+   * @param {*} item
+   * @returns {boolean}
+   */
+  JDSUtils._isProductLike = function _isProductLike(item) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    return !!(item.name || item.title || item.productName ||
+      item.id || item.skuId || item.productId || item.auctionId);
   };
 
   /**

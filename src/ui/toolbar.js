@@ -128,11 +128,14 @@
     const searchBtn = container.querySelector('.jds-search-btn');
 
     // 搜索框输入 — 实时过滤 + 清除按钮显隐
+    // 防抖：避免每键击都全量重过滤+重渲染全局商品（结果量多时卡顿）
+    let debounceTimer = null;
     input.addEventListener('input', (e) => {
       const val = e.target.value.trim();
       state.keyword = val;
       clearBtn.classList.toggle('is-visible', val.length > 0);
-      handlers.onInput();
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => handlers.onInput(), 120);
     });
 
     // 搜索框回车

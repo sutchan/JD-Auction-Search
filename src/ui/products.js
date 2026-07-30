@@ -35,9 +35,21 @@
     panel.appendChild(grid);
     this.gridElement = grid;
 
-    products.forEach((p) => {
+    // 限制单次渲染数量，避免全局命中上千条时一次性生成大量卡片导致页面卡死
+    const MAX_RENDER = 200;
+    const total = products.length;
+    const visible = products.slice(0, MAX_RENDER);
+    visible.forEach((p) => {
       grid.appendChild(this._buildOwnCard(p));
     });
+
+    // 超出上限时展示截断提示，说明仅渲染前 N 条
+    if (total > MAX_RENDER) {
+      const tip = document.createElement('div');
+      tip.style.cssText = 'grid-column:1/-1;padding:8px 4px;color:#71717a;font-size:13px;text-align:center;';
+      tip.textContent = `已显示前 ${MAX_RENDER} 条，共 ${total} 条匹配结果`;
+      panel.appendChild(tip);
+    }
   };
 
   /**

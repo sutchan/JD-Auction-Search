@@ -38,7 +38,9 @@
 
     const toast = document.createElement('div');
     toast.className = `jds-toast jds-toast-${type}`;
-    toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+    // 文案转义后注入，防御潜在 HTML 注入（纵深防御）
+    const safeMessage = JDSUtils.escapeHtml(message);
+    toast.innerHTML = `${icons[type] || icons.info}<span>${safeMessage}</span>`;
     stack.appendChild(toast);
 
     requestAnimationFrame(() => toast.classList.add('is-show'));

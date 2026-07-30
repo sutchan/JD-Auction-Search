@@ -85,6 +85,21 @@
       top = Math.max(0, Math.round(rect.bottom));
     }
     panel.style.top = top + 'px';
+
+    // 与原始商品列表宽度保持一致：测量原生列表容器，约束结果面板的左/宽
+    const listEl = global.JDSDom.getProductListContainer && global.JDSDom.getProductListContainer();
+    if (listEl) {
+      const r = listEl.getBoundingClientRect();
+      panel.style.left = Math.round(r.left) + 'px';
+      panel.style.width = Math.round(r.width) + 'px';
+      // 解除 inset:0 的 right:0，避免与显式 width 冲突
+      panel.style.right = 'auto';
+    } else {
+      // 无列表容器（页面未就绪）时恢复整屏覆盖
+      panel.style.left = '';
+      panel.style.width = '';
+      panel.style.right = '';
+    }
   };
 
   /**

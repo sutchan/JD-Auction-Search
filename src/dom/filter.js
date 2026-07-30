@@ -90,4 +90,35 @@
 
     return cards;
   };
+
+  /**
+   * 获取商品列表容器（列表外层包裹元素），用于让结果面板宽度与原始列表对齐
+   * 逻辑与 _getProductContainers 一致，但返回容器本身而非卡片
+   * @returns {HTMLElement|null}
+   */
+  JDSDom.getProductListContainer = function getProductListContainer() {
+    const listContainerSelectors = [
+      '[class*="goods-list" i]', '[class*="auction-list" i]', '[class*="product-list" i]',
+      '[class*="list" i]', '[class*="grid" i]', '[class*="goods" i]'
+    ];
+    const cardSelector = '[class*="auction-item" i], [class*="product-item" i], [class*="goods-item" i], ' +
+      '[class*="auction-card" i], [class*="product-card" i], [class*="goods-card" i]';
+
+    let container = null;
+    for (const sel of listContainerSelectors) {
+      const el = document.querySelector(sel);
+      if (el && el.querySelectorAll(cardSelector).length) {
+        container = el;
+        break;
+      }
+    }
+
+    // 回退：取首个商品卡片的父容器
+    if (!container) {
+      const firstCard = document.querySelector(cardSelector);
+      container = firstCard ? firstCard.parentElement : null;
+    }
+
+    return container;
+  };
 })(window);
