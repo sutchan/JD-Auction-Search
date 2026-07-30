@@ -164,13 +164,15 @@ ok('现价 null→起拍价', U.getProductPrice({ currentPrice: null, startPrice
 // 无 cappedPrice 时兼容回退 maxPrice
 ok('无 cappedPrice→maxPrice', U.getProductOriginalPrice({ maxPrice: 199, currentPrice: 50 }) === 199);
 
-console.log('\n[product card] 起拍价/封顶价标注');
+console.log('\n[product card] 起拍价/封顶价分开显示');
 const cardBid = UI._buildOwnCard({ id: 1, name: 'x', currentPrice: 46, cappedPrice: 238, recordCount: 2 });
 ok('有出价：现价不含"起拍"标签', !/起拍/.test(cardBid.textContent));
-ok('有出价：原价含封顶价238', /238/.test(cardBid.textContent));
+const bodyBid = cardBid.childNodes.find(c => c.className === 'jds-product-body');
+ok('有出价：原价独立成行(.jds-product-subprice)', !!bodyBid.childNodes.find(c => c.className === 'jds-product-subprice'));
 const cardStart = UI._buildOwnCard({ id: 2, name: 'y', currentPrice: null, startPrice: 1, cappedPrice: 238 });
 ok('未开拍：标注"起拍"', /起拍/.test(cardStart.textContent));
-ok('未开拍：标注"封顶"(不误混为原价)', /封顶/.test(cardStart.textContent));
+const bodyStart = cardStart.childNodes.find(c => c.className === 'jds-product-body');
+ok('未开拍：封顶价独立成行(.jds-product-subprice)', !!bodyStart.childNodes.find(c => c.className === 'jds-product-subprice') && /封顶/.test(cardStart.textContent));
 
 console.log('\n[paginator] 跨页聚合');
 (async () => {

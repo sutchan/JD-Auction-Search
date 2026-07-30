@@ -94,8 +94,8 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 价格行：有出价显示「现价」(currentPrice)，未开拍显示「起拍价」(startPrice)，
-    // 两者显式标注前缀，避免把起拍价与封顶价(cappedPrice)误混为同一类价格
+    // 主价格行：有出价显示「现价」(currentPrice)，未开拍显示「起拍价」(startPrice)，
+    // 并标注「起拍」前缀；封顶价/原价单独成行(见下)，与起拍价明确分开显示
     const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
     const isStarting = !(rawCurrent != null && rawCurrent > 0);
     const current = isStarting ? U.getProductPrice(p) : rawCurrent;
@@ -115,22 +115,25 @@
     priceEl.appendChild(yen);
     priceEl.appendChild(document.createTextNode(' '));
     priceEl.appendChild(amount);
+    body.appendChild(priceEl);
 
-    // 封顶价(cappedPrice)：有出价时作「原价」划线参考；未开拍时标「封顶」且不划线，
-    // 明确它是价格上限而非折扣原价，与起拍价区分开
+    // 次价格行：封顶价(cappedPrice)独立成行，与起拍价/现价分开显示；
+    // 有出价时作「原价」划线参考，未开拍时标「封顶」且不划线(价格上限而非折扣原价)
     const capped = U.getProductOriginalPrice(p);
     if (capped && capped > current) {
-      const origEl = document.createElement('span');
-      origEl.className = 'jds-product-orig';
+      const sub = document.createElement('div');
+      sub.className = 'jds-product-subprice';
+      const subEl = document.createElement('span');
       if (isStarting) {
-        origEl.textContent = '封顶 ¥' + U.formatPrice(capped);
-        origEl.classList.add('jds-product-cap');
+        subEl.className = 'jds-product-cap';
+        subEl.textContent = '封顶 ¥' + U.formatPrice(capped);
       } else {
-        origEl.textContent = '¥' + U.formatPrice(capped);
+        subEl.className = 'jds-product-orig';
+        subEl.textContent = '¥' + U.formatPrice(capped);
       }
-      priceEl.appendChild(origEl);
+      sub.appendChild(subEl);
+      body.appendChild(sub);
     }
-    body.appendChild(priceEl);
 
     // 出价人数：独立 badge 行，与价格数字明显区分
     const bidCount = U.getProductBidCount(p);
