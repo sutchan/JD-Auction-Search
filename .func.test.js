@@ -28,10 +28,20 @@ function makeStub() {
   });
 }
 sandbox.chrome = makeStub();
+function makeEl() {
+  const el = {
+    style: {}, setAttribute() {}, appendChild() {}, remove() {},
+    classList: { add() {}, remove() {}, contains: () => false },
+    getBoundingClientRect: () => ({ bottom: 0, left: 0, width: 0 }),
+    attachShadow: () => makeEl(),
+    querySelector: () => null
+  };
+  return el;
+}
 sandbox.document = {
-  getElementById: () => null,
-  querySelector: () => null,
-  createElement: () => ({ style: {}, setAttribute() {}, appendChild() {}, classList: { add() {}, remove() {} } }),
+  getElementById: () => makeEl(),
+  querySelector: () => makeEl(),
+  createElement: () => makeEl(),
   head: { appendChild() {} },
   body: { appendChild() {} }
 };
@@ -56,8 +66,20 @@ function ok(name, cond) {
   else { console.log('  FAIL', name); fail++; }
 }
 
-// 1) 加载全部模块，捕获加载期错误
+// 扩展入口（content.js / background.js）依赖真实浏览器 DOM / 扩展宿主，
+// 仅做语法编译校验；其余逻辑模块载入沙箱执行断言。
+const ENTRY_FILES = new Set(['src/content.js', 'background.js']);
+
+// 1) 对所有文件做语法校验（vm.Script 编译，捕获语法错误）
 for (const f of files) {
+  const code = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  try { new vm.Script(code, { filename: f }); }
+  catch (e) { console.log('  SYNTAX ERROR', f, e.message); fail++; }
+}
+
+// 2) 载入可无头运行的逻辑模块
+for (const f of files) {
+  if (ENTRY_FILES.has(f)) continue;
   const code = fs.readFileSync(path.join(ROOT, f), 'utf8');
   try { vm.runInContext(code, sandbox, { filename: f }); }
   catch (e) { console.log('  LOAD ERROR', f, e.message); fail++; }
