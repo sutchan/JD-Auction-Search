@@ -45,7 +45,7 @@
       .jds-clear svg { width: 12px; height: 12px; }
       .jds-search-btn {
         border: none; background: var(--primary); color: var(--primary-foreground);
-        padding: 8px 16px; border-radius: var(--radius-md);
+        padding: 8px 16px; border-radius: var(--radius-sm);
         font-family: var(--font-sans); font-size: 12px; font-weight: 600;
         cursor: pointer; flex-shrink: 0;
         transition: background var(--dur-fast) var(--ease-out);

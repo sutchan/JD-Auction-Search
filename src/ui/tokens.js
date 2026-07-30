@@ -24,7 +24,7 @@
         --popover: #ffffff;
         --primary: #e1251b;
         --primary-hover: #c1170f;
-        --primary-foreground: #fafafa;
+        --primary-foreground: #ffffff;
         --primary-subtle: #fef2f2;
         --primary-muted: #fee2e2;
         --secondary: #f4f4f5;
@@ -53,15 +53,15 @@
         --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
         --shadow-sm: 0 1px 3px 0 rgb(24 24 27 / 0.06), 0 1px 2px -1px rgb(24 24 27 / 0.05);
         --shadow-md: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
-        --shadow-lg: 0 12px 32px -8px rgb(24 24 27 / 0.12);
-        --shadow-ring: 0 0 0 3px rgb(225 37 27 / 0.15);
+        --shadow-lg: 0 10px 24px -4px rgb(24 24 27 / 0.10), 0 4px 8px -4px rgb(24 24 27 / 0.06);
+        --shadow-ring: 0 0 0 3px rgb(225 37 27 / 0.12);
         --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
         --font-mono: 'SF Mono', ui-monospace, 'Cascadia Code', monospace;
         --font-display: 'Instrument Serif', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
-        --dur-fast: 0.15s;
-        --dur-base: 0.2s;
-        --dur-slow: 0.3s;
-        --ease-out: cubic-bezier(0, 0, 0.2, 1);
+        --dur-fast: 0.18s;
+        --dur-base: 0.3s;
+        --dur-slow: 0.6s;
+        --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
         --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
         --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       }
