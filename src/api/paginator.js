@@ -14,6 +14,7 @@
    * @returns {Promise<Array|null>}
    */
   JDSApi.loadAllProducts = async function loadAllProducts(params = {}, maxPages = 30) {
+    // maxPages=30：分页重放最大翻页次数上限，防止接口无末页标记时无限循环请求
     const tpl = this._requestTemplate;
     if (!tpl) return null;
 

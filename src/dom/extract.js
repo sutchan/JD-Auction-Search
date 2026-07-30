@@ -32,7 +32,11 @@
       const price = priceRaw ? Number(priceRaw) : 0;
 
       const imgEl = card.querySelector('img');
-      const img = imgEl ? (imgEl.getAttribute('src') || imgEl.getAttribute('data-src') || imgEl.getAttribute('data-original') || '') : '';
+      const img = imgEl
+        ? (imgEl.getAttribute('src') ||
+          imgEl.getAttribute('data-src') ||
+          imgEl.getAttribute('data-original') || '')
+        : '';
 
       const aEl = card.closest('a') || card.querySelector('a');
       const url = aEl ? (aEl.href || '') : '';
@@ -60,8 +64,12 @@
    * @private
    */
   JDSDom._cardIdFallback = function _cardIdFallback(card, name) {
-    const ds = card.getAttribute &&
-      (card.getAttribute('data-id') || card.getAttribute('data-sku') || card.getAttribute('data-productid') || card.getAttribute('data-pid'));
+    const ds = card.getAttribute && (
+      card.getAttribute('data-id') ||
+      card.getAttribute('data-sku') ||
+      card.getAttribute('data-productid') ||
+      card.getAttribute('data-pid')
+    );
     if (ds) return ds;
     let h = 0;
     const s = name + (card.className || '');

@@ -17,9 +17,14 @@
 
     // success/error/info 对应的 SVG 图标
     const icons = {
-      success: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
-      error: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
-      info: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+      success: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>',
+      error: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/>' +
+        '<path d="M15 9l-6 6M9 9l6 6"/></svg>',
+      info: '<svg class="jds-toast-icon" viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/>' +
+        '<path d="M12 16v-4M12 8h.01"/></svg>'
     };
 
     // 启停切换对应类型

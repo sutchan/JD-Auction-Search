@@ -31,7 +31,10 @@
     const grid = document.createElement('div');
     grid.className = 'jds-product-grid';
     grid.setAttribute('aria-live', 'polite');
-    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:16px 24px 40px;';
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(200px,1fr))';
+    grid.style.gap = '16px';
+    grid.style.padding = '16px 24px 40px';
     panel.appendChild(grid);
     this.gridElement = grid;
 

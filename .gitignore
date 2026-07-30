@@ -26,3 +26,4 @@ replay_pid*
 /node_modules
 *_test*.js
 .codebuddy/
+*report.md

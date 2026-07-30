@@ -104,10 +104,18 @@
     return `
       <div class="jds-toolbar" role="region" aria-label="夺宝搜索工具栏">
         <div class="jds-search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" class="jds-search-input" placeholder="${getMessage('searchPlaceholder')}" aria-label="搜索商品" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="jds-search-input"
+            placeholder="${getMessage('searchPlaceholder')}" aria-label="搜索商品" />
           <button class="jds-clear" aria-label="清除搜索">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
           </button>
           <button class="jds-search-btn">${getMessage('searchButton')}</button>
         </div>
@@ -130,12 +138,14 @@
     // 搜索框输入 — 实时过滤 + 清除按钮显隐
     // 防抖：避免每键击都全量重过滤+重渲染全局商品（结果量多时卡顿）
     let debounceTimer = null;
+    // 防抖 120ms：避免连续键击触发全量重过滤+重渲染（结果量多时卡顿）
+    const DEBOUNCE_MS = 120;
     input.addEventListener('input', (e) => {
       const val = e.target.value.trim();
       state.keyword = val;
       clearBtn.classList.toggle('is-visible', val.length > 0);
       if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => handlers.onInput(), 120);
+      debounceTimer = setTimeout(() => handlers.onInput(), DEBOUNCE_MS);
     });
 
     // 搜索框回车

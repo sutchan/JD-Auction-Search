@@ -40,7 +40,8 @@
       // 标记全局加载中：加载完成前进入搜索态展示骨架屏（见 _autoLoadProducts）
       this.state.isLoading = true;
 
-      // 自动加载商品
+      // 自动加载商品：延迟 2000ms 等待页面列表接口就绪后再做分页重放
+      // （页面初始脚本较慢，过早请求可能拿不到真实请求模板）
       setTimeout(() => this._autoLoadProducts(), 2000);
     },
 
@@ -159,6 +160,7 @@
           // 仍无则静默留空（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
           if (!this._detailRetry) {
             this._detailRetry = true;
+            // 详情页相关拍卖列表接口可能较晚到达：延时 1500ms 重试一次以拿到全局数据
             setTimeout(() => this._autoLoadProducts(), 1500);
           }
           // 重试进行中：保持 isLoading=true（搜索态将看到骨架屏），先刷新一次展示

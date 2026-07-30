@@ -42,7 +42,9 @@
     for (let i = 0; i < count; i++) {
       const card = document.createElement('div');
       card.className = 'jds-skeleton-card';
-      card.innerHTML = '<div class="jds-skel jds-skel-img"></div><div class="jds-skel jds-skel-line"></div><div class="jds-skel jds-skel-line"></div>';
+      card.innerHTML = '<div class="jds-skel jds-skel-img"></div>' +
+        '<div class="jds-skel jds-skel-line"></div>' +
+        '<div class="jds-skel jds-skel-line"></div>';
       this.gridElement.appendChild(card);
     }
     // 渲染完成后清除 busy 状态，避免长期占用
