@@ -30,7 +30,9 @@ function makeStub() {
 sandbox.chrome = makeStub();
 function makeEl() {
   const el = {
-    style: {}, setAttribute() {}, appendChild() {}, remove() {},
+    style: {}, childNodes: [],
+    setAttribute() {}, remove() {},
+    appendChild(c) { (this.childNodes = this.childNodes || []).push(c); return c; },
     classList: { add() {}, remove() {}, contains: () => false },
     getBoundingClientRect: () => ({ bottom: 0, left: 0, width: 0 }),
     attachShadow: () => makeEl(),
@@ -42,6 +44,7 @@ sandbox.document = {
   getElementById: () => makeEl(),
   querySelector: () => makeEl(),
   createElement: () => makeEl(),
+  createTextNode: (t) => ({ nodeType: 3, textContent: String(t) }),
   head: { appendChild() {} },
   body: { appendChild() {} }
 };
@@ -118,6 +121,40 @@ ok('令牌含 --radius-xl 16px', tokHost.includes('--radius-xl: 16px'));
 ok('令牌含 --radius-2xl 22px', tokHost.includes('--radius-2xl: 22px'));
 ok('令牌含 --shadow-lg', tokHost.includes('--shadow-lg:'));
 ok('令牌含 --info #2563eb', tokHost.includes('--info: #2563eb'));
+ok('令牌含 --shadow-ring(聚焦光环)', tokHost.includes('--shadow-ring:'));
+ok('令牌含 --font-display(衬线价格)', tokHost.includes("--font-display: 'Instrument Serif'"));
+
+console.log('\n[product card] 对齐 prototype 类化结构');
+const card = UI._buildOwnCard({ id: 'x', name: '测试商品', price: 128, image: 'u', originalPrice: 200, bidCount: 3, url: 'https://jd.com/x' });
+ok('卡片 className=jds-product-card', card.className === 'jds-product-card');
+const body = card.childNodes.find(c => c.className === 'jds-product-body');
+const priceEl = body && body.childNodes.find(c => c.className === 'jds-product-price');
+ok('含 .jds-product-price 子元素', !!priceEl);
+const meta = body && body.childNodes.find(c => c.className === 'jds-product-meta');
+ok('含 .jds-product-meta(原价+出价)', !!meta && meta.childNodes.length === 2);
+ok('不含内联 style(由浅 DOM CSS 驱动)', card.style.cssText === undefined || card.style.cssText === '');
+
+console.log('\n[extract] 拍拍 auction.list 真实字段映射');
+const sample = {
+  id: 404584168,
+  productName: '【99成新】赫莲娜HR绿宝瓶',
+  currentPrice: 46.0,
+  cappedPrice: 238.0,
+  startPrice: 1.0,
+  recordCount: 2,
+  primaryPic: 'jfs/t1/184988/24/3993/117980/609e17cbE130d1fa7/c519504d15825077.png'
+};
+ok('现价=currentPrice', U.getProductPrice(sample) === 46);
+ok('原价=cappedPrice(页面 origin-price)', U.getProductOriginalPrice(sample) === 238);
+ok('出价人数=recordCount', U.getProductBidCount(sample) === 2);
+ok('主图=primaryPic 拼 CDN', U.getProductImage(sample) ===
+  'https://m.360buyimg.com/n1/s220x220_jfs/t1/184988/24/3993/117980/609e17cbE130d1fa7/c519504d15825077.png');
+ok('详情链接=夺宝岛 auction-detail', U.getProductUrl(sample) ===
+  'https://1paipai.jd.com/auction-detail/404584168');
+// 未开拍(currentPrice 为 null)时现价回退起拍价
+ok('现价 null→起拍价', U.getProductPrice({ currentPrice: null, startPrice: 1.0 }) === 1);
+// 无 cappedPrice 时兼容回退 maxPrice
+ok('无 cappedPrice→maxPrice', U.getProductOriginalPrice({ maxPrice: 199, currentPrice: 50 }) === 199);
 
 console.log('\n[paginator] 跨页聚合');
 (async () => {

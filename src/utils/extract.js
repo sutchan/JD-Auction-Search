@@ -6,6 +6,9 @@
 
   const JDSUtils = global.JDSUtils = global.JDSUtils || {};
 
+  // 京东拍拍/夺宝岛 auction.list 接口商品图主域（primaryPic 为 "jfs/..." 相对路径，需拼此前缀）
+  const JD_IMG_CDN = 'https://m.360buyimg.com/n1/s220x220_';
+
   /**
    * 从多个可能的字段中获取商品ID
    * @param {Object} product - 商品对象
@@ -35,12 +38,17 @@
     const candidates = [
       product.imageUrl, product.imgUrl, product.picUrl, product.image,
       product.img, product.picture, product.pic, product.skuImg,
-      product.coverUrl, product.thumbUrl, product.photo, product.imagePath
+      product.coverUrl, product.thumbUrl, product.photo, product.imagePath,
+      product.primaryPic
     ];
     const isValid = (v) => typeof v === 'string' && /^(https?:|\/\/|\/)/i.test(v.trim());
+    const toCdn = (v) => (typeof v === 'string' && /^jfs\//i.test(v.trim()))
+      ? JD_IMG_CDN + v.trim() : null;
     for (const c of candidates) {
       if (isValid(c)) return c.trim();
       if (Array.isArray(c) && c.length && isValid(c[0])) return c[0].trim();
+      const cdn = toCdn(c);
+      if (cdn) return cdn;
     }
     if (product.image && typeof product.image === 'object' && isValid(product.image.url)) {
       return product.image.url.trim();
@@ -63,10 +71,12 @@
       }
       return null;
     };
+    // 现价优先 currentPrice；未开拍(currentPrice 为 null)时回退起拍价 startPrice。
+    // 注意：maxPrice/cappedPrice 为封顶/参考价，不可作为现价。
     const flat = [
       product.price, product.currentPrice, product.startPrice,
       product.auctionPrice, product.realPrice, product.salePrice,
-      product.nowPrice, product.finalPrice, product.minPrice, product.maxPrice
+      product.nowPrice, product.finalPrice, product.minPrice
     ];
     for (const f of flat) {
       const n = toNum(f);
@@ -99,10 +109,13 @@
       }
       return null;
     };
+    // 原价(划线参考价)：京东拍拍接口对应 cappedPrice(页面 class=origin-price)；
+    // 其次 maxPrice、以及常见多态字段作为兼容兜底。startPrice 起拍价不作原价。
     const flat = [
+      product.cappedPrice, product.maxPrice,
       product.marketPrice, product.originalPrice, product.originPrice,
       product.refPrice, product.referencePrice, product.listPrice,
-      product.highPrice, product.startPrice
+      product.highPrice
     ];
     for (const f of flat) {
       const n = toNum(f);
@@ -110,7 +123,8 @@
     }
     if (product.priceInfo) {
       const n = toNum(product.priceInfo.marketPrice ??
-        product.priceInfo.originalPrice ?? product.priceInfo.refPrice);
+        product.priceInfo.originalPrice ?? product.priceInfo.refPrice ??
+        product.priceInfo.cappedPrice);
       if (n !== null && n >= 0) return n;
     }
     return 0;
@@ -131,7 +145,9 @@
       }
       return null;
     };
+    // 出价人数：京东拍拍接口对应 recordCount(出价记录数)；其余为兼容多态兜底
     const flat = [
+      product.recordCount,
       product.bidCount, product.bidNum, product.bidderCount, product.bidUserCount,
       product.offerCount, product.applyNum, product.applyCount,
       product.joinCount, product.personCount, product.signUpCount
@@ -161,7 +177,7 @@
       if (u) return u;
     }
     const id = this.getProductId(product);
-    if (id) return `https://paimai.jd.com/${encodeURIComponent(String(id))}.html`;
+    if (id) return `https://1paipai.jd.com/auction-detail/${encodeURIComponent(String(id))}`;
     return null;
   };
 })(window);

@@ -5,6 +5,7 @@
 - 国际化：补齐 `toastNetworkError`/`toastRequestError` 翻译键，清除语言包死键（logoText/tabAll 等），扩展可翻译 Toast 键集合
 - 构建：`build.js` 新增产物预览、zh-TW 本地化输出（`--tw`）、Firefox 字符串转义（`--firefox`），统一 `path` 跨平台路径
 - 修复跨页搜索失效（`paginator.js` 末页判定基准改为首页实际 `pageSize`）
+- 修复搜索结果价格显示错误：字段名对齐京东拍拍 `auction.list` 真实接口——现价 `currentPrice`（未开拍回退 `startPrice`）、原价 `cappedPrice`（页面 `origin-price`）、出价人数 `recordCount`、主图 `primaryPic` 拼 `m.360buyimg.com` CDN、详情链接 `1paipai.jd.com/auction-detail/{id}`；DOM 兜底同步匹配 `origin-price`
 - 优化结果面板宽度对齐原生列表、详情页全局搜索一致性、`transform` 有界递归、`toolbar` 防抖、`products` 渲染上限、骨架屏接线、Toast `escapeHtml` 转义
 
 ## v1.3.5

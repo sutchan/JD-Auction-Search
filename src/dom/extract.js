@@ -27,13 +27,16 @@
       }
       if (!nameRaw || nameRaw.length < 2 || nameRaw.length > 200) return;
 
-      const priceEl = card.querySelector('[class*="price" i]');
+      // 现价：取 class 含 price 且非 origin(划线原价) 的元素；优先 current-price
+      const priceEls = card.querySelectorAll('[class*="price" i]');
+      const priceEl = Array.from(priceEls).find(e => !/origin/i.test(e.className))
+        || priceEls[0] || null;
       const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
       const price = priceRaw ? Number(priceRaw) : 0;
 
-      // 原价：优先取 class 含 old/original/market/ref 的价格片段（避免与现价同元素）
+      // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
       let originalPrice = 0;
-      const origEl = card.querySelector('[class*="old" i], [class*="original" i], [class*="market" i], [class*="ref" i]');
+      const origEl = card.querySelector('[class*="old" i], [class*="original" i], [class*="origin" i], [class*="market" i], [class*="ref" i]');
       if (origEl && origEl !== priceEl) {
         const oRaw = origEl.textContent.replace(/[^\d.]/g, '');
         if (oRaw) originalPrice = Number(oRaw);

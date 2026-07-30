@@ -28,3 +28,4 @@ replay_pid*
 .codebuddy/
 *report.md
 .dedup-trash/
+.playwright-cli/
