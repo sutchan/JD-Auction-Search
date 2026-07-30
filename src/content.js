@@ -37,6 +37,9 @@
         JDSDom.updateProductDisplay(this.state);
       });
 
+      // 标记全局加载中：加载完成前进入搜索态展示骨架屏（见 _autoLoadProducts）
+      this.state.isLoading = true;
+
       // 自动加载商品
       setTimeout(() => this._autoLoadProducts(), 2000);
     },
@@ -92,7 +95,12 @@
         // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
         this.state.searchMode = true;
         JDSDom.hideNativeProducts();
-        JDSUI.showResults(filtered);
+        if (filtered.length === 0 && this.state.isLoading) {
+          // 全局商品仍在加载（如详情页延时抓取），先展示骨架屏而非空态
+          JDSUI.showLoading();
+        } else {
+          JDSUI.showResults(filtered);
+        }
       } else {
         // 浏览模式：恢复原生列表，隐藏结果面板
         this.state.searchMode = false;
@@ -126,42 +134,51 @@
      */
     async _autoLoadProducts() {
       const isDetail = this._isDetailPage();
+      // 标记全局加载中；终点分支负责复位，详情页重试期间保持 true 以展示骨架屏
+      this.state.isLoading = true;
       try {
         // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
         const products = await JDSApi.loadAllProducts();
         if (products && products.length > 0) {
           this.state.products = JDSUtils.deduplicateProducts(products);
+          this.state.isLoading = false;
           this._applyFilterAndUpdate();
           return;
         }
-      } catch (e) {
-        // 跨页API加载失败，进入下方降级逻辑（DOM 提取兜底）
-      }
 
-      // 已有全局数据（拦截器增量捕获），直接刷新展示
-      if (this.state.products.length > 0) {
-        this._applyFilterAndUpdate();
-        return;
-      }
-
-      if (isDetail) {
-        // 详情页：保持全局一致，严禁回退“搜索当前页”。
-        // 相关拍卖等列表接口可能较晚到达，延时重试一次以拿到全局数据；
-        // 仍无则静默留空（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
-        if (!this._detailRetry) {
-          this._detailRetry = true;
-          setTimeout(() => this._autoLoadProducts(), 1500);
+        // 已有全局数据（拦截器增量捕获），直接刷新展示
+        if (this.state.products.length > 0) {
+          this.state.isLoading = false;
+          this._applyFilterAndUpdate();
+          return;
         }
-        return;
-      }
 
-      // 列表页降级：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
-      JDSUtils.showToast('toastApiFailed');
-      const domProducts = JDSDom.extractProductsFromDOM();
-      if (domProducts.length > 0) {
-        this.state.products = JDSUtils.deduplicateProducts(domProducts);
+        if (isDetail) {
+          // 详情页：保持全局一致，严禁回退“搜索当前页”。
+          // 相关拍卖等列表接口可能较晚到达，延时重试一次以拿到全局数据；
+          // 仍无则静默留空（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
+          if (!this._detailRetry) {
+            this._detailRetry = true;
+            setTimeout(() => this._autoLoadProducts(), 1500);
+          }
+          // 重试进行中：保持 isLoading=true（搜索态将看到骨架屏），先刷新一次展示
+          this._applyFilterAndUpdate();
+          return;
+        }
+
+        // 列表页降级：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
+        JDSUtils.showToast('toastApiFailed');
+        const domProducts = JDSDom.extractProductsFromDOM();
+        if (domProducts.length > 0) {
+          this.state.products = JDSUtils.deduplicateProducts(domProducts);
+        }
+        this.state.isLoading = false;
+        this._applyFilterAndUpdate();
+      } catch (e) {
+        // 跨页API加载失败：复位标志并刷新（降级由上方 DOM 提取兜底）
+        this.state.isLoading = false;
+        this._applyFilterAndUpdate();
       }
-      this._applyFilterAndUpdate();
     },
 
     /**

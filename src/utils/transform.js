@@ -34,7 +34,8 @@
   };
 
   /**
-   * 有界递归查找首个“商品对象数组”
+   * 有界递归查找最大的“商品对象数组”
+   * 取元素最多者，避免 breadcrumbs/categories 等含 name 的数组排在商品列表前时误匹配；
    * 仅接受元素为含名称/id 字段的对象的数组，避免误匹配字符串/数字数组
    * @private
    * @param {Object} node - 当前遍历节点
@@ -43,29 +44,36 @@
    */
   JDSUtils._findProductsArray = function _findProductsArray(node, depth) {
     if (depth <= 0 || !node || typeof node !== 'object') return null;
+    let best = null;
     for (const key of Object.keys(node)) {
       const val = node[key];
       if (Array.isArray(val) && val.length && this._isProductLike(val[0])) {
-        return val;
-      }
-      if (val && typeof val === 'object') {
+        // 取元素最多的匹配数组（商品列表通常远大于面包屑/分类等）
+        if (!best || val.length > best.length) best = val;
+      } else if (val && typeof val === 'object') {
         const r = this._findProductsArray(val, depth - 1);
-        if (r) return r;
+        if (r && (!best || r.length > best.length)) best = r;
       }
     }
-    return null;
+    return best;
   };
 
   /**
-   * 判断是否为“商品对象”（含名称或 id 类字段之一）
+   * 判断是否为“商品对象”
+   * 优先要求含 id 类字段；否则要求同时含名称与电商字段（价格/主图/链接），
+   * 以区分面包屑（仅 name）、分类（仅 name）等非商品对象
    * @private
    * @param {*} item
    * @returns {boolean}
    */
   JDSUtils._isProductLike = function _isProductLike(item) {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
-    return !!(item.name || item.title || item.productName ||
-      item.id || item.skuId || item.productId || item.auctionId);
+    const hasId = item.id || item.skuId || item.productId || item.auctionId;
+    if (hasId) return true;
+    const hasName = item.name || item.title || item.productName;
+    const hasCommerce = item.price || item.image || item.imageUrl ||
+      item.imgUrl || item.picUrl || item.url || item.link;
+    return !!(hasName && hasCommerce);
   };
 
   /**

@@ -137,6 +137,18 @@
   };
 
   /**
+   * 展示加载态骨架屏 — 全局商品仍在加载（如详情页延时抓取）时，
+   * 进入搜索态先给出骨架占位而非立即空态，改善感知性能
+   */
+  JDSUI.showLoading = function showLoading() {
+    this._initResultsHost();
+    const panel = this.resultsRoot.querySelector('.jds-results-panel');
+    panel.classList.add('is-visible');
+    this._positionResultsPanel();
+    this.renderSkeletons(8);
+  };
+
+  /**
    * 显示空状态浮层 — 对齐原型空状态设计（图标 + 标题 + 描述）
    * 浮层渲染在结果面板宿主内，样式由 RESULTS_HOST_CSS 提供
    */

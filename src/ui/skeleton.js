@@ -22,8 +22,8 @@
       grid.className = 'jds-product-grid';
       grid.setAttribute('aria-live', 'polite');
       grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
-      grid.style.gap = '12px';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+      grid.style.gap = '16px';
       grid.style.padding = '16px 24px 40px';
       panel.appendChild(grid);
     }
