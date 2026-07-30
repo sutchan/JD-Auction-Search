@@ -20,7 +20,7 @@
     "description": "空状态标题"
   },
   "emptyDesc": {
-    "message": "试试其他关键词，或清除筛选条件",
+    "message": "试试其他关键词，或清除搜索",
     "description": "空状态描述"
   },
   "toastApiFailed": {

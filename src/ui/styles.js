@@ -49,6 +49,10 @@
     `;
 
     return this._getTokensCss() +
+      '\n      /* ===== BASE (shadow only, 不泄漏到页面) ===== */\n      ' +
+      '* { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+      ':host(.jds-inline) { display: inline-flex; flex: 0 1 auto; align-self: center; margin-right: 12px; width: auto; max-width: 100%; }\n' +
+      '.jds-root { font-family: var(--font-sans); color: var(--foreground); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }\n' +
       '\n      /* ===== TOOLBAR ===== */\n      ' +
       toolbarCss + '\n' +
       this._getComponentsCss();

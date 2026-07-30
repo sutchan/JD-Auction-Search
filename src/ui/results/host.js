@@ -23,18 +23,52 @@
       pointer-events: auto;
     }
     #jds-results-host .jds-results-panel.is-visible { display: block; }
+  `;
+
+  // 浅 DOM 结果面板组件样式（仅作用域 #jds-results-host，不污染京东页面）。
+  // 注意：*.jds-* 选择器均带作用域前缀，且无全局 * 重置，避免样式泄漏。
+  // 令牌由 RESULTS_HOST_CSS 之外的注入段（_getTokensCss('#jds-results-host')）提供。
+  const RESULTS_COMPONENT_CSS = `
+    /* Skeleton 骨架屏（对齐原型 shimmer 占位） */
+    #jds-results-host .jds-skeleton-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+    }
+    #jds-results-host .jds-skel {
+      background: linear-gradient(90deg, var(--secondary) 25%, var(--muted) 50%, var(--secondary) 75%);
+      background-size: 200% 100%;
+      animation: jds-shimmer 1.4s infinite;
+    }
+    @keyframes jds-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    #jds-results-host .jds-skel-img { height: 120px; }
+    #jds-results-host .jds-skel-line { height: 10px; margin: 12px; border-radius: var(--radius-sm); }
+    #jds-results-host .jds-skel-line:last-child { width: 50%; margin-bottom: 16px; }
+
+    /* Empty 空状态（对齐原型：居中浮层） */
     #jds-results-host .jds-empty-overlay {
-      position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%);
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
       display: flex; flex-direction: column; align-items: center; gap: 12px;
-      color: #71717a; text-align: center;
-      background: #fff; border: 1px solid #e4e4e7; border-radius: 10px;
-      padding: 48px 64px; box-shadow: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: var(--muted-foreground); text-align: center;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 48px 64px; box-shadow: var(--shadow-md);
+      animation: jds-fadeIn 0.3s var(--ease-out);
       pointer-events: auto;
     }
-    #jds-results-host .jds-empty-icon svg { width: 48px; height: 48px; color: #d4d4d8; }
-    #jds-results-host .jds-empty-title { font-size: 15px; font-weight: 600; color: #18181b; }
-    #jds-results-host .jds-empty-desc { font-size: 13px; }
+    @keyframes jds-fadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) translateY(-8px); }
+      to { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+    }
+    #jds-results-host .jds-empty-icon {
+      width: 56px; height: 56px; border-radius: var(--radius-full);
+      background: var(--secondary); display: grid; place-items: center;
+      margin: 0 auto 16px; color: var(--subtle-foreground);
+    }
+    #jds-results-host .jds-empty-icon svg { width: 26px; height: 26px; }
+    #jds-results-host .jds-empty-title { font-size: 18px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
+    #jds-results-host .jds-empty-desc { font-size: 13px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
+
+    /* Grid 网格兜底（未设置内联样式时） */
+    #jds-results-host .jds-product-grid { display: grid; gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
   `;
 
   /**
@@ -51,11 +85,14 @@
     this.resultsHost = host;
     this.resultsRoot = host;
 
-    // 仅作用于覆盖层外壳的样式；卡片本身由京东全局 CSS 渲染
+    // 浅 DOM 样式：覆盖层外壳 + 设计令牌(#jds-results-host 作用域) + 组件样式(骨架/空状态/网格)
+    // 令牌与工具栏 Shadow 同源(_getTokensCss)，组件样式仅作用域 #jds-results-host，不泄漏到京东页面
     if (!document.getElementById('jds-results-style')) {
       const style = document.createElement('style');
       style.id = 'jds-results-style';
-      style.textContent = RESULTS_HOST_CSS;
+      style.textContent = RESULTS_HOST_CSS + '\n' +
+        this._getTokensCss('#jds-results-host') + '\n' +
+        RESULTS_COMPONENT_CSS;
       document.head.appendChild(style);
     }
 
