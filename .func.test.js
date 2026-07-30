@@ -107,6 +107,18 @@ sandbox.navigator = { language: 'zh-CN', userLanguage: 'zh-CN' };
 // 回归：之前缺失的键曾返回原始键，现在必须返回译文而非键名
 ok('缺失键已修复(非原始键)', U.getMessage('toastNetworkError') !== 'toastNetworkError');
 
+console.log('\n[tokens] 对齐 prototype 浅色令牌');
+const tokHost = UI._getTokensCss();
+const tokLight = UI._getTokensCss('#jds-results-host');
+ok('Shadow 作用域令牌', tokHost.includes(':host {'));
+ok('浅 DOM 作用域令牌', tokLight.includes('#jds-results-host {'));
+ok('令牌含 --primary #e1251b', tokHost.includes('--primary: #e1251b'));
+ok('令牌含 --card #ffffff', tokHost.includes('--card: #ffffff'));
+ok('令牌含 --radius-xl 16px', tokHost.includes('--radius-xl: 16px'));
+ok('令牌含 --radius-2xl 22px', tokHost.includes('--radius-2xl: 22px'));
+ok('令牌含 --shadow-lg', tokHost.includes('--shadow-lg:'));
+ok('令牌含 --info #2563eb', tokHost.includes('--info: #2563eb'));
+
 console.log('\n[paginator] 跨页聚合');
 (async () => {
   A._requestTemplate = { url: 'https://api.jd.com/list?page=1', method: 'GET', headers: {} };

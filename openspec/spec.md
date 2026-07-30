@@ -74,6 +74,8 @@ JD-Auction-Search/
 
 - **Manifest V3** - 现代扩展标准
 - **Shadow DOM** - 样式隔离（工具栏样式内联至 Shadow DOM `:host`）
+- **设计令牌共享** - `tokens._getTokensCss(scope)` 按作用域注入：工具栏用 `:host`，结果面板（浅 DOM）用 `#jds-results-host`，二者共用同一套 prototype 浅色令牌
+- **结果面板用浅 DOM** - 为继承京东原生卡片样式，结果面板覆盖层使用真实 DOM 承载；其组件样式（骨架/空状态/网格）严格作用域 `#jds-results-host`，不泄漏到京东页面
 - **MutationObserver** - DOM变化监听
 - **Fetch/XHR Interceptor** - API拦截
 - **Internationalization (i18n)** - 多语言支持
