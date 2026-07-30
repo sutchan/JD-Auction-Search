@@ -97,11 +97,33 @@
     const titleEl = document.createElement('div');
     titleEl.style.cssText = 'font-size:13px;line-height:1.4;color:#18181b;max-height:36px;overflow:hidden;';
     titleEl.textContent = name;
-    const priceEl = document.createElement('div');
+
+    // 价格行：现价（红色大字）+ 原价（高于现价时划线展示）
+    const priceRow = document.createElement('div');
+    priceRow.style.cssText = 'display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;';
+    const priceEl = document.createElement('span');
     priceEl.style.cssText = 'color:#e1251b;font-weight:600;font-size:16px;';
     priceEl.textContent = '¥' + price;
+    priceRow.appendChild(priceEl);
+
+    const original = U.getProductOriginalPrice(p);
+    if (original && original > Number(price)) {
+      const origEl = document.createElement('span');
+      origEl.style.cssText = 'color:#a1a1aa;font-size:12px;text-decoration:line-through;';
+      origEl.textContent = '¥' + U.formatPrice(original);
+      priceRow.appendChild(origEl);
+    }
     body.appendChild(titleEl);
-    body.appendChild(priceEl);
+    body.appendChild(priceRow);
+
+    // 出价人数（仅在有值且为正时展示）
+    const bidCount = U.getProductBidCount(p);
+    if (bidCount > 0) {
+      const bidEl = document.createElement('div');
+      bidEl.style.cssText = 'color:#71717a;font-size:12px;';
+      bidEl.textContent = bidCount + ' 人出价';
+      body.appendChild(bidEl);
+    }
     card.appendChild(body);
 
     return card;

@@ -31,6 +31,22 @@
       const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
       const price = priceRaw ? Number(priceRaw) : 0;
 
+      // 原价：优先取 class 含 old/original/market/ref 的价格片段（避免与现价同元素）
+      let originalPrice = 0;
+      const origEl = card.querySelector('[class*="old" i], [class*="original" i], [class*="market" i], [class*="ref" i]');
+      if (origEl && origEl !== priceEl) {
+        const oRaw = origEl.textContent.replace(/[^\d.]/g, '');
+        if (oRaw) originalPrice = Number(oRaw);
+      }
+
+      // 出价人数：取 class 含 bid/apply/join/count/报名/出价 的数字片段
+      let bidCount = 0;
+      const bidEl = card.querySelector('[class*="bid" i], [class*="apply" i], [class*="join" i], [class*="count" i], [class*="报名" i], [class*="出价" i]');
+      if (bidEl) {
+        const bRaw = bidEl.textContent.replace(/[^\d]/g, '');
+        if (bRaw) bidCount = Number(bRaw);
+      }
+
       const imgEl = card.querySelector('img');
       const img = imgEl
         ? (imgEl.getAttribute('src') ||
@@ -51,6 +67,8 @@
         name: nameRaw,
         title: nameRaw,
         price,
+        originalPrice,
+        bidCount,
         image: /^https?:|^\/\//i.test(img) ? img : '',
         url: /^https?:|^\/\//i.test(url) ? url : ''
       });

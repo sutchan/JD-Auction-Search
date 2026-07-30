@@ -84,6 +84,66 @@
   };
 
   /**
+   * 从多个可能字段中获取商品原价（市场价/参考价/起拍价），统一归一为数值（单位：元）
+   * 仅作兼容提取；是否展示由渲染层判断（高于现价才划线展示，避免与现价重复）
+   * @param {Object} product - 商品对象
+   * @returns {number}
+   */
+  JDSUtils.getProductOriginalPrice = function getProductOriginalPrice(product) {
+    if (!product || typeof product !== 'object') return 0;
+    const toNum = (v) => {
+      if (typeof v === 'number' && isFinite(v)) return v;
+      if (typeof v === 'string') {
+        const n = parseFloat(v.replace(/[^\d.]/g, ''));
+        return isFinite(n) ? n : null;
+      }
+      return null;
+    };
+    const flat = [
+      product.marketPrice, product.originalPrice, product.originPrice,
+      product.refPrice, product.referencePrice, product.listPrice,
+      product.highPrice, product.startPrice
+    ];
+    for (const f of flat) {
+      const n = toNum(f);
+      if (n !== null && n >= 0) return n;
+    }
+    if (product.priceInfo) {
+      const n = toNum(product.priceInfo.marketPrice ??
+        product.priceInfo.originalPrice ?? product.priceInfo.refPrice);
+      if (n !== null && n >= 0) return n;
+    }
+    return 0;
+  };
+
+  /**
+   * 从多个可能字段中获取商品出价人数（报名/参拍人数），统一归一为整数
+   * @param {Object} product - 商品对象
+   * @returns {number}
+   */
+  JDSUtils.getProductBidCount = function getProductBidCount(product) {
+    if (!product || typeof product !== 'object') return 0;
+    const toNum = (v) => {
+      if (typeof v === 'number' && isFinite(v)) return Math.round(v);
+      if (typeof v === 'string') {
+        const n = parseInt(v.replace(/[^\d]/g, ''), 10);
+        return isFinite(n) ? n : null;
+      }
+      return null;
+    };
+    const flat = [
+      product.bidCount, product.bidNum, product.bidderCount, product.bidUserCount,
+      product.offerCount, product.applyNum, product.applyCount,
+      product.joinCount, product.personCount, product.signUpCount
+    ];
+    for (const f of flat) {
+      const n = toNum(f);
+      if (n !== null && n >= 0) return n;
+    }
+    return 0;
+  };
+
+  /**
    * 从多个可能字段中获取商品详情链接，并做协议白名单校验
    * 无显式链接时按京东拍卖惯例回退为 https://paimai.jd.com/{id}.html
    * @param {Object} product - 商品对象

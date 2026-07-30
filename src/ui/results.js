@@ -136,9 +136,12 @@
     grid.className = 'jds-product-grid';
     grid.setAttribute('aria-live', 'polite');
     grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+    grid.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
     grid.style.gap = '16px';
     grid.style.padding = '16px 24px 40px';
+    // 固定一行 5 个并整体居中（超宽屏下限制最大宽度，避免卡片被拉得过宽）
+    grid.style.maxWidth = '1200px';
+    grid.style.margin = '0 auto';
     panel.appendChild(grid);
     return grid;
   };
