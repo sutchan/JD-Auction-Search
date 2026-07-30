@@ -131,7 +131,7 @@ const body = card.childNodes.find(c => c.className === 'jds-product-body');
 const priceEl = body && body.childNodes.find(c => c.className === 'jds-product-price');
 ok('含 .jds-product-price 子元素', !!priceEl);
 const meta = body && body.childNodes.find(c => c.className === 'jds-product-meta');
-ok('含 .jds-product-meta(原价+出价)', !!meta && meta.childNodes.length === 2);
+ok('含 .jds-product-meta(出价 badge)', !!meta && meta.childNodes.length === 1);
 ok('不含内联 style(由浅 DOM CSS 驱动)', card.style.cssText === undefined || card.style.cssText === '');
 
 console.log('\n[extract] 拍拍 auction.list 真实字段映射');

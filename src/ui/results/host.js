@@ -99,13 +99,20 @@
     }
     #jds-results-host .jds-product-price {
       font-family: var(--font-display); font-size: 18px; font-weight: 400;
-      color: var(--primary); letter-spacing: -0.01em; margin-bottom: 8px;
+      color: var(--primary); letter-spacing: -0.01em; margin-bottom: 6px;
       font-variant-numeric: tabular-nums;
     }
     #jds-results-host .jds-product-price small { font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
-    #jds-results-host .jds-product-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    #jds-results-host .jds-product-orig { color: var(--muted-foreground); font-size: 12px; text-decoration: line-through; }
-    #jds-results-host .jds-product-bid { color: var(--muted-foreground); font-size: 12px; }
+    #jds-results-host .jds-product-price .jds-product-orig {
+      margin-left: 8px; font-size: 12px; color: var(--muted-foreground);
+      text-decoration: line-through; vertical-align: middle;
+    }
+    #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; }
+    #jds-results-host .jds-product-bid {
+      display: inline-flex; align-items: center; padding: 2px 8px;
+      background: var(--secondary); color: var(--muted-foreground);
+      font-size: 11px; border-radius: var(--radius-full);
+    }
 
     /* Grid 网格兜底（未设置内联样式时） */
     #jds-results-host .jds-product-grid { display: grid; gap: 16px; padding: 16px 24px 40px; min-height: 420px; }

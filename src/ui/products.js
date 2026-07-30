@@ -95,7 +95,7 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 价格：现价（红色衬线大字）+ 原价（高于现价时划线展示）
+    // 价格行：现价（红色衬线大字）+ 原价（高于现价时内联划线展示，避免与出价人数混在同一行）
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
     const yen = document.createElement('small');
@@ -105,26 +105,27 @@
     priceEl.appendChild(yen);
     priceEl.appendChild(document.createTextNode(' '));
     priceEl.appendChild(amount);
-    body.appendChild(priceEl);
 
-    // 元信息行：原价 + 出价人数
-    const meta = document.createElement('div');
-    meta.className = 'jds-product-meta';
     const original = U.getProductOriginalPrice(p);
     if (original && original > Number(price)) {
       const origEl = document.createElement('span');
       origEl.className = 'jds-product-orig';
       origEl.textContent = '¥' + U.formatPrice(original);
-      meta.appendChild(origEl);
+      priceEl.appendChild(origEl);
     }
+    body.appendChild(priceEl);
+
+    // 出价人数：独立 badge 行，与价格数字明显区分
     const bidCount = U.getProductBidCount(p);
     if (bidCount > 0) {
+      const meta = document.createElement('div');
+      meta.className = 'jds-product-meta';
       const bidEl = document.createElement('span');
       bidEl.className = 'jds-product-bid';
       bidEl.textContent = bidCount + ' 人出价';
       meta.appendChild(bidEl);
+      body.appendChild(meta);
     }
-    if (meta.childNodes.length) body.appendChild(meta);
 
     card.appendChild(body);
     return card;
