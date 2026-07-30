@@ -12,7 +12,7 @@
    * @param {string} [type='info'] - toast 类型: success | error | info
    */
   JDSUtils.showToast = function showToast(key, type = 'info') {
-    const translationKeys = ['toastEnabled', 'toastDisabled', 'toastApiFailed'];
+    const translationKeys = ['toastApiFailed'];
     const message = translationKeys.includes(key) ? JDSUtils.getMessage(key) : key;
 
     // success/error/info 对应的 SVG 图标
@@ -27,10 +27,7 @@
         '<path d="M12 16v-4M12 8h.01"/></svg>'
     };
 
-    // 启停切换对应类型
-    if (key === 'toastEnabled') type = 'success';
-    else if (key === 'toastDisabled') type = 'error';
-    else if (key === 'toastApiFailed') type = 'error';
+    if (key === 'toastApiFailed') type = 'error';
 
     let stack = document.querySelector('.jds-toast-stack');
     if (!stack) {
@@ -64,15 +61,5 @@
     link.rel = 'stylesheet';
     link.href = chrome.runtime.getURL(cssPath);
     (document.head || document.documentElement).appendChild(link);
-  };
-
-  /**
-   * 安全查询Shadow DOM中的元素
-   * @param {ShadowRoot} shadowRoot - Shadow DOM根
-   * @param {string} selector - 选择器
-   * @returns {HTMLElement|null}
-   */
-  JDSUtils.queryShadowDom = function queryShadowDom(shadowRoot, selector) {
-    return shadowRoot && shadowRoot.querySelector(selector);
   };
 })(window);

@@ -148,6 +148,38 @@ JD-Auction-Search/
 
 ## 版本历史
 
+### 待发布改进（2026-07-30，未升版）
+- 修复跨页搜索失效（critical）：`paginator.js` 末页判定硬编码 50 条阈值，京东拍卖每页仅 20~30 条，导致第 1 页抓取后立刻停止翻页、跨页搜索失效；改为以首页实际条数 `pageSize` 为基准，仅「非首页且条数 < pageSize（真正末页）」或「整页重复」时停止
+- 优化结果面板宽度对齐原生列表：新增 `dom.getProductListContainer`；`results._positionResultsPanel` 测量原生容器设 `left`/`width` 与原始页一致，滚动/缩放时重算
+- 详情页搜索保持全局一致：`content._isDetailPage()` 仅非详情页走 DOM 兜底，详情页只用全局聚合 `state.products`，避免只搜当前详情页
+- `transform.extractProductsFromResponse` 有界递归（深度 4）取「元素最多」的商品数组，兼容 `{data:{list}}` 等嵌套响应，排除面包屑/分类误判
+- `toolbar` 搜索输入 120ms 防抖，减少全量重渲染
+- `products.renderProducts` 单次渲染上限 200 条，超出显示「已显示前 N 条，共 M 条」提示
+- 骨架屏接线：新增 `JDSUI.showLoading()`，`init` 提前置 `isLoading`，搜索态无结果且加载中显示骨架屏
+- `ui-shared` Toast 文案经 `escapeHtml` 转义后注入，纵深防御 XSS
+
+### v1.3.5
+- 修复“清空搜索按钮失效”：结果面板宿主 `#jds-results-host` 为全屏透明覆盖层未设 `pointer-events`，搜索激活时盖住嵌入态工具栏致按钮点击被拦截；现宿主 `pointer-events:none`、面板/空状态 `pointer-events:auto`，工具栏与页面恢复可交互
+
+### v1.3.4
+- 彻底修复“搜索结果不显示”：jsdom 全链路复现确认克隆京东原生卡片在真实页面“尺寸正常却整片空白”，原兜底无法识别；现彻底弃用克隆，统一扩展自带内联样式卡片（图片+标题+价格，京东红），完全脱离京东 DOM/CSS 依赖
+
+### v1.3.3
+- 彻底修复“搜索结果不显示”：京东虚拟列表把克隆卡片内容高度压为 0（`display` 非 `none`），v1.3.2 兜底无法覆盖；现统一自带网格容器 + 实测可见性校验（`display:none` 或 `height===0`）自动回退内联样式卡片
+
+### v1.3.2
+- 修复“搜索后显示空白”：克隆卡片类级 `display:none` 未被覆盖；现挂载后 `getComputedStyle` 检测并兜底为 `block`；空状态补充背景/边框/内边距/阴影
+
+### v1.3.1
+- 进一步拆分超 200 行模块：`styles.js`→`tokens.js`+`components.js`+`styles.js`；`results.js`→`results.js`+`products.js`+`skeleton.js`，`manifest` content_scripts 同步
+- 安全：移除 fallback 卡片内联 `onerror`（MV3 CSP 拦截），改 `img.onerror` 属性绑定
+- 国际化：补充 `zh_TW` 兜底翻译；清理源码全部 `console.log`/`console.warn`
+
+### v1.3.0
+- 源码模块化拆分：utils/api/ui/dom 四个超 200 行单体文件拆分为 17 个子模块，`manifest` content_scripts 同步，运行时行为不变
+- 修复 `:host(.jds-inline)` 被错误嵌套在 `:host {}` 内的 CSS 语法错误与 `renderSkeletons` 调用未定义 `_ensureGrid` 的 TypeError
+- 清理死代码（`API_BASE_URL`/废弃 i18n 键/`storage`/`activeTab` 权限等）
+
 ### v1.2.14
 - 修复商品名称提取脏数据：`extractProductsFromDOM` 标题选择器误命中包裹整卡的 `<a>`，改为优先取 class 化名称元素，仅回退取 `<a>` 的 title 属性
 

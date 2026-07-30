@@ -524,6 +524,18 @@
     .empty-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; margin-bottom: var(--space-2); }
     .empty-desc { font-size: 13px; color: var(--muted-foreground); max-width: 36ch; }
 
+    /* Render cap notice — 对齐扩展 products.renderProducts 的 200 条上限提示 */
+    .result-notice {
+      grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3); font-size: 12px; color: var(--muted-foreground);
+      background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-md);
+    }
+    .result-notice::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .result-notice strong { color: var(--primary); font-weight: 600; }
+
     /* Skeleton */
     .skeleton-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
     .skel { background: linear-gradient(90deg, var(--secondary) 25%, var(--accent) 50%, var(--secondary) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
@@ -1005,7 +1017,7 @@
               <button class="ext-search-btn">搜索</button>
             </div>
           </div>
-          <div class="comp-spec">focus → --primary + ring<br>clear btn conditional<br>aria-label</div>
+          <div class="comp-spec">focus → --primary + ring<br>clear btn conditional<br>input debounce 120ms<br>aria-label</div>
         </div>
         <div class="comp-row">
           <div class="comp-meta"><h4>Card</h4><p>内容容器</p><code>Header + Content + Footer</code></div>
@@ -1241,6 +1253,7 @@
     ];
 
     const STATUS_LABELS = { ongoing: '进行中', upcoming: '即将开始', ending: '即将结束' };
+    const RENDER_CAP = 200; // 对齐扩展 products.renderProducts 单次渲染上限
     const state = { keyword: '' };
 
     // ============================================================
@@ -1329,8 +1342,17 @@
         return;
       }
 
+      const capped = filtered.length > RENDER_CAP;
+      const visible = capped ? filtered.slice(0, RENDER_CAP) : filtered;
+
       grid.innerHTML = '';
-      filtered.forEach((p, i) => {
+      if (capped) {
+        const notice = document.createElement('div');
+        notice.className = 'result-notice';
+        notice.innerHTML = `已显示前 <strong>${visible.length}</strong> 条，共 <strong>${filtered.length}</strong> 条`;
+        grid.appendChild(notice);
+      }
+      visible.forEach((p, i) => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.style.animationDelay = `${i * 0.03}s`;
@@ -1355,10 +1377,13 @@
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearBtn');
 
+    let debounceTimer;
     searchInput.addEventListener('input', (e) => {
-      state.keyword = e.target.value.trim();
-      clearBtn.classList.toggle('is-visible', state.keyword.length > 0);
-      renderProducts();
+      const val = e.target.value.trim();
+      clearBtn.classList.toggle('is-visible', val.length > 0);
+      state.keyword = val;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(renderProducts, 120); // 对齐扩展 toolbar 120ms 防抖
     });
 
     searchInput.addEventListener('keydown', (e) => {

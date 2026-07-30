@@ -78,15 +78,6 @@
   };
 
   /**
-   * 获取页面上第一个原生商品卡片（作为克隆模板，用于让搜索结果外观与原始页面一致）
-   * @returns {HTMLElement|null}
-   */
-  JDSDom.getFirstProductCard = function getFirstProductCard() {
-    const cards = this._getProductContainers();
-    return cards.length ? cards[0] : null;
-  };
-
-  /**
    * 隐藏原生商品列表 — 多页面搜索模式下，结果由扩展结果面板渲染
    */
   JDSDom.hideNativeProducts = function hideNativeProducts() {

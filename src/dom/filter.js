@@ -6,6 +6,14 @@
 
   const JDSDom = global.JDSDom = global.JDSDom || {};
 
+  // 列表容器与商品卡片选择器（_getProductContainers / getProductListContainer 共用）
+  const LIST_CONTAINER_SELECTORS = [
+    '[class*="goods-list" i]', '[class*="auction-list" i]', '[class*="product-list" i]',
+    '[class*="list" i]', '[class*="grid" i]', '[class*="goods" i]'
+  ];
+  const CARD_SELECTOR = '[class*="auction-item" i], [class*="product-item" i], [class*="goods-item" i], ' +
+    '[class*="auction-card" i], [class*="product-card" i], [class*="goods-card" i]';
+
   /**
    * 更新页面上的商品展示
    * @param {Object} state - 应用状态
@@ -43,7 +51,7 @@
       }
 
       // 如果没有匹配到产品，检查关键词直接匹配
-      if (!shouldShow && state.keyword) {
+      if (!shouldShow) {
         shouldShow = containerText.includes(state.keyword.toLowerCase());
       }
 
@@ -59,18 +67,11 @@
    * @returns {Array<HTMLElement>}
    */
   JDSDom._getProductContainers = function _getProductContainers() {
-    const listContainerSelectors = [
-      '[class*="goods-list" i]', '[class*="auction-list" i]', '[class*="product-list" i]',
-      '[class*="list" i]', '[class*="grid" i]', '[class*="goods" i]'
-    ];
-    const cardSelector = '[class*="auction-item" i], [class*="product-item" i], [class*="goods-item" i], ' +
-      '[class*="auction-card" i], [class*="product-card" i], [class*="goods-card" i]';
-
     let cards = [];
-    for (const sel of listContainerSelectors) {
+    for (const sel of LIST_CONTAINER_SELECTORS) {
       const container = document.querySelector(sel);
       if (container) {
-        const found = container.querySelectorAll(cardSelector);
+        const found = container.querySelectorAll(CARD_SELECTOR);
         if (found.length) {
           cards = Array.from(found);
           break;
@@ -97,17 +98,10 @@
    * @returns {HTMLElement|null}
    */
   JDSDom.getProductListContainer = function getProductListContainer() {
-    const listContainerSelectors = [
-      '[class*="goods-list" i]', '[class*="auction-list" i]', '[class*="product-list" i]',
-      '[class*="list" i]', '[class*="grid" i]', '[class*="goods" i]'
-    ];
-    const cardSelector = '[class*="auction-item" i], [class*="product-item" i], [class*="goods-item" i], ' +
-      '[class*="auction-card" i], [class*="product-card" i], [class*="goods-card" i]';
-
     let container = null;
-    for (const sel of listContainerSelectors) {
+    for (const sel of LIST_CONTAINER_SELECTORS) {
       const el = document.querySelector(sel);
-      if (el && el.querySelectorAll(cardSelector).length) {
+      if (el && el.querySelectorAll(CARD_SELECTOR).length) {
         container = el;
         break;
       }
@@ -115,7 +109,7 @@
 
     // 回退：取首个商品卡片的父容器
     if (!container) {
-      const firstCard = document.querySelector(cardSelector);
+      const firstCard = document.querySelector(CARD_SELECTOR);
       container = firstCard ? firstCard.parentElement : null;
     }
 

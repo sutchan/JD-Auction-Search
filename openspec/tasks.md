@@ -2,6 +2,17 @@
 
 ## 已完成任务
 
+### 待发布改进（2026-07-30，未升版）
+- [x] 修复跨页搜索失效（critical）：`paginator.js` 末页判定硬编码 50 条阈值，京东每页仅 20~30 条导致第 1 页后停止翻页；改为以首页 `pageSize` 为基准，仅真正末页或整页重复时停止
+- [x] 结果面板宽度对齐原生列表：新增 `dom.getProductListContainer`，`results._positionResultsPanel` 测量原生容器设 `left`/`width` 与原始页一致（滚动/缩放重算）
+- [x] 详情页搜索保持全局一致：`content._isDetailPage()` 仅非详情页走 DOM 兜底，详情页只用全局聚合数据
+- [x] `transform.extractProductsFromResponse` 有界递归（深度 4）取元素最多的商品数组，兼容嵌套响应、排除面包屑/分类误判
+- [x] `toolbar` 搜索输入 120ms 防抖，减少全量重渲染
+- [x] `products.renderProducts` 单次渲染上限 200 条，超出显示「已显示前 N 条，共 M 条」
+- [x] 骨架屏接线：新增 `JDSUI.showLoading()`，`init` 提前置 `isLoading`，搜索态无结果且加载中显示骨架屏
+- [x] `ui-shared` Toast 文案经 `escapeHtml` 转义注入，纵深防御 XSS
+- [x] 代码审查（code-reviewer 技能）：11 处超长行折行清零；为魔法数字补常量说明（DEBOUNCE_MS / maxPages=30 / 加载延时）
+
 ### v1.3.5
 - [x] 修复“清空搜索按钮失效”：结果面板宿主全屏透明覆盖层未设 pointer-events，搜索激活时盖住嵌入态工具栏致按钮点击被拦截；现宿主 pointer-events:none、面板/空状态 pointer-events:auto，工具栏与页面恢复可交互
 

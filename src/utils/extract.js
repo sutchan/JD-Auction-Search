@@ -25,24 +25,6 @@
   };
 
   /**
-   * 检查商品是否正在进行中
-   * @param {Object} product - 商品对象
-   * @returns {boolean}
-   */
-  JDSUtils.isOngoing = function isOngoing(product) {
-    return product.status === 1 || product.state === 'ongoing' || product.auctionStatus === 1;
-  };
-
-  /**
-   * 检查商品是否即将开始
-   * @param {Object} product - 商品对象
-   * @returns {boolean}
-   */
-  JDSUtils.isUpcoming = function isUpcoming(product) {
-    return product.status === 0 || product.state === 'upcoming' || product.auctionStatus === 0;
-  };
-
-  /**
    * 从多个可能字段中获取商品主图 URL
    * 兼容京东拍卖常见字段；仅允许 http/https/协议相对/绝对路径，防止注入非法 scheme
    * @param {Object} product - 商品对象

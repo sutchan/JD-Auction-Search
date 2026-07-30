@@ -30,7 +30,6 @@
     container.innerHTML = this._getUIMarkup();
     this.shadowRoot.appendChild(container);
 
-    this.gridElement = container.querySelector('.jds-product-grid');
     this._bindEvents(container, state, handlers);
 
     // 挂载：优先嵌入夺宝岛页面的 auction_head 容器，页面 header 可能延迟渲染则重试，最终回退为浮动条
@@ -96,7 +95,7 @@
 
   /**
    * 获取UI HTML — 对齐原型的 ext-toolbar 组件结构
-   * 真实扩展只注入工具栏；商品由京东页面自身渲染，由 JDSDom 过滤
+   * 真实扩展只注入工具栏；商品由扩展自带内联卡片渲染（见 products.js），不再依赖京东原生 DOM
    * @private
    * @returns {string}
    */

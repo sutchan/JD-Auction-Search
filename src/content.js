@@ -28,7 +28,7 @@
       });
 
       // 拦截API
-      JDSApi.interceptApi(this.state, (data, url) => this._handleApiResponse(data, url));
+      JDSApi.interceptApi(this.state, (data) => this._handleApiResponse(data));
 
       // 观察DOM变化
       JDSDom.observeDOM(this.state, () => {
@@ -49,7 +49,7 @@
      * 处理API响应
      * @private
      */
-    _handleApiResponse(data, url) {
+    _handleApiResponse(data) {
       const products = JDSUtils.extractProductsFromResponse(data);
 
       if (products.length > 0) {

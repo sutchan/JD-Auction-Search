@@ -28,14 +28,7 @@
     this.hideEmptyState();
 
     // 扩展自带网格容器（内联样式，完全独立于京东列表布局）
-    const grid = document.createElement('div');
-    grid.className = 'jds-product-grid';
-    grid.setAttribute('aria-live', 'polite');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(200px,1fr))';
-    grid.style.gap = '16px';
-    grid.style.padding = '16px 24px 40px';
-    panel.appendChild(grid);
+    const grid = this._createGrid(panel);
     this.gridElement = grid;
 
     // 限制单次渲染数量，避免全局命中上千条时一次性生成大量卡片导致页面卡死

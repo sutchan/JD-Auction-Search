@@ -43,8 +43,6 @@
         'searchButton': '搜索',
         'emptyTitle': '未找到匹配商品',
         'emptyDesc': '试试其他关键词，或清除筛选条件',
-        'toastEnabled': '插件已启用',
-        'toastDisabled': '插件已禁用',
         'toastApiFailed': 'API加载失败，将依赖页面内容'
       },
       'zh-TW': {
@@ -52,8 +50,6 @@
         'searchButton': '搜索',
         'emptyTitle': '未找到匹配商品',
         'emptyDesc': '試試其他關鍵詞，或清除篩選條件',
-        'toastEnabled': '插件已啟用',
-        'toastDisabled': '插件已禁用',
         'toastApiFailed': 'API加載失敗，將依賴頁面內容'
       }
     };

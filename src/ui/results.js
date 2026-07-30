@@ -115,14 +115,40 @@
   };
 
   /**
-   * 展示跨页搜索结果（渲染到结果面板）
-   * @param {Array} products - 过滤后的商品
+   * 初始化结果面板宿主并使其可见（showResults/showLoading 的公共前置逻辑）
+   * @private
    */
-  JDSUI.showResults = function showResults(products) {
+  JDSUI._revealPanel = function _revealPanel() {
     this._initResultsHost();
     const panel = this.resultsRoot.querySelector('.jds-results-panel');
     panel.classList.add('is-visible');
     this._positionResultsPanel();
+  };
+
+  /**
+   * 在结果面板内创建扩展自带的网格容器（内联样式，独立于京东列表布局）
+   * products.js 与 skeleton.js 共用，避免网格样式重复定义
+   * @private
+   * @returns {HTMLElement}
+   */
+  JDSUI._createGrid = function _createGrid(panel) {
+    const grid = document.createElement('div');
+    grid.className = 'jds-product-grid';
+    grid.setAttribute('aria-live', 'polite');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+    grid.style.gap = '16px';
+    grid.style.padding = '16px 24px 40px';
+    panel.appendChild(grid);
+    return grid;
+  };
+
+  /**
+   * 展示跨页搜索结果（渲染到结果面板）
+   * @param {Array} products - 过滤后的商品
+   */
+  JDSUI.showResults = function showResults(products) {
+    this._revealPanel();
     this.renderProducts(products);
   };
 
@@ -141,10 +167,7 @@
    * 进入搜索态先给出骨架占位而非立即空态，改善感知性能
    */
   JDSUI.showLoading = function showLoading() {
-    this._initResultsHost();
-    const panel = this.resultsRoot.querySelector('.jds-results-panel');
-    panel.classList.add('is-visible');
-    this._positionResultsPanel();
+    this._revealPanel();
     this.renderSkeletons(8);
   };
 
