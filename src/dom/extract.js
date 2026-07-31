@@ -65,7 +65,7 @@
       if (urlMatch) id = urlMatch[1];
       if (!id) id = this._cardIdFallback(card, nameRaw);
 
-      products.push({
+      const product = {
         id,
         name: nameRaw,
         title: nameRaw,
@@ -74,7 +74,18 @@
         bidCount,
         image: /^https?:|^\/\//i.test(img) ? img : '',
         url: /^https?:|^\/\//i.test(url) ? url : ''
-      });
+      };
+      // 映射到接口路径的规范字段，使统一渲染层（extract.js / products.js）正确识别：
+      // - 有出价(bidCount>0) → 现价 currentPrice；无出价 → 起拍价 startPrice（currentPrice 留空）
+      // - 划线原价 originalPrice → cappedPrice；出价人数 bidCount → recordCount
+      if (bidCount > 0) {
+        product.currentPrice = price;
+      } else {
+        product.startPrice = price;
+      }
+      if (originalPrice > 0) product.cappedPrice = originalPrice;
+      if (bidCount > 0) product.recordCount = bidCount;
+      products.push(product);
     });
 
     return products;

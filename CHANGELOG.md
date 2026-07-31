@@ -8,6 +8,9 @@
 - 修复搜索结果价格显示错误：字段名对齐京东拍拍 `auction.list` 真实接口——现价 `currentPrice`（未开拍回退 `startPrice`）、原价 `cappedPrice`（页面 `origin-price`）、出价人数 `recordCount`、主图 `primaryPic` 拼 `m.360buyimg.com` CDN、详情链接 `1paipai.jd.com/auction-detail/{id}`；DOM 兜底同步匹配 `origin-price`
 - 优化搜索结果价格布局：将「现价 + 原价」聚合在同一价格行（红色现价 + 灰色删除线原价），「出价人数」独立为 badge/pill，避免三者视觉混排
 - 修复起拍价/封顶价混淆：未开拍商品(currentPrice 为 null)此前被当成「现价」显示，与封顶价(cappedPrice)并排造成误混。现未开拍时显式标注「起拍」前缀、封顶价标注「封顶」且不划线，有出价时仍显示现价 + 划线原价
+- 起拍价/封顶价分开成行：将封顶价（未开拍）或原价（有出价）从价格行内移到独立 `.jds-product-subprice` 行，与原价划线样式解耦，避免与现价同行混排；`.func.test.js` 新增 4 条卡片布局断言（共 34 条通过）
+- 修复卡片标题双重 HTML 转义：`products.js` 对标题先 `escapeHtml` 再赋 `textContent`，导致含 `& < >` 的标题被原样显示成 `&amp; &lt; &gt;`；`textContent` 本已防 XSS，移除多余的 `escapeHtml`
+- 修复 DOM 兜底字段名不匹配：搜索降级路径（接口拦截失败/JSONP）`extractProductsFromDOM` 输出 `price/originalPrice/bidCount`，而统一渲染层只读 `currentPrice/cappedPrice/recordCount`，导致所有兜底卡片被误标「起拍」、原价被当「封顶」。现按出价情况映射：有出价→`currentPrice`、无出价→`startPrice`、`originalPrice`→`cappedPrice`、`bidCount`→`recordCount`，与接口路径语义一致
 - 优化结果面板宽度对齐原生列表、详情页全局搜索一致性、`transform` 有界递归、`toolbar` 防抖、`products` 渲染上限、骨架屏接线、Toast `escapeHtml` 转义
 
 ## v1.3.5

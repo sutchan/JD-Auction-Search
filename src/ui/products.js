@@ -56,7 +56,9 @@
    */
   JDSUI._buildOwnCard = function _buildOwnCard(p) {
     const U = global.JDSUtils;
-    const name = U.escapeHtml(U.getProductName(p) || '');
+    // 注：标题经 textContent 赋值（不会被解析为 HTML，本身防 XSS），无需 escapeHtml，
+    // 否则已转义的 &amp;/&lt; 会被原样显示成乱码
+    const name = U.getProductName(p) || '';
     const image = U.getProductImage(p);
     const url = U.getProductUrl(p);
 
