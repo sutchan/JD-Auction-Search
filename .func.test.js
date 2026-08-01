@@ -164,21 +164,22 @@ ok('现价 null→起拍价', U.getProductPrice({ currentPrice: null, startPrice
 // 无 cappedPrice 时兼容回退 maxPrice
 ok('无 cappedPrice→maxPrice', U.getProductOriginalPrice({ maxPrice: 199, currentPrice: 50 }) === 199);
 
-console.log('\n[product card] 起拍价/封顶价分开显示');
+console.log('\n[product card] 仅显示现价(无封顶/原价次行)');
 const cardBid = UI._buildOwnCard({ id: 1, name: 'x', currentPrice: 46, cappedPrice: 238, recordCount: 2 });
 ok('有出价：现价不含"起拍"标签', !/起拍/.test(cardBid.textContent));
 const bodyBid = cardBid.childNodes.find(c => c.className === 'jds-product-body');
-ok('有出价：原价独立成行(.jds-product-subprice)', !!bodyBid.childNodes.find(c => c.className === 'jds-product-subprice'));
+ok('有出价：不渲染封顶/原价次行(.jds-product-subprice)', !bodyBid.childNodes.find(c => c.className === 'jds-product-subprice'));
+ok('有出价：主价显示 46', /46/.test(cardBid.textContent) && !/238/.test(cardBid.textContent));
 const cardStart = UI._buildOwnCard({ id: 2, name: 'y', currentPrice: null, startPrice: 1, cappedPrice: 238 });
 ok('未开拍：标注"起拍"', /起拍/.test(cardStart.textContent));
 const bodyStart = cardStart.childNodes.find(c => c.className === 'jds-product-body');
-ok('未开拍：封顶价独立成行(.jds-product-subprice)', !!bodyStart.childNodes.find(c => c.className === 'jds-product-subprice') && /封顶/.test(cardStart.textContent));
+ok('未开拍：不渲染封顶次行', !bodyStart.childNodes.find(c => c.className === 'jds-product-subprice'));
 
 console.log('\n[price] 脏数据/异常回归');
-// 仅 cappedPrice 有值：此前现价回退 0 → 空价卡片；现应取封顶价作主价并标「封顶」
+// 仅 cappedPrice 有值：此前现价回退 0 → 空价卡片；现应取封顶价作主价（仅显示现价，不标"封顶"）
 const cardCapOnly = UI._buildOwnCard({ id: 3, name: 'z', cappedPrice: 199 });
 ok('仅封顶价：主价非 ¥0', !/¥0/.test(cardCapOnly.textContent) && /199/.test(cardCapOnly.textContent));
-ok('仅封顶价：标注"封顶"而非"起拍"', /封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
+ok('仅封顶价：不标"封顶"也不标"起拍"', !/封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
 // 流拍：currentPrice 为 0（有效现价）不应误判为未开拍标「起拍」
 const cardZero = UI._buildOwnCard({ id: 4, name: 'w', currentPrice: 0, cappedPrice: 100 });
 ok('流拍 currentPrice:0：不标"起拍"', !/起拍/.test(cardZero.textContent) && /¥\s*0/.test(cardZero.textContent));

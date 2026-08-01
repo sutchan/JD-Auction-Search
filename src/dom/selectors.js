@@ -46,8 +46,9 @@
       // 模糊回退：仅当精确类未命中时使用，且排除明显非商品名
       '[class*="name" i]:not([class*="user" i]):not([class*="nick" i]):not([class*="account" i]):not([class*="shop" i])'
     ]),
-    // 价格元素（排除划线原价）
-    PRICE: '[class*="price" i]',
+    // 价格元素：优先京东精确现价类 .p-price（与页面实际显示现价一致），
+    // 其次宽泛 [class*="price"]（仍排除划线原价）；用户要求价格只取 p-price 现价
+    PRICE: '.p-price, [class*="p-price" i], [class*="price-current" i], [class*="current-price" i], [class*="price" i]',
     ORIGIN: '[class*="old" i], [class*="original" i], [class*="origin" i], [class*="market" i], [class*="ref" i]',
     BID: '[class*="bid" i], [class*="apply" i], [class*="join" i], [class*="count" i], [class*="报名" i], [class*="出价" i]',
     IMG: 'img'

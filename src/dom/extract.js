@@ -36,9 +36,12 @@
       }
       if (!nameRaw || nameRaw.length < 2 || nameRaw.length > 200) return;
 
-      // 现价：取 class 含 price 且非 origin(划线原价) 的元素；优先 current-price
+      // 现价：优先京东精确现价元素 .p-price（页面实际显示现价），
+      // 其次取其它 class 含 price 且非 origin(划线原价) 的元素，保证价格等于 span.p-price
+      const pPriceEl = card.querySelector('.p-price, [class*="p-price" i]');
       const priceEls = card.querySelectorAll(this.SELECTORS.PRICE);
-      const priceEl = Array.from(priceEls).find(e => !/origin/i.test(e.className))
+      const priceEl = (pPriceEl && !/origin/i.test(pPriceEl.className) ? pPriceEl
+        : Array.from(priceEls).find(e => !/origin/i.test(e.className)))
         || priceEls[0] || null;
       const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
       const price = priceRaw ? Number(priceRaw) : 0;
