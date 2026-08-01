@@ -45,6 +45,7 @@
     if (!root) return;
     if (!this.emptyElement) {
       this.emptyElement = document.createElement('div');
+      this.emptyElement.id = 'jds-empty-overlay';
       this.emptyElement.className = 'jds-empty-overlay';
       this.emptyElement.setAttribute('role', 'status');
       this.emptyElement.innerHTML = `

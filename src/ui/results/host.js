@@ -160,6 +160,7 @@
     }
 
     const panel = document.createElement('div');
+    panel.id = 'jds-results-panel';
     panel.className = 'jds-results-panel';
     panel.setAttribute('role', 'region');
     panel.setAttribute('aria-label', '搜索结果');
@@ -248,6 +249,7 @@
    */
   JDSUI._createGrid = function _createGrid(panel) {
     const grid = document.createElement('div');
+    grid.id = 'jds-product-grid';
     grid.className = 'jds-product-grid';
     grid.setAttribute('aria-live', 'polite');
     grid.style.display = 'grid';

@@ -26,6 +26,7 @@
 
     // 工具栏容器
     const container = document.createElement('div');
+    container.id = 'jds-toolbar-root';
     container.className = 'jds-root';
     container.innerHTML = this._getUIMarkup();
     this.shadowRoot.appendChild(container);

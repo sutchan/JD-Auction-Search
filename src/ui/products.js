@@ -53,6 +53,7 @@
     if (oldBtn) oldBtn.remove();
     if (rendered < total) {
       const btn = document.createElement('button');
+      btn.id = 'jds-load-more';
       btn.className = 'jds-load-more';
       btn.type = 'button';
       btn.textContent = `加载更多（已显示 ${rendered} / ${total}）`;
@@ -80,6 +81,9 @@
 
     const card = document.createElement('a');
     card.className = 'jds-product-card';
+    // 语义化 id：优先用商品 id，回退到标题（便于调试时从 DOM 直接定位具体商品）
+    const cardId = (p && (p.id != null ? p.id : p.productId));
+    card.id = 'jds-card-' + (cardId != null ? String(cardId) : encodeURIComponent(name || 'unknown'));
     card.href = url || 'javascript:void(0)';
     if (url) {
       card.target = '_blank';

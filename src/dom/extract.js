@@ -118,7 +118,14 @@
     if (!name || typeof name !== 'string') return null;
     const target = name.trim();
     if (target.length < 2) return null;
-    const cards = this._getProductContainers();
+    let cards;
+    try {
+      cards = this._getProductContainers();
+    } catch (e) {
+      // 非浏览器/测试环境下容器查询不可用时安全回退
+      return null;
+    }
+    if (!cards || typeof cards.forEach !== 'function') return null;
     for (const card of cards) {
       let cardName = '';
       for (const sel of this.SELECTORS.NAME) {

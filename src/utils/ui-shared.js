@@ -32,6 +32,7 @@
     let stack = document.querySelector('.jds-toast-stack');
     if (!stack) {
       stack = document.createElement('div');
+      stack.id = 'jds-toast-stack';
       stack.className = 'jds-toast-stack';
       stack.setAttribute('role', 'status');
       stack.setAttribute('aria-live', 'polite');

@@ -15,6 +15,8 @@
 - UI 细节：Toast 日志窗口左缘对齐可见的左侧结果面板列（与左侧商品栏同宽对齐），无面板时回退居中；工具栏新增实时匹配计数（共 N 件）；原型 index.html 同步字号与版本至 v1.5.0
 - 修复价格显示异常：仅 `cappedPrice` 有值时主价不再回退 ¥0（`getProductPrice` 兜底取封顶/参考价）；流拍 `currentPrice:0` 不再误判为未开拍标「起拍」（`products.js` 改用 `currentPrice != null` 判据）；区分「起拍/封顶/仅封顶」三种语义，避免同一数字重复显示；`formatPrice` 非有限值(NaN/Infinity/undefined)兜底为 0 杜绝「¥NaN」；`.func.test.js` 新增 9 条脏数据/异常回归断言
 - 价格只显示现价（span.p-price）：搜索结果卡片仅渲染一个现价，移除封顶价/划线原价次价格行（`products.js`）；DOM 提取现价优先取京东精确现价元素 `.p-price`（`selectors.js` PRICE / `dom/extract.js`），确保兜底路径价格等于页面 `p-price` 实际显示值；未开拍仍保留「起拍」标签作为现价语义修饰
+- 修复价格仍不准：渲染价格改为优先使用页面原生卡片 `span.p-price` 实际文本（新增 `JDSDom.getProductPriceText` 按名称回查，原生列表隐藏时 textContent 仍可读取），彻底不再依赖接口字段名/单位(分/元)猜测；DOM 提取同步存 `priceText` 原文；无对应原生卡片时回退 `formatPrice(currentPrice)`，避免单位误差导致的 ¥128,800 等错价
+- 调试友好：为所有动态容器补充语义化 id——`#jds-search-wrapper`、`#jds-toolbar-root`、`#jds-results-host`、`#jds-results-panel`、`#jds-product-grid`、`#jds-empty-overlay`、`#jds-toast-stack`、`#jds-load-more`，商品卡片 `id="jds-card-{id|name}"`，便于 DevTools 直接定位
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）

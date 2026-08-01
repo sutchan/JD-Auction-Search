@@ -67,7 +67,7 @@ ok('出价人数→recordCount 映射', prods[0] && prods[0].recordCount === 3);
 ok('详情链接保留', prods[0] && prods[0].url.includes('123456'));
 
 // getProductPriceText：按名称回查页面原生卡片 .p-price 实际文本（价格只显示 p-price）
-document.body.innerHTML += `
+document.body.innerHTML = `
   <div class="goods-list">
     <div class="auction-item">
       <div class="product-name">价格回查商品</div>
