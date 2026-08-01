@@ -90,6 +90,11 @@
       const n = toNum(product.priceInfo.currentPrice ?? product.priceInfo.price);
       if (n !== null && n >= 0) return n;
     }
+    // 最后兜底：常规价格字段全缺失时，谨慎回退封顶/参考价(cappedPrice/maxPrice)，
+    // 避免出现「¥0」空价卡片；调用方(products.js)会据 currentPrice 是否存在区分
+    // 「起拍」与「封顶」语义，此处仅保证有值可显示。
+    const fallback = toNum(product.cappedPrice) ?? toNum(product.maxPrice);
+    if (fallback !== null && fallback >= 0) return fallback;
     return 0;
   };
 

@@ -112,11 +112,17 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 主价格行：有出价显示「现价」(currentPrice)，未开拍显示「起拍价」(startPrice)，
-    // 并标注「起拍」前缀；封顶价/原价单独成行(见下)，与起拍价明确分开显示
+    // 主价格行语义判定（修复价格显示异常）：
+    // - hasCurrent: 接口给出 currentPrice（含 0，流拍亦算有效现价，不再误判为未开拍）
+    // - hasStart: 无 currentPrice 但有 startPrice → 未开拍「起拍价」
+    // - 均缺失但 cappedPrice 有值: 用封顶/参考价作主价，标注「封顶」(避免 ¥0 空卡)
     const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
-    const isStarting = !(rawCurrent != null && rawCurrent > 0);
-    const current = isStarting ? U.getProductPrice(p) : rawCurrent;
+    const hasCurrent = rawCurrent != null;
+    const startPrice = (p && p.startPrice != null) ? Number(p.startPrice) : null;
+    const isStarting = !hasCurrent && startPrice != null && startPrice > 0;
+    const isCapOnly = !hasCurrent && !isStarting; // 仅封顶价可用
+    const current = isStarting ? startPrice
+      : (hasCurrent ? rawCurrent : U.getProductPrice(p));
 
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
@@ -124,6 +130,11 @@
       const tag = document.createElement('small');
       tag.className = 'jds-price-tag';
       tag.textContent = '起拍';
+      priceEl.appendChild(tag);
+    } else if (isCapOnly) {
+      const tag = document.createElement('small');
+      tag.className = 'jds-price-tag';
+      tag.textContent = '封顶';
       priceEl.appendChild(tag);
     }
     const yen = document.createElement('small');
@@ -136,9 +147,9 @@
     body.appendChild(priceEl);
 
     // 次价格行：封顶价(cappedPrice)独立成行，与起拍价/现价分开显示；
-    // 有出价时作「原价」划线参考，未开拍时标「封顶」且不划线(价格上限而非折扣原价)
+    // 有出价时作「原价」划线参考，未开拍/仅封顶时不再重复展示(主行已含封顶)
     const capped = U.getProductOriginalPrice(p);
-    if (capped && capped > current) {
+    if (capped && capped > current && !isCapOnly) {
       const sub = document.createElement('div');
       sub.className = 'jds-product-subprice';
       const subEl = document.createElement('span');

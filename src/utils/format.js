@@ -26,7 +26,9 @@
    * @returns {string}
    */
   JDSUtils.formatPrice = function formatPrice(n) {
-    const num = Number(n) || 0;
+    const num = Number(n);
+    // 非有限数（NaN/Infinity/undefined）兜底为 0，避免卡片显示 "NaN"
+    if (!isFinite(num)) return '0';
     return num.toLocaleString('zh-CN', {
       minimumFractionDigits: Number.isInteger(num) ? 0 : 2,
       maximumFractionDigits: 2

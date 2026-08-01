@@ -174,6 +174,23 @@ ok('未开拍：标注"起拍"', /起拍/.test(cardStart.textContent));
 const bodyStart = cardStart.childNodes.find(c => c.className === 'jds-product-body');
 ok('未开拍：封顶价独立成行(.jds-product-subprice)', !!bodyStart.childNodes.find(c => c.className === 'jds-product-subprice') && /封顶/.test(cardStart.textContent));
 
+console.log('\n[price] 脏数据/异常回归');
+// 仅 cappedPrice 有值：此前现价回退 0 → 空价卡片；现应取封顶价作主价并标「封顶」
+const cardCapOnly = UI._buildOwnCard({ id: 3, name: 'z', cappedPrice: 199 });
+ok('仅封顶价：主价非 ¥0', !/¥0/.test(cardCapOnly.textContent) && /199/.test(cardCapOnly.textContent));
+ok('仅封顶价：标注"封顶"而非"起拍"', /封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
+// 流拍：currentPrice 为 0（有效现价）不应误判为未开拍标「起拍」
+const cardZero = UI._buildOwnCard({ id: 4, name: 'w', currentPrice: 0, cappedPrice: 100 });
+ok('流拍 currentPrice:0：不标"起拍"', !/起拍/.test(cardZero.textContent) && /¥0/.test(cardZero.textContent));
+// 现价优先级：currentPrice 存在时不被 cappedPrice 覆盖
+ok('现价优先 cappedPrice', U.getProductPrice({ currentPrice: 50, cappedPrice: 200 }) === 50);
+// 兜底：常规价格字段全缺失时回退封顶价（不再返回 0）
+ok('无现价字段→回退封顶价', U.getProductPrice({ cappedPrice: 199 }) === 199);
+// formatPrice 非有限值兜底为 0，杜绝 "NaN"
+ok('formatPrice(NaN)→0', U.formatPrice(NaN) === '0');
+ok('formatPrice(undefined)→0', U.formatPrice(undefined) === '0');
+ok('formatPrice(Infinity)→0', U.formatPrice(Infinity) === '0');
+
 console.log('\n[paginator] 跨页聚合');
 (async () => {
   A._requestTemplate = { url: 'https://api.jd.com/list?page=1', method: 'GET', headers: {} };
