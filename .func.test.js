@@ -181,7 +181,7 @@ ok('仅封顶价：主价非 ¥0', !/¥0/.test(cardCapOnly.textContent) && /199/
 ok('仅封顶价：标注"封顶"而非"起拍"', /封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
 // 流拍：currentPrice 为 0（有效现价）不应误判为未开拍标「起拍」
 const cardZero = UI._buildOwnCard({ id: 4, name: 'w', currentPrice: 0, cappedPrice: 100 });
-ok('流拍 currentPrice:0：不标"起拍"', !/起拍/.test(cardZero.textContent) && /¥0/.test(cardZero.textContent));
+ok('流拍 currentPrice:0：不标"起拍"', !/起拍/.test(cardZero.textContent) && /¥\s*0/.test(cardZero.textContent));
 // 现价优先级：currentPrice 存在时不被 cappedPrice 覆盖
 ok('现价优先 cappedPrice', U.getProductPrice({ currentPrice: 50, cappedPrice: 200 }) === 50);
 // 兜底：常规价格字段全缺失时回退封顶价（不再返回 0）

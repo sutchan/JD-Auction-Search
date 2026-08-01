@@ -13,6 +13,7 @@
 - 构建：build.js 新增文件头版本自动同步（从 manifest.version 注入 src 首行），避免多文件版本手动同步漏改
 - UI 易用性：整体放大字号——搜索栏输入/按钮(13→15/12→14)、商品名/价格(12/18→14/22)、骨架屏与空状态字号同步放大、卡片图片高度(120→140)、加载更多按钮尺寸加大；工具栏内边距同步放宽
 - UI 细节：Toast 日志窗口左缘对齐可见的左侧结果面板列（与左侧商品栏同宽对齐），无面板时回退居中；工具栏新增实时匹配计数（共 N 件）；原型 index.html 同步字号与版本至 v1.5.0
+- 修复价格显示异常：仅 `cappedPrice` 有值时主价不再回退 ¥0（`getProductPrice` 兜底取封顶/参考价）；流拍 `currentPrice:0` 不再误判为未开拍标「起拍」（`products.js` 改用 `currentPrice != null` 判据）；区分「起拍/封顶/仅封顶」三种语义，避免同一数字重复显示；`formatPrice` 非有限值(NaN/Infinity/undefined)兜底为 0 杜绝「¥NaN」；`.func.test.js` 新增 9 条脏数据/异常回归断言
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）
