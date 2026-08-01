@@ -112,8 +112,8 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 主价格行：价格只显示页面 span.p-price（接口 currentPrice / DOM 提取现价）的现价，
-    // 不再展示封顶价/划线原价次行（用户要求仅显示现价）。
+    // 主价格行：价格优先取自页面 span.p-price 实际文本（用户要求只显示 p-price 价格），
+    // 不再依赖接口字段名/单位猜测；无对应原生卡片时回退数字格式化(currentPrice/startPrice)。
     // - hasCurrent: 接口/提取给出 currentPrice（含 0，流拍亦算有效现价）
     // - isStarting: 无 currentPrice 但有 startPrice → 未开拍「起拍价」（标签为现价语义修饰，仍保留）
     const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
@@ -123,6 +123,10 @@
     const current = isStarting ? startPrice
       : (hasCurrent ? rawCurrent : U.getProductPrice(p));
 
+    // 优先用 p-price 原文（DOM 提取存的值 / 实时回查页面原生卡片），避免单位(分/元)误差
+    const priceText = (p && p.priceText)
+      || (global.JDSDom && global.JDSDom.getProductPriceText ? global.JDSDom.getProductPriceText(name) : null);
+
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
     if (isStarting) {
@@ -131,13 +135,18 @@
       tag.textContent = '起拍';
       priceEl.appendChild(tag);
     }
-    const yen = document.createElement('small');
-    yen.textContent = '¥';
-    const amount = document.createElement('span');
-    amount.textContent = U.formatPrice(current);
-    priceEl.appendChild(yen);
-    priceEl.appendChild(document.createTextNode(' '));
-    priceEl.appendChild(amount);
+    if (priceText) {
+      // p-price 原文可能已含 ¥ 符号，直接展示避免重复
+      priceEl.appendChild(document.createTextNode(priceText));
+    } else {
+      const yen = document.createElement('small');
+      yen.textContent = '¥';
+      const amount = document.createElement('span');
+      amount.textContent = U.formatPrice(current);
+      priceEl.appendChild(yen);
+      priceEl.appendChild(document.createTextNode(' '));
+      priceEl.appendChild(amount);
+    }
     body.appendChild(priceEl);
 
     // 出价人数：独立 badge 行，与价格数字明显区分

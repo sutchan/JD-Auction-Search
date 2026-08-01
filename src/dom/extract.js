@@ -43,6 +43,8 @@
       const priceEl = (pPriceEl && !/origin/i.test(pPriceEl.className) ? pPriceEl
         : Array.from(priceEls).find(e => !/origin/i.test(e.className)))
         || priceEls[0] || null;
+      // 保留 p-price 原始文本（如 "¥1,288.00"），供渲染层直接显示，避免单位/千分位/分单位误差
+      const priceText = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '';
       const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
       const price = priceRaw ? Number(priceRaw) : 0;
 
@@ -82,6 +84,7 @@
         name: nameRaw,
         title: nameRaw,
         price,
+        priceText,
         originalPrice,
         bidCount,
         image: /^https?:|^\/\//i.test(img) ? img : '',
@@ -101,6 +104,42 @@
     });
 
     return products;
+  };
+
+  /**
+   * 按商品名称从页面原生卡片取 .p-price 实际价格文本
+   * 渲染结果卡片时用于以页面真实显示价为准（用户要求价格只显示 p-price），
+   * 避免接口字段名/单位（分/元）猜测导致的价格不准。原生列表隐藏(display:none)时
+   * textContent 仍可读取，故搜索态仍可命中。
+   * @param {string} name - 商品名称
+   * @returns {string|null} 如 "¥1,288.00"，无匹配返回 null
+   */
+  JDSDom.getProductPriceText = function getProductPriceText(name) {
+    if (!name || typeof name !== 'string') return null;
+    const target = name.trim();
+    if (target.length < 2) return null;
+    const cards = this._getProductContainers();
+    for (const card of cards) {
+      let cardName = '';
+      for (const sel of this.SELECTORS.NAME) {
+        const el = card.querySelector(sel);
+        const t = el ? (el.textContent || '').trim() : '';
+        if (t) { cardName = t; break; }
+      }
+      // 名称精确或包含匹配（短名防误匹配），确保对应到正确原生卡片
+      const matched = cardName && cardName.length > 2 && (
+        cardName === target || target.includes(cardName) || cardName.includes(target)
+      );
+      if (!matched) continue;
+      const pEl = card.querySelector('.p-price, [class*="p-price" i]');
+      const priceEl = pEl || (Array.from(card.querySelectorAll(this.SELECTORS.PRICE))
+        .find(e => !/origin/i.test(e.className))) || null;
+      if (priceEl) {
+        const txt = priceEl.textContent.replace(/\s+/g, ' ').trim();
+        if (txt) return txt;
+      }
+    }
+    return null;
   };
 
   /**

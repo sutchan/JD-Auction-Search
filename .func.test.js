@@ -175,6 +175,12 @@ ok('未开拍：标注"起拍"', /起拍/.test(cardStart.textContent));
 const bodyStart = cardStart.childNodes.find(c => c.className === 'jds-product-body');
 ok('未开拍：不渲染封顶次行', !bodyStart.childNodes.find(c => c.className === 'jds-product-subprice'));
 
+// 价格优先 p-price 原文：带 priceText 时直接显示原文，不做二次格式化（避免单位/千分位误差）
+const cardPText = UI._buildOwnCard({ id: 9, name: 'pt', priceText: '¥1,288.00', currentPrice: 128800 });
+ok('价格优先显示 p-price 原文', /¥1,288\.00/.test(cardPText.textContent) && !/128,800/.test(cardPText.textContent));
+const cardNoText = UI._buildOwnCard({ id: 10, name: 'nt', currentPrice: 128800 });
+ok('无 priceText 回退 formatPrice', /128,800/.test(cardNoText.textContent));
+
 console.log('\n[price] 脏数据/异常回归');
 // 仅 cappedPrice 有值：此前现价回退 0 → 空价卡片；现应取封顶价作主价（仅显示现价，不标"封顶"）
 const cardCapOnly = UI._buildOwnCard({ id: 3, name: 'z', cappedPrice: 199 });
