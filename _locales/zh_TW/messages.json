@@ -34,5 +34,9 @@
   "toastRequestError": {
     "message": "請求失敗，請稍後重試",
     "description": "請求錯誤時提示"
+  },
+  "toastDomExtractFailed": {
+    "message": "未能從頁面識別商品，可能頁面已改版",
+    "description": "DOM 兜底提取失敗時提示"
   }
 }

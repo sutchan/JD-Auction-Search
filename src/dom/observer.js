@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/observer.js v1.4.0
+// JD-Auction-Search/src/dom/observer.js v1.5.0
 // DOM 观察器：监听页面商品列表变化（搜索态下由面板接管，跳过原生更新）
 
 (function(global) {
@@ -39,19 +39,7 @@
    * @returns {HTMLElement}
    */
   JDSDom._getObservedContainer = function _getObservedContainer() {
-    const selectors = [
-      '[class*="auction"], [class*="product"], [class*="goods"]',
-      '.jd-paipai',
-      '#app',
-      'main'
-    ];
-
-    for (const selector of selectors) {
-      const el = document.querySelector(selector);
-      if (el) return el;
-    }
-
-    return document.body;
+    return this.queryFirst(this.SELECTORS.OBSERVE) || document.body;
   };
 
   /**

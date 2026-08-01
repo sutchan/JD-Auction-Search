@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/interceptor.js v1.4.0
+// JD-Auction-Search/src/api/interceptor.js v1.5.0
 // API 拦截器：捕获页面真实列表请求作模板，并按"像不像列表接口"打分选优
 
 (function(global) {
@@ -32,18 +32,31 @@
       headers: (options && options.headers) || null,
       _score: score
     };
+    // 模板锁定：首次成功拿到非空商品列表的模板后不再替换，避免后续其它接口（如相关推荐）
+    // 打分更高而覆盖掉正确的列表模板，导致分页重放拿到错误数据
+    if (this._requestTemplateLocked) return;
     if (!this._requestTemplate || score > this._requestTemplate._score) {
       this._requestTemplate = tpl;
     }
   };
 
   /**
+   * 锁定当前列表模板（在 loadAllProducts 首次成功聚合后调用）
+   * @private
+   */
+  JDSApi._lockRequestTemplate = function _lockRequestTemplate() {
+    this._requestTemplateLocked = true;
+  };
+
+  /**
    * 给请求 URL 打分，越像“列表接口”分数越高，用于挑出最佳模板
+   * 对已知拍拍列表 functionId 加权，降低被其它拍卖相关接口误替的风险
    * @private
    */
   JDSApi._listScore = function _listScore(url) {
     const u = url.toLowerCase();
     let s = 0;
+    if (/functionid=paipai\.auction\.list/i.test(u)) s += 20;
     if (u.includes('auction-list')) s += 10;
     if (u.includes('auctionlist')) s += 8;
     if (/\/list(\?|$)/.test(u)) s += 6;

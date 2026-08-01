@@ -1,0 +1,32 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "webextensions": true,
+    "es2021": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "script"
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "JDSUtils": "readonly",
+    "JDSApi": "readonly",
+    "JDSUI": "readonly",
+    "JDSDom": "readonly",
+    "JDSContent": "readonly",
+    "chrome": "readonly",
+    "MutationObserver": "readonly",
+    "XMLHttpRequest": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "args": "none" }],
+    "no-console": "off",
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-prototype-builtins": "off",
+    "no-case-declarations": "off"
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "*.zip", ".func.test.js", "integration.test.js"]
+}

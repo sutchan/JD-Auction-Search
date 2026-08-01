@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.4.0
+// JD-Auction-Search/src/ui/results.js v1.5.0
 // 结果面板公开 API：展示/隐藏、骨架屏、空状态、销毁
 // 面板宿主逻辑见 results/host.js
 
@@ -78,10 +78,13 @@
     const wrapper = document.getElementById('jds-search-wrapper');
     if (wrapper) wrapper.remove();
     if (this.resultsHost) this.resultsHost.remove();
+    this._unbindResultsPosition();
     this.shadowRoot = null;
     this.resultsRoot = null;
     this.resultsHost = null;
     this.gridElement = null;
+    this._renderAll = null;
+    this._renderPage = 0;
     if (this.emptyElement) {
       this.emptyElement.remove();
       this.emptyElement = null;

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/skeleton.js v1.4.0
+// JD-Auction-Search/src/ui/skeleton.js v1.5.0
 // 骨架屏：结果面板 fallback 网格容器创建与 shimmer 占位渲染
 // 商品渲染见 products.js，面板生命周期见 results.js
 
@@ -30,7 +30,6 @@
   JDSUI.renderSkeletons = function renderSkeletons(count = 8) {
     this._ensureGrid();
     if (!this.gridElement) return;
-    this.gridElement.setAttribute('aria-busy', 'true');
     this.gridElement.innerHTML = '';
     for (let i = 0; i < count; i++) {
       const card = document.createElement('div');
@@ -40,7 +39,5 @@
         '<div class="jds-skel jds-skel-line"></div>';
       this.gridElement.appendChild(card);
     }
-    // 渲染完成后清除 busy 状态，避免长期占用
-    this.gridElement.setAttribute('aria-busy', 'false');
   };
 })(window);

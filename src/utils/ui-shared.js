@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/ui-shared.js v1.4.0
+// JD-Auction-Search/src/utils/ui-shared.js v1.5.0
 // UI 共享能力：Toast 反馈、样式注入、Shadow DOM 查询
 
 (function(global) {
@@ -12,7 +12,7 @@
    * @param {string} [type='info'] - toast 类型: success | error | info
    */
   JDSUtils.showToast = function showToast(key, type = 'info') {
-    const translationKeys = ['toastApiFailed', 'toastNetworkError', 'toastRequestError'];
+    const translationKeys = ['toastApiFailed', 'toastNetworkError', 'toastRequestError', 'toastDomExtractFailed'];
     const message = translationKeys.includes(key) ? JDSUtils.getMessage(key) : key;
 
     // success/error/info 对应的 SVG 图标
@@ -36,6 +36,8 @@
       stack.setAttribute('role', 'status');
       stack.setAttribute('aria-live', 'polite');
       document.body.appendChild(stack);
+      // Toast 窗口对齐左侧结果栏：左缘与结果面板同列，无面板时回退为居中
+      JDSUtils.positionToastStack(stack);
     }
 
     const toast = document.createElement('div');
@@ -50,6 +52,27 @@
       toast.classList.remove('is-show');
       setTimeout(() => toast.remove(), 300);
     }, 2500);
+  };
+
+  /**
+   * 定位 Toast 堆叠容器 — 左缘对齐可见的左侧结果面板列，否则居中
+   * 结果面板由 host.js 对齐原生列表宽度（left/width），此处复用同一 left 值，
+   * 使日志窗口与左侧商品列视觉对齐；无可见面板时回退为屏幕居中。
+   * @param {HTMLElement} stack - .jds-toast-stack 容器
+   */
+  JDSUtils.positionToastStack = function positionToastStack(stack) {
+    if (!stack) return;
+    const panel = document.querySelector('#jds-results-host .jds-results-panel.is-visible');
+    if (panel) {
+      const rect = panel.getBoundingClientRect();
+      stack.style.left = Math.round(rect.left) + 'px';
+      stack.style.right = 'auto';
+      stack.style.transform = 'none';
+    } else {
+      stack.style.left = '50%';
+      stack.style.right = 'auto';
+      stack.style.transform = 'translateX(-50%)';
+    }
   };
 
   /**

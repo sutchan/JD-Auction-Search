@@ -34,5 +34,9 @@
   "toastRequestError": {
     "message": "请求失败，请稍后重试",
     "description": "请求错误时提示"
+  },
+  "toastDomExtractFailed": {
+    "message": "未能从页面识别商品，可能页面已改版",
+    "description": "DOM 兜底提取失败时提示"
   }
 }

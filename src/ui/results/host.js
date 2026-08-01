@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/host.js v1.4.0
+// JD-Auction-Search/src/ui/results/host.js v1.5.0
 // 结果面板宿主：覆盖层外壳、面板定位、显隐前置与网格容器
 // 商品渲染见 products.js，骨架屏见 skeleton.js
 
@@ -40,9 +40,9 @@
       animation: jds-shimmer 1.4s infinite;
     }
     @keyframes jds-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    #jds-results-host .jds-skel-img { height: 120px; }
-    #jds-results-host .jds-skel-line { height: 10px; margin: 12px; border-radius: var(--radius-sm); }
-    #jds-results-host .jds-skel-line:last-child { width: 50%; margin-bottom: 16px; }
+    #jds-results-host .jds-skel-img { height: 140px; }
+    #jds-results-host .jds-skel-line { height: 11px; margin: 14px; border-radius: var(--radius-sm); }
+    #jds-results-host .jds-skel-line:last-child { width: 50%; margin-bottom: 18px; }
 
     /* Empty 空状态（对齐原型：居中浮层） */
     #jds-results-host .jds-empty-overlay {
@@ -64,8 +64,8 @@
       margin: 0 auto 16px; color: var(--subtle-foreground);
     }
     #jds-results-host .jds-empty-icon svg { width: 26px; height: 26px; }
-    #jds-results-host .jds-empty-title { font-size: 18px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
-    #jds-results-host .jds-empty-desc { font-size: 13px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
+    #jds-results-host .jds-empty-title { font-size: 20px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
+    #jds-results-host .jds-empty-desc { font-size: 14px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
 
     /* Product Card 商品卡片（对齐 prototype .product-card） */
     #jds-results-host .jds-product-card {
@@ -86,33 +86,40 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     #jds-results-host .jds-product-img {
-      height: 120px; display: grid; place-items: center; font-size: 40px;
+      height: 140px; display: grid; place-items: center; font-size: 44px;
       background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
       color: var(--subtle-foreground); position: relative; overflow: hidden;
     }
     #jds-results-host .jds-product-img-el { width: 100%; height: 100%; object-fit: cover; display: block; }
-    #jds-results-host .jds-product-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    #jds-results-host .jds-product-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     #jds-results-host .jds-product-name {
-      font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
-      margin-bottom: 8px; min-height: 34px;
+      font-size: 14px; font-weight: 500; color: var(--foreground); line-height: 1.45;
+      margin-bottom: 8px; min-height: 38px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     #jds-results-host .jds-product-price {
-      font-family: var(--font-display); font-size: 18px; font-weight: 400;
+      font-family: var(--font-display); font-size: 22px; font-weight: 400;
       color: var(--primary); letter-spacing: -0.01em; margin-bottom: 6px;
       font-variant-numeric: tabular-nums;
     }
-    #jds-results-host .jds-product-price small { font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
-    #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 11px; color: var(--muted-foreground); font-weight: 400; }
+    #jds-results-host .jds-product-price small { font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
+    #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
     #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
-    #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
-    #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
+    #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 13px; color: var(--muted-foreground); text-decoration: line-through; }
+    #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 13px; color: var(--muted-foreground); }
     #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; }
     #jds-results-host .jds-product-bid {
-      display: inline-flex; align-items: center; padding: 2px 8px;
+      display: inline-flex; align-items: center; padding: 3px 10px;
       background: var(--secondary); color: var(--muted-foreground);
-      font-size: 11px; border-radius: var(--radius-full);
+      font-size: 12px; border-radius: var(--radius-full);
     }
+    #jds-results-host .jds-load-more {
+      grid-column: 1 / -1; justify-self: center; margin: 8px auto 24px;
+      padding: 10px 24px; border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--card); color: var(--foreground); font-size: 14px; cursor: pointer;
+      font-family: var(--font-sans); transition: border-color var(--dur-fast) var(--ease-out);
+    }
+    #jds-results-host .jds-load-more:hover { border-color: var(--primary); color: var(--primary); }
 
     /* Grid 网格兜底（未设置内联样式时） */
     #jds-results-host .jds-product-grid { display: grid; gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
@@ -202,8 +209,24 @@
     if (this._positionBound) return;
     this._positionBound = true;
     const update = () => this._positionResultsPanel();
+    this._positionHandler = update;
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
+  };
+
+  /**
+   * 解绑面板定位监听（destroy 时调用，避免 window 监听泄漏）
+   * @private
+   */
+  JDSUI._unbindResultsPosition = function _unbindResultsPosition() {
+    if (!this._positionBound) return;
+    const update = this._positionHandler;
+    if (update) {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    }
+    this._positionBound = false;
+    this._positionHandler = null;
   };
 
   /**
@@ -231,9 +254,8 @@
     grid.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
     grid.style.gap = '16px';
     grid.style.padding = '16px 24px 40px';
-    // 固定一行 5 个并整体居中（超宽屏下限制最大宽度，避免卡片被拉得过宽）
-    grid.style.maxWidth = '1200px';
-    grid.style.margin = '0 auto';
+    // 网格宽度跟随结果面板（已由 _positionResultsPanel 对齐原生列表宽度），不再额外限宽居中，
+    // 避免宽列表下 grid 两侧出现多余留白
     panel.appendChild(grid);
     return grid;
   };

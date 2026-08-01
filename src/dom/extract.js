@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.4.0
+// JD-Auction-Search/src/dom/extract.js v1.5.0
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url），以及原生卡片模板获取与显隐
 
 (function(global) {
@@ -15,12 +15,21 @@
     const containers = this._getProductContainers();
     const products = [];
 
+    // 全部选择器未命中（京东改版/页面结构变化）：显式告警，避免静默返回空结果
+    if (!containers.length) {
+      global.JDSUtils.showToast('toastDomExtractFailed');
+      return products;
+    }
+
     containers.forEach(card => {
-      // 优先取 class 化的名称元素（.name/.title 等），避免匹配到包裹整张卡片的 <a>
-      // （<a> 在文档顺序上早于内部 .name，且其 textContent 为整卡文本，会污染名称）
-      const nameEl = card.querySelector('[class*="name" i], [class*="title" i], h3, h4');
-      let nameRaw = nameEl ? (nameEl.textContent || '').trim() : '';
-      // 仅当 class 名称元素取不到时，回退 <a> 的 title 属性（取属性而非整段文本）
+      // 名称提取：精确类优先（product-name/title/.name 等），再回退模糊 class（已排除 username 等），
+      // 最后回退 <a title>；避免匹配到包裹整张卡片的 <a>（其 textContent 为整卡文本，会污染名称）
+      let nameRaw = '';
+      for (const sel of this.SELECTORS.NAME) {
+        const el = card.querySelector(sel);
+        const t = el ? (el.textContent || '').trim() : '';
+        if (t && t.length >= 2 && t.length <= 200) { nameRaw = t; break; }
+      }
       if (!nameRaw) {
         const aEl = card.querySelector('a[title]');
         nameRaw = aEl ? (aEl.getAttribute('title') || '').trim() : '';
@@ -28,7 +37,7 @@
       if (!nameRaw || nameRaw.length < 2 || nameRaw.length > 200) return;
 
       // 现价：取 class 含 price 且非 origin(划线原价) 的元素；优先 current-price
-      const priceEls = card.querySelectorAll('[class*="price" i]');
+      const priceEls = card.querySelectorAll(this.SELECTORS.PRICE);
       const priceEl = Array.from(priceEls).find(e => !/origin/i.test(e.className))
         || priceEls[0] || null;
       const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
@@ -36,7 +45,7 @@
 
       // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
       let originalPrice = 0;
-      const origEl = card.querySelector('[class*="old" i], [class*="original" i], [class*="origin" i], [class*="market" i], [class*="ref" i]');
+      const origEl = card.querySelector(this.SELECTORS.ORIGIN);
       if (origEl && origEl !== priceEl) {
         const oRaw = origEl.textContent.replace(/[^\d.]/g, '');
         if (oRaw) originalPrice = Number(oRaw);
@@ -44,13 +53,13 @@
 
       // 出价人数：取 class 含 bid/apply/join/count/报名/出价 的数字片段
       let bidCount = 0;
-      const bidEl = card.querySelector('[class*="bid" i], [class*="apply" i], [class*="join" i], [class*="count" i], [class*="报名" i], [class*="出价" i]');
+      const bidEl = card.querySelector(this.SELECTORS.BID);
       if (bidEl) {
         const bRaw = bidEl.textContent.replace(/[^\d]/g, '');
         if (bRaw) bidCount = Number(bRaw);
       }
 
-      const imgEl = card.querySelector('img');
+      const imgEl = card.querySelector(this.SELECTORS.IMG);
       const img = imgEl
         ? (imgEl.getAttribute('src') ||
           imgEl.getAttribute('data-src') ||

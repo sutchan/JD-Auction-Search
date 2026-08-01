@@ -17,6 +17,13 @@ const DIST_DIR = path.join(ROOT, 'dist');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
 const VERSION = manifest.version;
 
+// 文件头版本同步：src 各文件首行形如 `// path vX.Y.Z`，构建时统一替换为 manifest.version，
+// 避免手动同步多文件版本号漏改（仅替换首行匹配，不动正文）
+const HEADER_RE = /^(\/\/ [^\n]*?\bv)(\d+\.\d+\.\d+)/;
+function syncHeader(raw, relPath) {
+  return raw.replace(HEADER_RE, (m, p, old) => p + VERSION);
+}
+
 // 解析命令行参数
 const args = process.argv.slice(2);
 const BUILD_LOCALE = args.includes('--tw') ? 'zh-TW' : 'zh-CN';
@@ -66,7 +73,13 @@ function copyDir(srcDir, destDir, filter) {
       if (filter && !filter(entry.name)) continue;
       copyDir(srcPath, destPath, filter);
     } else {
-      fs.copyFileSync(srcPath, destPath);
+      // 对 JS 文件同步文件头版本号
+      if (entry.name.endsWith('.js')) {
+        const raw = fs.readFileSync(srcPath, 'utf8');
+        fs.writeFileSync(destPath, syncHeader(raw, srcPath));
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
     }
   }
 }

@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.0
+- 工程化：新增 ESLint 配置(.eslintrc.json) 与 `npm run lint`，GitHub Actions CI（lint+test+build）接入 PR/推送校验
+- 测试增强：新增 `integration.test.js`（jsdom 集成测试，覆盖 DOM 兜底提取字段映射、未命中显式告警、搜索 searchMode 编排、结果分页渲染），`npm test` 串联单元+集成共 47 断言
+- 选择器集中化：新建 `src/dom/selectors.js` 统一维护挂载/列表/卡片/观察/价格等京东 DOM 选择器，toolbar/filter/observer/extract 改为引用，改版时一处调整
+- DOM 提取健壮性：名称提取精确类优先（product-name/title 等）再回退模糊类（排除 username 等误匹配）；全部选择器未命中时显式 Toast 告警（不再静默空结果）
+- 结果渲染分页：移除 200 条硬截断，改为首屏 60 条 + “加载更多”按需追加，超量结果可完整查看（新增 `.jds-load-more` 样式）
+- 拦截器模板锁定：首次成功聚合后锁定列表模板，避免被相关推荐等其它接口误替；`_listScore` 对 `functionId=paipai.auction.list` 加权
+- i18n 收敛单一来源：优先 `chrome.i18n`（_locales 多语言），移除占位符双格式死代码；新增 `toastDomExtractFailed` 键（zh-CN/zh-TW）
+- 资源清理：`destroy()` 解绑 window scroll/resize 监听避免泄漏；骨架屏移除无意义的同步 `aria-busy`
+- 细节打磨：挂载重试窗口延长至 ~4s 避免过早回退浮动条；非搜索态拦截响应不再冗余重渲染；结果网格去掉 maxWidth 以贴合面板对齐宽度
+- 构建：build.js 新增文件头版本自动同步（从 manifest.version 注入 src 首行），避免多文件版本手动同步漏改
+- UI 易用性：整体放大字号——搜索栏输入/按钮(13→15/12→14)、商品名/价格(12/18→14/22)、骨架屏与空状态字号同步放大、卡片图片高度(120→140)、加载更多按钮尺寸加大；工具栏内边距同步放宽
+- UI 细节：Toast 日志窗口左缘对齐可见的左侧结果面板列（与左侧商品栏同宽对齐），无面板时回退居中；工具栏新增实时匹配计数（共 N 件）；原型 index.html 同步字号与版本至 v1.5.0
+
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）
 - 国际化：补齐 `toastNetworkError`/`toastRequestError` 翻译键，清除语言包死键（logoText/tabAll 等），扩展可翻译 Toast 键集合

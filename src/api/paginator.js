@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/paginator.js v1.4.0
+// JD-Auction-Search/src/api/paginator.js v1.5.0
 // 分页重放：基于页面真实请求模板逐页重放，聚合全部分页商品（多页面搜索的数据基础）
 
 (function(global) {
@@ -44,6 +44,8 @@
       }
       const items = global.JDSUtils.extractProductsFromResponse(data);
       if (!items.length) break;
+      // 首次成功聚合到非空列表：锁定该模板，避免后续被其它接口误替
+      if (!this._requestTemplateLocked) this._lockRequestTemplate();
       // 首页条数作为页大小基准；后续页以此为据判定是否到达末页
       if (page === 1) pageSize = items.length;
       let added = 0;

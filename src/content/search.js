@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/search.js v1.4.0
+// JD-Auction-Search/src/content/search.js v1.5.0
 // 搜索编排：API 响应处理、过滤与跨页自动加载
 
 (function (global) {
@@ -19,7 +19,8 @@
         ...this.state.products,
         ...products
       ]);
-      this._applyFilterAndUpdate();
+      // 仅在搜索态（结果面板接管）时才即时刷新；浏览态由原生列表展示，避免每帧冗余重渲染
+      if (this.state.searchMode) this._applyFilterAndUpdate();
     }
   };
 
@@ -40,6 +41,9 @@
 
     this._applyFilter();
     const filtered = this.state.filteredProducts;
+
+    // 实时刷新工具栏匹配计数（浏览态归零）
+    JDSUI.updateResultCount(filtered.length);
 
     // 是否处于筛选态（有搜索关键词即进入搜索模式）
     const hasFilter = !!this.state.keyword;

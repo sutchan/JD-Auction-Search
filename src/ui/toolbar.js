@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.4.0
+// JD-Auction-Search/src/ui/toolbar.js v1.5.0
 // 工具栏：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）、事件绑定
 
 (function(global) {
@@ -44,21 +44,8 @@
    * @returns {HTMLElement|null}
    */
   JDSUI._getMountContainer = function _getMountContainer() {
-    // 夺宝岛页面 (1paipai.jd.com/auction-list/) 的页头容器为 class="auction_head"（下划线）
-    const selectors = [
-      'div.auction_head',
-      '[class*="auction_head" i]',
-      '#auction_head',
-      '[id*="auction_head" i]',
-      '[class*="auction-head" i]',
-      '[class*="auctionHead" i]',
-      '[data-module="auction_head"]'
-    ];
-    for (const sel of selectors) {
-      const el = document.querySelector(sel);
-      if (el) return el;
-    }
-    return null;
+    // 选择器集中维护在 src/dom/selectors.js（JDSDom.SELECTORS.MOUNT）
+    return global.JDSDom.queryFirst(global.JDSDom.SELECTORS.MOUNT);
   };
 
   /**
@@ -72,7 +59,7 @@
     const target = this._getMountContainer();
     if (target) {
       // 找到页头右侧区（auction_head_right），将工具栏插入到它的左侧（内联），更贴合页面布局
-      const rightEl = target.querySelector('[class*="auction_head_right" i], [id*="auction_head_right" i]');
+      const rightEl = global.JDSDom.queryFirst(global.JDSDom.SELECTORS.MOUNT_RIGHT);
       if (rightEl) {
         wrapper.classList.add('jds-embedded', 'jds-inline');
         target.insertBefore(wrapper, rightEl);
@@ -84,7 +71,8 @@
       }
       return;
     }
-    if (attempt < 8) {
+    // 京东 header 有时渲染较慢，延长重试窗口至 ~4s（20×200ms）再回退浮动条，避免过早遮挡内容
+    if (attempt < 20) {
       setTimeout(() => this._mountWithRetry(wrapper, styleEl, attempt + 1), 200);
       return;
     }
@@ -118,8 +106,18 @@
           </button>
           <button class="jds-search-btn">${getMessage('searchButton')}</button>
         </div>
+        <span class="jds-count" aria-live="polite">共 <strong class="jds-count-num">0</strong> 件</span>
       </div>
     `;
+  };
+
+  /**
+   * 更新工具栏匹配计数 — 搜索态实时刷新命中件数
+   * @param {number} n - 匹配商品数量
+   */
+  JDSUI.updateResultCount = function updateResultCount(n) {
+    const num = this.shadowRoot && this.shadowRoot.querySelector('.jds-count-num');
+    if (num) num.textContent = String(n);
   };
 
   /**

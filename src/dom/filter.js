@@ -1,18 +1,10 @@
-// JD-Auction-Search/src/dom/filter.js v1.4.0
+// JD-Auction-Search/src/dom/filter.js v1.5.0
 // 原生列表过滤：根据关键词更新页面商品显隐（浏览态）；产品容器精确定位
 
 (function(global) {
   'use strict';
 
   const JDSDom = global.JDSDom = global.JDSDom || {};
-
-  // 列表容器与商品卡片选择器（_getProductContainers / getProductListContainer 共用）
-  const LIST_CONTAINER_SELECTORS = [
-    '[class*="goods-list" i]', '[class*="auction-list" i]', '[class*="product-list" i]',
-    '[class*="list" i]', '[class*="grid" i]', '[class*="goods" i]'
-  ];
-  const CARD_SELECTOR = '[class*="auction-item" i], [class*="product-item" i], [class*="goods-item" i], ' +
-    '[class*="auction-card" i], [class*="product-card" i], [class*="goods-card" i]';
 
   /**
    * 更新页面上的商品展示
@@ -67,26 +59,11 @@
    * @returns {Array<HTMLElement>}
    */
   JDSDom._getProductContainers = function _getProductContainers() {
-    let cards = [];
-    for (const sel of LIST_CONTAINER_SELECTORS) {
-      const container = document.querySelector(sel);
-      if (container) {
-        const found = container.querySelectorAll(CARD_SELECTOR);
-        if (found.length) {
-          cards = Array.from(found);
-          break;
-        }
-      }
-    }
+    let cards = this.queryCards(this.SELECTORS.LIST_CONTAINER, this.SELECTORS.CARD);
 
     // 列表容器未命中时，全局回退（仍排除明显非商品项，缓解过宽匹配）
     if (!cards.length) {
-      cards = Array.from(document.querySelectorAll(
-        '[class*="item" i]' +
-        ':not([class*="nav" i]):not([class*="menu" i]):not([class*="page" i])' +
-        ':not([class*="breadcrumb" i]):not([class*="tab" i]):not([class*="step" i])' +
-        ':not([class*="option" i]):not([class*="cart" i]):not([class*="order" i])'
-      ));
+      cards = Array.from(document.querySelectorAll(this.FALLBACK_CARD));
     }
 
     return cards;
@@ -99,9 +76,9 @@
    */
   JDSDom.getProductListContainer = function getProductListContainer() {
     let container = null;
-    for (const sel of LIST_CONTAINER_SELECTORS) {
+    for (const sel of this.SELECTORS.LIST_CONTAINER) {
       const el = document.querySelector(sel);
-      if (el && el.querySelectorAll(CARD_SELECTOR).length) {
+      if (el && el.querySelectorAll(this.SELECTORS.CARD.join(',')).length) {
         container = el;
         break;
       }
@@ -109,7 +86,7 @@
 
     // 回退：取首个商品卡片的父容器
     if (!container) {
-      const firstCard = document.querySelector(CARD_SELECTOR);
+      const firstCard = document.querySelector(this.SELECTORS.CARD.join(','));
       container = firstCard ? firstCard.parentElement : null;
     }
 

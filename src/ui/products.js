@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/products.js v1.4.0
+// JD-Auction-Search/src/ui/products.js v1.5.0
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
 // 保证跨页搜索结果在任意京东页面都稳定可见（此前克隆原生卡片在真实页面常因京东 class 级 CSS
 // 表现为“尺寸正常却整片不可见”，难以可靠检测）。
@@ -27,24 +27,40 @@
     }
     this.hideEmptyState();
 
-    // 扩展自带网格容器（内联样式，完全独立于京东列表布局）
+    // 分页渲染：首屏渲染 PAGE_SIZE 条，超出部分由“加载更多”按需追加，
+    // 避免全局命中上千条时一次性生成大量卡片导致页面卡死
+    this._renderPage = 1;
+    this._renderAll = products;
     const grid = this._createGrid(panel);
     this.gridElement = grid;
+    this._appendPage(grid, products);
+  };
 
-    // 限制单次渲染数量，避免全局命中上千条时一次性生成大量卡片导致页面卡死
-    const MAX_RENDER = 200;
+  /**
+   * 追加一页商品卡片到网格（分页渲染核心）
+   * @private
+   */
+  JDSUI._appendPage = function _appendPage(grid, products) {
+    const PAGE_SIZE = 60;
+    const start = (this._renderPage - 1) * PAGE_SIZE;
+    const slice = products.slice(start, start + PAGE_SIZE);
+    slice.forEach((p) => grid.appendChild(this._buildOwnCard(p)));
+
     const total = products.length;
-    const visible = products.slice(0, MAX_RENDER);
-    visible.forEach((p) => {
-      grid.appendChild(this._buildOwnCard(p));
-    });
-
-    // 超出上限时展示截断提示，说明仅渲染前 N 条
-    if (total > MAX_RENDER) {
-      const tip = document.createElement('div');
-      tip.style.cssText = 'grid-column:1/-1;padding:8px 4px;color:#71717a;font-size:13px;text-align:center;';
-      tip.textContent = `已显示前 ${MAX_RENDER} 条，共 ${total} 条匹配结果`;
-      panel.appendChild(tip);
+    const rendered = start + slice.length;
+    // 移除旧“加载更多”按钮，避免重复
+    const oldBtn = grid.parentNode && grid.parentNode.querySelector('.jds-load-more');
+    if (oldBtn) oldBtn.remove();
+    if (rendered < total) {
+      const btn = document.createElement('button');
+      btn.className = 'jds-load-more';
+      btn.type = 'button';
+      btn.textContent = `加载更多（已显示 ${rendered} / ${total}）`;
+      btn.addEventListener('click', () => {
+        this._renderPage++;
+        this._appendPage(grid, products);
+      });
+      grid.parentNode.appendChild(btn);
     }
   };
 
