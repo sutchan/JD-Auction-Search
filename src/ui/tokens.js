@@ -36,6 +36,7 @@
         --accent-foreground: #18181b;
         --border: #e4e4e7;
         --border-strong: #d4d4d8;
+        --ring: #e1251b;
         --success: #16a34a;
         --success-subtle: #f0fdf4;
         --warning: #d97706;

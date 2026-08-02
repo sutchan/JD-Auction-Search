@@ -73,13 +73,20 @@
     };
     // 现价优先 currentPrice；未开拍(currentPrice 为 null)时回退起拍价 startPrice。
     // 注意：maxPrice/cappedPrice 为封顶/参考价，不可作为现价。
+    // 单位归一：京东部分接口 price 字段以「分」为单位（如 128800 表示 1288.00 元），
+    // 若数值过大（>100000 且无小数）疑似分，则 ÷100 还原为元，避免显示成十几万。
+    const normalize = (v) => {
+      const n = toNum(v);
+      if (n === null || n <= 0) return n;
+      return (Number.isInteger(n) && n > 100000) ? n / 100 : n;
+    };
     const flat = [
       product.price, product.currentPrice, product.startPrice,
       product.auctionPrice, product.realPrice, product.salePrice,
       product.nowPrice, product.finalPrice, product.minPrice
     ];
     for (const f of flat) {
-      const n = toNum(f);
+      const n = normalize(f);
       if (n !== null && n >= 0) return n;
     }
     if (product.price && typeof product.price === 'object') {
@@ -182,7 +189,11 @@
       if (u) return u;
     }
     const id = this.getProductId(product);
-    if (id) return `https://1paipai.jd.com/auction-detail/${encodeURIComponent(String(id))}`;
+    if (id) {
+      // 回退详情链接基于当前站点 host 拼接，避免硬编码 1paipai 在 paipai/paimai 等子域下 404
+      const origin = (typeof location !== 'undefined' && location.origin) ? location.origin : 'https://1paipai.jd.com';
+      return `${origin}/auction-detail/${encodeURIComponent(String(id))}`;
+    }
     return null;
   };
 })(window);

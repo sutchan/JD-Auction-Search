@@ -20,6 +20,15 @@
 - 价格展示优化：重新渲染划线原价（原价/封顶价高于现价时显示 `.jds-product-subprice`，灰色 `line-through`、12px 较小字），与主价红色现价明显区分；出价人数 badge 缩至 11px 灰色（`jds-product-bid`），`.func.test.js` 同步更新划线次行断言
 - 当前价优先：商品只要能显示当前价（`currentPrice` 或页面 `p-price` 文本任一存在）即用当前价展示，不再标注/使用起拍价；仅当两者皆无且存在 `startPrice` 时才显示「起拍」标签与起拍价
 - UI 布局修复：结果网格由硬编码 `repeat(5, minmax(0,1fr))` 改为响应式 `repeat(auto-fill, minmax(200px,1fr))`（对齐原型），避免窄列表拥挤、宽列表留白；移除 `_createGrid` 与 CSS 类冲突的内联网格样式；结果面板内边距归零，消除与网格内边距叠加导致的上下过大留白
+- 卡片优化：消除 body `gap` 与标题/价格 `margin-bottom` 叠加的双重间距；价格行改为 `flex` 基线对齐（¥ 与金额对齐，封顶标签居中）；新增键盘 `:focus-visible` 焦点环；图片悬停轻微放大（复刻原型）；卡片入场按页内序号错位延迟（封顶 0.4s），提升视觉层次
+
+## 代码审查与健壮性改进
+- 焦点令牌补全：`tokens.js` 新增 `--ring`（原型与卡片 `:focus-visible` 均引用），修复键盘焦点环因 `var(--ring)` 未定义而失效
+- 幂等初始化与资源还原：`enhancer.init()` 增加 `_inited` 守卫，避免京东 SPA 局部刷新重复挂载 UI / 嵌套包裹 fetch；`destroy()` 复位标志、清理自动加载定时器并调用新增 `JDSApi.restoreApi()` 还原原生 fetch/XHR
+- 详情链接回退基于 `location.origin` 拼接，修复硬编码 `1paipai.jd.com` 在 paipai/paimai 等子域下 404
+- 价格单位归一：`getProductPrice` 对疑似「分」的大整数（>100000 整数）÷100 还原为元，规避接口 `price` 字段为分导致的 ¥128,800 类错价
+- 卡片 id 稳定性：无商品 id 时改用自增序号 `jds-card-n{n}`，避免标题 `encodeURIComponent` 产生非法/重复 id
+- 浏览态原生过滤精确化：`filter.js` 优先按 `filteredProducts` 的 id 集合 + 卡片链接 `auction-detail/{id}` 精确比对显隐，回退关键词全文匹配，修正商品名互含时的误显/漏显
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）

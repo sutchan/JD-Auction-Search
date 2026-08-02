@@ -12,8 +12,24 @@
    * @param {Function} handleResponse - 处理API响应的回调
    */
   JDSApi.interceptApi = function interceptApi(state, handleResponse) {
+    // 幂等：已注入过则不重复包裹 fetch/XHR，避免 SPA 重渲染导致拦截逻辑嵌套执行两次
+    if (this._intercepted) return;
+    this._intercepted = true;
     this._interceptFetch(state, handleResponse);
     this._interceptXHR(state, handleResponse);
+  };
+
+  /**
+   * 还原原生 fetch / XHR，解除扩展注入（destroy 时调用，避免 content script 卸载/重渲染后
+   * 仍残留被包裹的全局方法，造成重复捕获或与其他扩展冲突）
+   */
+  JDSApi.restoreApi = function restoreApi() {
+    if (this._origFetch) window.fetch = this._origFetch;
+    if (this._origXHROpen) XMLHttpRequest.prototype.open = this._origXHROpen;
+    if (this._origXHRSend) XMLHttpRequest.prototype.send = this._origXHRSend;
+    if (this._origXHRSetHeader) XMLHttpRequest.prototype.setRequestHeader = this._origXHRSetHeader;
+    this._origFetch = this._origXHROpen = this._origXHRSend = this._origXHRSetHeader = null;
+    this._intercepted = false;
   };
 
   /**
@@ -83,7 +99,8 @@
    * @private
    */
   JDSApi._interceptFetch = function _interceptFetch(state, handleResponse) {
-    const origFetch = window.fetch;
+    this._origFetch = window.fetch;
+    const origFetch = this._origFetch;
     const self = this;
 
     window.fetch = async function(...args) {
@@ -112,9 +129,12 @@
    * @private
    */
   JDSApi._interceptXHR = function _interceptXHR(state, handleResponse) {
-    const origXHROpen = XMLHttpRequest.prototype.open;
-    const origXHRSend = XMLHttpRequest.prototype.send;
-    const origXHRSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+    this._origXHROpen = XMLHttpRequest.prototype.open;
+    this._origXHRSend = XMLHttpRequest.prototype.send;
+    this._origXHRSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+    const origXHROpen = this._origXHROpen;
+    const origXHRSend = this._origXHRSend;
+    const origXHRSetHeader = this._origXHRSetHeader;
     const self = this;
 
     XMLHttpRequest.prototype.open = function(method, url, ...rest) {

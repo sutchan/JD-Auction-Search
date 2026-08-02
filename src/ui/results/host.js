@@ -81,6 +81,9 @@
       box-shadow: var(--shadow-md);
       transform: translateY(-3px);
     }
+    #jds-results-host .jds-product-card:focus-visible {
+      outline: 2px solid var(--ring); outline-offset: 2px; border-color: var(--primary);
+    }
     @keyframes jds-cardIn {
       from { opacity: 0; transform: translateY(14px) scale(0.99); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -91,20 +94,23 @@
       color: var(--subtle-foreground); position: relative; overflow: hidden;
     }
     #jds-results-host .jds-product-img-el { width: 100%; height: 100%; object-fit: cover; display: block; }
-    #jds-results-host .jds-product-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    /* 图片悬停轻微放大（复刻原型 product-card 交互） */
+    #jds-results-host .jds-product-card:hover .jds-product-img-el { transform: scale(1.06); transition: transform var(--dur-base) var(--ease-out); }
+    #jds-results-host .jds-product-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
     #jds-results-host .jds-product-name {
       font-size: 14px; font-weight: 500; color: var(--foreground); line-height: 1.45;
-      margin-bottom: 8px; min-height: 38px;
+      min-height: 38px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     #jds-results-host .jds-product-price {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px;
       font-family: var(--font-display); font-size: 22px; font-weight: 400;
-      color: var(--primary); letter-spacing: -0.01em; margin-bottom: 6px;
+      color: var(--primary); letter-spacing: -0.01em; line-height: 1.1;
       font-variant-numeric: tabular-nums;
     }
     #jds-results-host .jds-product-price small { font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
-    #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
-    #jds-results-host .jds-product-subprice { display: flex; align-items: center; margin-top: -2px; }
+    #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: center; }
+    #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
     #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
     #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
     #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }

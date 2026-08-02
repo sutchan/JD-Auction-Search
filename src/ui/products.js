@@ -44,11 +44,15 @@
     const PAGE_SIZE = 60;
     const start = (this._renderPage - 1) * PAGE_SIZE;
     const slice = products.slice(start, start + PAGE_SIZE);
-    slice.forEach((p) => grid.appendChild(this._buildOwnCard(p)));
 
     const total = products.length;
     const rendered = start + slice.length;
-    // 移除旧“加载更多”按钮，避免重复
+    // 入场动画错位：按当前页内序号递增延迟，封顶 0.4s 避免大列表等待过久
+    slice.forEach((p, i) => {
+      const card = this._buildOwnCard(p);
+      card.style.animationDelay = Math.min(i * 0.03, 0.4) + 's';
+      grid.appendChild(card);
+    });
     const oldBtn = grid.parentNode && grid.parentNode.querySelector('.jds-load-more');
     if (oldBtn) oldBtn.remove();
     if (rendered < total) {
@@ -81,9 +85,9 @@
 
     const card = document.createElement('a');
     card.className = 'jds-product-card';
-    // 语义化 id：优先用商品 id，回退到标题（便于调试时从 DOM 直接定位具体商品）
+    // 语义化 id：优先用商品 id；无 id 时用稳定自增序号（避免用标题 encodeURIComponent 产生非法/重复 id）
     const cardId = (p && (p.id != null ? p.id : p.productId));
-    card.id = 'jds-card-' + (cardId != null ? String(cardId) : encodeURIComponent(name || 'unknown'));
+    card.id = 'jds-card-' + (cardId != null ? String(cardId) : 'n' + (JDSUI._cardSeq = (JDSUI._cardSeq || 0) + 1));
     card.href = url || 'javascript:void(0)';
     if (url) {
       card.target = '_blank';

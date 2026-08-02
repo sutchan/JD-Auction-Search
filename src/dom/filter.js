@@ -22,29 +22,26 @@
     // 先显示所有商品，然后隐藏不匹配的
     productContainers.forEach(el => el.style.display = '');
 
-    // 构建匹配产品名称的集合
-    const matchedProductNames = new Set(
-      state.filteredProducts.map(p =>
-        global.JDSUtils.getProductName(p).toLowerCase()
-      )
+    // 精确匹配：优先用 filteredProducts 的 id 集合，从卡片链接中提取 auction-detail/{id}
+    // 比对，避免「全文 includes」在商品名互含/描述含关键词时误显或漏显
+    const matchedIds = new Set(
+      state.filteredProducts.map(p => String(global.JDSUtils.getProductId(p) || ''))
     );
+    const kw = state.keyword.toLowerCase();
 
-    // 遍历商品容器，检查是否匹配
     productContainers.forEach(container => {
-      const containerText = container.textContent.toLowerCase();
       let shouldShow = false;
 
-      // 检查是否有匹配的产品名称
-      for (const name of matchedProductNames) {
-        if (containerText.includes(name)) {
-          shouldShow = true;
-          break;
-        }
+      if (matchedIds.size) {
+        const anchor = container.querySelector('a[href]');
+        const href = anchor ? anchor.getAttribute('href') : '';
+        const m = /\/auction-detail\/(\d+)/i.exec(href || '');
+        if (m && matchedIds.has(m[1])) shouldShow = true;
       }
 
-      // 如果没有匹配到产品，检查关键词直接匹配
+      // 无 id 可比对（原生卡片无详情链接）时回退关键词全文匹配
       if (!shouldShow) {
-        shouldShow = containerText.includes(state.keyword.toLowerCase());
+        shouldShow = container.textContent.toLowerCase().includes(kw);
       }
 
       container.style.display = shouldShow ? '' : 'none';
