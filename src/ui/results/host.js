@@ -104,14 +104,14 @@
     }
     #jds-results-host .jds-product-price small { font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
     #jds-results-host .jds-product-price .jds-price-tag { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; }
-    #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
-    #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 13px; color: var(--muted-foreground); text-decoration: line-through; }
-    #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 13px; color: var(--muted-foreground); }
-    #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; }
+    #jds-results-host .jds-product-subprice { display: flex; align-items: center; margin-top: -2px; }
+    #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
+    #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
+    #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
     #jds-results-host .jds-product-bid {
-      display: inline-flex; align-items: center; padding: 3px 10px;
+      display: inline-flex; align-items: center; padding: 2px 9px;
       background: var(--secondary); color: var(--muted-foreground);
-      font-size: 12px; border-radius: var(--radius-full);
+      font-size: 11px; border-radius: var(--radius-full);
     }
     #jds-results-host .jds-load-more {
       grid-column: 1 / -1; justify-self: center; margin: 8px auto 24px;

@@ -17,6 +17,8 @@
 - 价格只显示现价（span.p-price）：搜索结果卡片仅渲染一个现价，移除封顶价/划线原价次价格行（`products.js`）；DOM 提取现价优先取京东精确现价元素 `.p-price`（`selectors.js` PRICE / `dom/extract.js`），确保兜底路径价格等于页面 `p-price` 实际显示值；未开拍仍保留「起拍」标签作为现价语义修饰
 - 修复价格仍不准：渲染价格改为优先使用页面原生卡片 `span.p-price` 实际文本（新增 `JDSDom.getProductPriceText` 按名称回查，原生列表隐藏时 textContent 仍可读取），彻底不再依赖接口字段名/单位(分/元)猜测；DOM 提取同步存 `priceText` 原文；无对应原生卡片时回退 `formatPrice(currentPrice)`，避免单位误差导致的 ¥128,800 等错价
 - 调试友好：为所有动态容器补充语义化 id——`#jds-search-wrapper`、`#jds-toolbar-root`、`#jds-results-host`、`#jds-results-panel`、`#jds-product-grid`、`#jds-empty-overlay`、`#jds-toast-stack`、`#jds-load-more`，商品卡片 `id="jds-card-{id|name}"`，便于 DevTools 直接定位
+- 价格展示优化：重新渲染划线原价（原价/封顶价高于现价时显示 `.jds-product-subprice`，灰色 `line-through`、12px 较小字），与主价红色现价明显区分；出价人数 badge 缩至 11px 灰色（`jds-product-bid`），`.func.test.js` 同步更新划线次行断言
+- 当前价优先：商品只要能显示当前价（`currentPrice` 或页面 `p-price` 文本任一存在）即用当前价展示，不再标注/使用起拍价；仅当两者皆无且存在 `startPrice` 时才显示「起拍」标签与起拍价
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）

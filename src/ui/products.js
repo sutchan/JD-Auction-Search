@@ -119,17 +119,22 @@
     // 主价格行：价格优先取自页面 span.p-price 实际文本（用户要求只显示 p-price 价格），
     // 不再依赖接口字段名/单位猜测；无对应原生卡片时回退数字格式化(currentPrice/startPrice)。
     // - hasCurrent: 接口/提取给出 currentPrice（含 0，流拍亦算有效现价）
-    // - isStarting: 无 currentPrice 但有 startPrice → 未开拍「起拍价」（标签为现价语义修饰，仍保留）
+    // - priceText: 页面原生 .p-price 文本，代表当前价（优先展示）
+    // - isStarting: 既无 currentPrice 也无 priceText，仅有 startPrice → 未开拍「起拍价」
+    //   只要商品能显示出当前价（currentPrice 或 priceText 任一存在），就用当前价代替起拍价
     const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
     const hasCurrent = rawCurrent != null;
     const startPrice = (p && p.startPrice != null) ? Number(p.startPrice) : null;
-    const isStarting = !hasCurrent && startPrice != null && startPrice > 0;
-    const current = isStarting ? startPrice
-      : (hasCurrent ? rawCurrent : U.getProductPrice(p));
 
     // 优先用 p-price 原文（DOM 提取存的值 / 实时回查页面原生卡片），避免单位(分/元)误差
     const priceText = (p && p.priceText)
       || (global.JDSDom && global.JDSDom.getProductPriceText ? global.JDSDom.getProductPriceText(name) : null);
+    const hasPriceText = !!priceText;
+
+    // 仅当没有任何当前价可显示（无 currentPrice 且无 priceText）时，才用起拍价并标注「起拍」
+    const isStarting = !hasCurrent && !hasPriceText && startPrice != null && startPrice > 0;
+    const current = isStarting ? startPrice
+      : (hasCurrent ? rawCurrent : (hasPriceText ? null : U.getProductPrice(p)));
 
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
@@ -153,7 +158,20 @@
     }
     body.appendChild(priceEl);
 
-    // 出价人数：独立 badge 行，与价格数字明显区分
+    // 划线原价：有封顶/原价且大于现价时展示（灰色、划线、较小字号），与现价明显区分
+    const origPrice = (p && p.cappedPrice != null) ? Number(p.cappedPrice) : null;
+    if (origPrice != null && isFinite(origPrice) && origPrice > 0 &&
+        (!hasCurrent || origPrice > rawCurrent)) {
+      const sub = document.createElement('div');
+      sub.className = 'jds-product-subprice';
+      const origEl = document.createElement('span');
+      origEl.className = 'jds-product-orig';
+      origEl.textContent = '¥' + U.formatPrice(origPrice);
+      sub.appendChild(origEl);
+      body.appendChild(sub);
+    }
+
+    // 出价人数：独立 badge 行，较小灰色字，与价格数字明显区分
     const bidCount = U.getProductBidCount(p);
     if (bidCount > 0) {
       const meta = document.createElement('div');
