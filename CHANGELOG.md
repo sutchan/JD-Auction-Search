@@ -19,6 +19,7 @@
 - 调试友好：为所有动态容器补充语义化 id——`#jds-search-wrapper`、`#jds-toolbar-root`、`#jds-results-host`、`#jds-results-panel`、`#jds-product-grid`、`#jds-empty-overlay`、`#jds-toast-stack`、`#jds-load-more`，商品卡片 `id="jds-card-{id|name}"`，便于 DevTools 直接定位
 - 价格展示优化：重新渲染划线原价（原价/封顶价高于现价时显示 `.jds-product-subprice`，灰色 `line-through`、12px 较小字），与主价红色现价明显区分；出价人数 badge 缩至 11px 灰色（`jds-product-bid`），`.func.test.js` 同步更新划线次行断言
 - 当前价优先：商品只要能显示当前价（`currentPrice` 或页面 `p-price` 文本任一存在）即用当前价展示，不再标注/使用起拍价；仅当两者皆无且存在 `startPrice` 时才显示「起拍」标签与起拍价
+- UI 布局修复：结果网格由硬编码 `repeat(5, minmax(0,1fr))` 改为响应式 `repeat(auto-fill, minmax(200px,1fr))`（对齐原型），避免窄列表拥挤、宽列表留白；移除 `_createGrid` 与 CSS 类冲突的内联网格样式；结果面板内边距归零，消除与网格内边距叠加导致的上下过大留白
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）

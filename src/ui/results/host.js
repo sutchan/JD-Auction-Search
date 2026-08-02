@@ -18,7 +18,7 @@
     }
     #jds-results-host .jds-results-panel {
       position: absolute; inset: 0; overflow-y: auto;
-      background: #fff; padding: 16px 0 40px;
+      background: #fff; padding: 0;
       display: none;
       pointer-events: auto;
     }
@@ -121,8 +121,8 @@
     }
     #jds-results-host .jds-load-more:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* Grid 网格兜底（未设置内联样式时） */
-    #jds-results-host .jds-product-grid { display: grid; gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
+    /* Grid 网格（响应式列数，对齐原型 auto-fill minmax(200px,1fr)，避免固定 5 列在窄列表下拥挤/宽列表下留白） */
+    #jds-results-host .jds-product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
 
     @media (prefers-reduced-motion: reduce) {
       #jds-results-host .jds-product-card,
@@ -252,12 +252,8 @@
     grid.id = 'jds-product-grid';
     grid.className = 'jds-product-grid';
     grid.setAttribute('aria-live', 'polite');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
-    grid.style.gap = '16px';
-    grid.style.padding = '16px 24px 40px';
-    // 网格宽度跟随结果面板（已由 _positionResultsPanel 对齐原生列表宽度），不再额外限宽居中，
-    // 避免宽列表下 grid 两侧出现多余留白
+    // 列数/间距/内边距由 RESULTS_COMPONENT_CSS 的 .jds-product-grid 响应式定义（auto-fill minmax(200px,1fr)），
+    // 不再内联硬编码，避免与样式表冲突且在窄列表下拥挤
     panel.appendChild(grid);
     return grid;
   };
