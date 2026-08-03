@@ -1,10 +1,10 @@
 {
   "extensionName": {
-    "message": "京东夺宝搜索增强",
+    "message": "京东夺宝岛搜索增强",
     "description": "插件名称"
   },
   "extensionDescription": {
-    "message": "为京东夺宝页面增加商品关键词搜索和分类过滤功能",
+    "message": "为京东夺宝岛页面增加商品关键词搜索和分类过滤功能",
     "description": "插件描述"
   },
   "searchPlaceholder": {
