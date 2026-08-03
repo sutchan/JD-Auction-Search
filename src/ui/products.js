@@ -142,24 +142,30 @@
 
     const priceEl = document.createElement('div');
     priceEl.className = 'jds-product-price';
-    if (isStarting) {
-      const tag = document.createElement('small');
-      tag.className = 'jds-price-tag';
-      tag.textContent = '起拍';
-      priceEl.appendChild(tag);
-    }
+
+    // 三个独立容器：标签 / 货币符号 / 金额，便于各自独立样式化
+    const labelEl = document.createElement('span');
+    labelEl.className = 'jds-price-label';
+    const yenEl = document.createElement('span');
+    yenEl.className = 'jds-price-yen';
+    const amountEl = document.createElement('span');
+    amountEl.className = 'jds-price-amount';
+
+    // 标签容器：仅未开拍（无当前价）时显示「起拍」
+    if (isStarting) labelEl.textContent = '起拍';
+
+    // 货币符号始终独立在 yenEl；金额容器只放数值（起拍价/当前价），不混入 ¥ 符号
+    yenEl.textContent = '¥';
     if (priceText) {
-      // p-price 原文可能已含 ¥ 符号，直接展示避免重复
-      priceEl.appendChild(document.createTextNode(priceText));
+      // p-price 原文可能含 ¥/￥，仅取其后的数值部分放入金额容器，货币由 yenEl 统一承载
+      amountEl.textContent = priceText.replace(/^[¥￥\s]+/, '').trim();
     } else {
-      const yen = document.createElement('small');
-      yen.textContent = '¥';
-      const amount = document.createElement('span');
-      amount.textContent = U.formatPrice(current);
-      priceEl.appendChild(yen);
-      priceEl.appendChild(document.createTextNode(' '));
-      priceEl.appendChild(amount);
+      amountEl.textContent = U.formatPrice(current);
     }
+    // 顺序：标签(起拍) → 货币符号 → 金额
+    priceEl.appendChild(labelEl);
+    priceEl.appendChild(yenEl);
+    priceEl.appendChild(amountEl);
     body.appendChild(priceEl);
 
     // 划线原价：有封顶/原价且大于现价时展示（灰色、划线、较小字号），与现价明显区分

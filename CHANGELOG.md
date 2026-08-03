@@ -29,6 +29,7 @@
 - 价格单位归一：`getProductPrice` 对疑似「分」的大整数（>100000 整数）÷100 还原为元，规避接口 `price` 字段为分导致的 ¥128,800 类错价
 - 卡片 id 稳定性：无商品 id 时改用自增序号 `jds-card-n{n}`，避免标题 `encodeURIComponent` 产生非法/重复 id
 - 浏览态原生过滤精确化：`filter.js` 优先按 `filteredProducts` 的 id 集合 + 卡片链接 `auction-detail/{id}` 精确比对显隐，回退关键词全文匹配，修正商品名互含时的误显/漏显
+- 价格行三容器拆分：`jds-product-price` 内「起拍」标签、¥ 货币符号、金额各自独立容器（`.jds-price-label` / `.jds-price-yen` / `.jds-price-amount`），便于分别样式化；原 `.jds-price-tag` 重命名为 `.jds-price-label`
 
 ## v1.4.0
 - 拆分 `content.js`(218)、`results.js`(230) 等超 200 行模块，提升可维护性（manifest content_scripts 同步）
