@@ -44,40 +44,40 @@ whatever you need, found instantly without paging.
 
 ## Preview
 
-> 📷 Place screenshots in `docs/screenshots/` (`search.png` / `empty.png` / `history.png`),
-> then replace the placeholders below. Current figures are ASCII previews.
-
-<details open>
-<summary><b>🔍 Search filtering</b></summary>
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Search  [ phone_______________ ]  ✕   Search  128 items     │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐               │
-│  │[img] │ │[img] │ │[img] │ │[img] │ │[img] │               │
-│  │Huawei│ │Apple │ │Xiaomi│ │OPPO  │ │vivo  │               │
-│  │¥1,288│ │¥2,399│ │¥999  │ │¥1,599│ │¥1,199│               │
-│  └──────┘ └──────┘ └──────┘ └──────┘ └──────┘               │
-│            Load more (60 / 128 shown)                        │
-└─────────────────────────────────────────────────────────────┘
-```
-
-</details>
+| Search filtering | Search history | Empty state |
+|------------------|----------------|-------------|
+| ![Search](./docs/screenshots/search.png) | ![History](./docs/screenshots/history.png) | ![Empty](./docs/screenshots/empty.png) |
 
 <details>
-<summary><b>🗂 Search history</b></summary>
+<summary>📐 UI structure (text)</summary>
+
+**Search filtering**
 
 ```
-┌──────────────────────────────────────┐
-│  Search  [ __________ ]  ✕   Search     │
-├──────────────────────────────────────┤
-│ Search history                Clear    │
-│ • phone                                 │
-│ • huawei                                │
-│ • gpu                          ×        │
-│ • digital                      ×        │
-└──────────────────────────────────────┘
+Search bar: [ phone_______ ] ✕  Search   128 items
+Grid:       [card][card][card][card][card]   ← 5 per row, red price + gray bid badge
+            [card][card][card][card][card]
+            Load more (60 / 128 shown)
+```
+
+**Search history**
+
+```
+Search bar: [ __________ ] ✕  Search
+Dropdown:   Search history              Clear
+            • phone
+            • huawei
+            • gpu                ×
+            • digital            ×
+```
+
+**Empty state**
+
+```
+        🔍
+    No matching products
+  Try another keyword, or clear search to view all
+        [ Clear search ]
 ```
 
 </details>
