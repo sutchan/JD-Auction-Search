@@ -244,6 +244,8 @@
 
     // 清空历史
     if (historyClear) {
+      // mousedown 阻止默认：避免点击令 input 失焦触发 focusout 误关下拉
+      historyClear.addEventListener('mousedown', (e) => e.preventDefault());
       historyClear.addEventListener('click', (e) => {
         e.stopPropagation();
         this._clearSearchHistory();
@@ -356,12 +358,18 @@
       del.className = 'jds-history-del';
       del.setAttribute('aria-label', '删除该历史');
       del.textContent = '×';
+      // mousedown 阻止默认：避免点击按钮令 input 失焦触发 focusout 误关下拉
+      del.addEventListener('mousedown', (e) => e.preventDefault());
       del.addEventListener('click', (e) => {
         e.stopPropagation();
         this._removeSearchHistory(i);
         this._renderHistory(listEl, emptyEl, input);
       });
       li.appendChild(del);
+
+      // mousedown 阻止默认：点击 li（非可聚焦）会令 input 失焦触发 focusout，
+      // 进而关闭下拉使 pointer-events:none 吞掉后续 click；preventDefault 保焦点、保下拉、保 click
+      li.addEventListener('mousedown', (e) => e.preventDefault());
 
       // 点击历史项：填入并搜索
       li.addEventListener('click', () => {
