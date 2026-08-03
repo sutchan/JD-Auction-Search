@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/banner.png" alt="京东夺宝岛搜索增强" width="100%">
+</p>
+
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">

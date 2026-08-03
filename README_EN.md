@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/banner.png" alt="JD Auction Search Enhancer" width="100%">
+</p>
+
 # JD Auction Search Enhancer
 
 <p align="center">
