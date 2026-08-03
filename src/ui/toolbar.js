@@ -229,15 +229,17 @@
     this.shadowRoot.addEventListener('focusout', onFocusOut);
     this._onFocusOut = onFocusOut;
 
-    // 清除按钮
-    clearBtn.addEventListener('click', () => {
+    // 清除搜索：清空输入+退出搜索态+恢复原生列表，单一行为来源
+    // 暴露为 JDSUI.clearSearch 供跨 Shadow 调用（如空状态清除按钮）
+    this.clearSearch = () => {
       input.value = '';
       state.keyword = '';
       clearBtn.classList.remove('is-visible');
       input.focus();
       handlers.onClear();
       this._renderHistory(historyList, historyEmpty, input);
-    });
+    };
+    clearBtn.addEventListener('click', () => this.clearSearch());
 
     // 搜索按钮
     searchBtn.addEventListener('click', submit);

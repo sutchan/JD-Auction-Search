@@ -6,9 +6,14 @@
   "license": "MIT",
   "keywords": [
     "jd",
-    "auction",
+    "jd-auction",
+    "京东夺宝岛",
+    "拍拍",
     "search",
     "extension",
-    "browser"
+    "browser-extension",
+    "chrome-extension",
+    "跨页聚合",
+    "商品筛选"
   ]
 }

@@ -59,13 +59,13 @@
         <div class="jds-empty-title">${getMessage('emptyTitle')}</div>
         <div class="jds-empty-desc">${getMessage('emptyDesc')}</div>
         <button type="button" class="jds-empty-action">${getMessage('emptyAction')}</button>`;
-      // 清除搜索：复用工具栏已验证的 .jds-clear 逻辑（清空输入 + 退出搜索态），
-      // 避免在此重复实现清空/过滤流程，保持单一行为来源
+      // 清除搜索：复用工具栏已验证的清空逻辑（清空输入 + 退出搜索态 + 恢复原生列表），
+      // 通过 JDSUI.clearSearch() 跨 Shadow 调用，避免 document.querySelector 穿透
+      // closed Shadow DOM 找不到内部 .jds-clear 而失效（仅 hideEmptyState 不真正清空）
       const actionBtn = this.emptyElement.querySelector('.jds-empty-action');
       if (actionBtn) {
         actionBtn.addEventListener('click', () => {
-          const clearBtn = document.querySelector('#jds-search-wrapper .jds-clear');
-          if (clearBtn) clearBtn.click();
+          if (typeof JDSUI.clearSearch === 'function') JDSUI.clearSearch();
           else this.hideEmptyState();
         });
       }
