@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.5.2
+// JD-Auction-Search/src/ui/toolbar.js v1.5.3
 // 工具栏：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）、事件绑定
 
 (function(global) {
@@ -6,6 +6,9 @@
 
   const JDSUI = global.JDSUI = global.JDSUI || {};
   const getMessage = global.JDSUtils.getMessage;
+
+  // 搜索历史持久化键（chrome.storage.local）
+  JDSUI._STORAGE_KEY = 'jds_search_history';
 
   /**
    * 渲染搜索UI — 注入 Shadow DOM 并渲染工具栏
@@ -35,6 +38,9 @@
 
     // 挂载：优先嵌入夺宝岛页面的 auction_head 容器，页面 header 可能延迟渲染则重试，最终回退为浮动条
     this._mountWithRetry(wrapper, style, 0);
+
+    // 加载持久化搜索历史（刷新后保留），无 storage 时回退内存
+    this._loadSearchHistory();
 
     return container;
   };
@@ -211,16 +217,17 @@
       }
     });
 
-    // 外部点击关闭下拉：基于 Shadow 边界判定，避免 closed Shadow DOM
-    // retargeting 导致 historyEl.contains(e.target) 始终为 false 而一闪即逝
-    const onDocPointerDown = (e) => {
-      const path = e.composedPath ? e.composedPath() : [];
-      // 点击落在工具栏 Shadow 内部（含历史项）则不关闭
-      if (path.indexOf(this.shadowRoot) >= 0) return;
-      this._hideHistory();
+    // 失焦关闭下拉：聚焦移出工具栏 Shadow 时收起。
+    // 用 focusout（blur 的冒泡版）而非 document click/pointerdown，
+    // 彻底规避 closed Shadow DOM 下 composedPath/retarget 不可靠导致的误关/吞点击。
+    // 点击历史项（li 不可聚焦）不会令 input 失焦，下拉保持、click 正常生效。
+    const onFocusOut = (e) => {
+      const next = e.relatedTarget;
+      // 焦点移出 Shadow（外部/空白）才关闭；留在内部则不关
+      if (!next || !this.shadowRoot.contains(next)) this._hideHistory();
     };
-    document.addEventListener('pointerdown', onDocPointerDown, true);
-    this._onDocPointerDown = onDocPointerDown;
+    this.shadowRoot.addEventListener('focusout', onFocusOut);
+    this._onFocusOut = onFocusOut;
 
     // 清除按钮
     clearBtn.addEventListener('click', () => {
@@ -246,7 +253,49 @@
   };
 
   /**
-   * 添加搜索历史（去重、置顶、上限 10 条）
+   * 从持久化存储读取搜索历史（chrome.storage.local，刷新后保留）
+   * @private
+   */
+  JDSUI._loadSearchHistory = function _loadSearchHistory() {
+    const self = this;
+    // 兼容无 storage 权限/环境（如测试桩）：回退内存
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local ||
+        typeof chrome.storage.local.get !== 'function') return;
+    try {
+      chrome.storage.local.get(self._STORAGE_KEY, (res) => {
+        const saved = (res && res[self._STORAGE_KEY]) || [];
+        if (Array.isArray(saved) && saved.length) {
+          self._searchHistory = saved.slice(0, 10);
+        }
+        // 若下拉正打开则刷新展示
+        const el = self.shadowRoot && self.shadowRoot.querySelector('.jds-history');
+        if (el && !el.hidden) {
+          const listEl = self.shadowRoot.querySelector('.jds-history-list');
+          const emptyEl = self.shadowRoot.querySelector('.jds-history-empty');
+          const input = self.shadowRoot.querySelector('.jds-search-input');
+          self._renderHistory(listEl, emptyEl, input);
+        }
+      });
+    } catch (e) { /* 忽略存储异常，保持内存模式 */ }
+  };
+
+  /**
+   * 持久化搜索历史到 chrome.storage.local
+   * @private
+   */
+  JDSUI._persistHistory = function _persistHistory() {
+    const self = this;
+    if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local ||
+        typeof chrome.storage.local.set !== 'function') return;
+    try {
+      const data = {};
+      data[self._STORAGE_KEY] = (self._searchHistory || []).slice(0, 10);
+      chrome.storage.local.set(data);
+    } catch (e) { /* 忽略存储异常，保持内存模式 */ }
+  };
+
+  /**
+   * 添加搜索历史（去重、置顶、上限 10 条，并持久化）
    * @param {string} keyword
    */
   JDSUI._addSearchHistory = function _addSearchHistory(keyword) {
@@ -257,6 +306,7 @@
     if (idx >= 0) hist.splice(idx, 1);
     hist.unshift(kw);
     if (hist.length > 10) hist.length = 10;
+    this._persistHistory();
   };
 
   /**
@@ -266,6 +316,7 @@
   JDSUI._removeSearchHistory = function _removeSearchHistory(index) {
     const hist = this._searchHistory || (this._searchHistory = []);
     if (index >= 0 && index < hist.length) hist.splice(index, 1);
+    this._persistHistory();
   };
 
   /**
@@ -273,6 +324,7 @@
    */
   JDSUI._clearSearchHistory = function _clearSearchHistory() {
     this._searchHistory = [];
+    this._persistHistory();
   };
 
   /**

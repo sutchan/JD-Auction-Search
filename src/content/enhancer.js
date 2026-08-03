@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/enhancer.js v1.5.2
+// JD-Auction-Search/src/content/enhancer.js v1.5.3
 // 主增强器：状态、初始化、生命周期与页面类型判断
 
 (function (global) {

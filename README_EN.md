@@ -44,10 +44,10 @@ npm install
 npm run build
 ```
 
-This produces `jd-auction-search-v1.5.2.zip` in the project root, ready to publish.
+This produces `jd-auction-search-v1.5.3.zip` in the project root, ready to publish.
 
 Optional build flags:
-- `node build.js --tw`: localized output named `jd-auction-search-v1.5.2-zh-TW.zip` (zh-TW)
+- `node build.js --tw`: localized output named `jd-auction-search-v1.5.3-zh-TW.zip` (zh-TW)
 - `node build.js --firefox`: apply Firefox string escaping to `messages.json`
   (`'` → `\'`, `\` → `\\`)
 - `node build.js --no-preview`: skip the build artifact preview

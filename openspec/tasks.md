@@ -2,6 +2,13 @@
 
 ## 已完成任务
 
+### v1.5.3
+- [x] 恢复国际化：`getMessage` 优先 `chrome.i18n`，仅保留 zh_CN/en，移除 zh_TW；`_locales` 重建（zh_CN 补 history 三键、新增 en/messages.json）；manifest 加 `default_locale`
+- [x] 搜索历史持久化：`manifest.json` 新增 `storage` 权限；`toolbar.js` 用 `chrome.storage.local`（`_STORAGE_KEY='jds_search_history'`）增/删/清空调 `_persistHistory()`、渲染调 `_loadSearchHistory()` 回填，无 storage 回退内存
+- [x] 历史下拉关闭逻辑由 document pointerdown 改为 Shadow `focusout`，规避 closed Shadow DOM retarget 不可靠导致的误关/吞点击
+- [x] 测试对齐：func 测试 zh-TW 断言改为 en 兜底校验
+- [x] 版本统一升至 v1.5.3（manifest / metadata / package / 各文件头 / prototype 徽标 / README 打包名 / CHANGELOG/spec/tasks）
+
 ### v1.5.2
 - [x] 修复搜索后清空原生列表空白：`hideNativeProducts` 优先隐藏整个列表容器（`getProductListContainer`），容器重见时京东自行重渲染，清空后原生列表稳定恢复
 - [x] DOM 提取商品性校验：`extractProductsFromDOM` 跳过无详情链接且无主图的非商品项（分类导航/标签/文字项），不再误混入结果

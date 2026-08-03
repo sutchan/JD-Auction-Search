@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/observer.js v1.5.2
+// JD-Auction-Search/src/dom/observer.js v1.5.3
 // DOM 观察器：监听页面商品列表变化（搜索态下由面板接管，跳过原生更新）
 
 (function(global) {

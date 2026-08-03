@@ -1,4 +1,4 @@
-// JD-Auction-Search/build.js v1.5.2
+// JD-Auction-Search/build.js v1.5.3
 // 构建脚本：打包扩展为 zip 发布包
 // 设计原则：仅简体中文，单一语言打包
 // 用法：

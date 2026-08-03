@@ -3,7 +3,7 @@
 ## 项目概述
 
 **项目名称**: JD-Auction-Search  
-**版本**: 1.5.2 
+**版本**: 1.5.3 
 **类型**: 浏览器扩展插件
 
 为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
@@ -154,6 +154,12 @@ JD-Auction-Search/
 - 函数必须有注释
 
 ## 版本历史
+
+### v1.5.3
+- 恢复国际化：`getMessage` 优先 `chrome.i18n`，缺失回退内置双语字典；仅保留 zh_CN 与 en，移除 zh_TW；`_locales` 重建（zh_CN 补 history 三键、新增 en/messages.json）；manifest 加 `default_locale`
+- 搜索历史持久化：`manifest.json` 新增 `storage` 权限；`toolbar.js` 用 `chrome.storage.local`（`_STORAGE_KEY='jds_search_history'`）在增/删/清空时 `_persistHistory()`、渲染时 `_loadSearchHistory()` 回填，无 storage 环境自动回退内存
+- 历史下拉关闭逻辑由 document pointerdown 改为 Shadow `focusout`，规避 closed Shadow DOM 下 retarget 不可靠导致的误关/吞点击
+- 测试对齐：func 测试 zh-TW 断言改为 en 兜底校验
 
 ### v1.5.2
 - 修复搜索后清空原生列表空白：`hideNativeProducts` 优先隐藏整个列表容器（虚拟列表/懒加载下，仅隐藏卡片会导致清空后原生列表仍空白），容器重见时京东自行重渲染

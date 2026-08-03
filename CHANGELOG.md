@@ -6,6 +6,8 @@
 - `_locales` 重建：zh_CN 补齐 historyTitle/historyClear/historyEmpty 三键；新增 en/messages.json
 - manifest 增加 `default_locale`: "zh_CN"
 - 测试对齐：func 测试 zh-TW 断言改为 en 兜底校验
+- 搜索历史持久化（修复刷新后消失）：`manifest.json` 新增 `storage` 权限；`toolbar.js` 用 `chrome.storage.local`（`_STORAGE_KEY='jds_search_history'`）在增/删/清空时 `_persistHistory()`、渲染时 `_loadSearchHistory()` 回填，无 storage 环境（测试桩）自动回退纯内存
+- 历史下拉关闭逻辑由 document pointerdown 改为 Shadow `focusout`：彻底规避 closed Shadow DOM 下 composedPath/retarget 不可靠导致的误关/吞点击，点击不可聚焦的历史项也不会令 input 失焦、下拉保持且 click 正常生效
 
 ## v1.5.2
 - 修复搜索后清空原生列表空白：京东为虚拟列表/懒加载，仅隐藏卡片时其不再维护卡片可见性，导致清空搜索恢复 display 后原生列表仍空白；现 `hideNativeProducts` 优先隐藏整个列表容器（`getProductListContainer`），容器重见时京东自行重渲染，清空后原生列表稳定恢复

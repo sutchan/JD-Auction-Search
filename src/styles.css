@@ -1,4 +1,4 @@
-/* JD-Auction-Search/src/styles.css v1.5.2 */
+/* JD-Auction-Search/src/styles.css v1.5.3 */
 /* 全局样式 — 仅用于 Shadow DOM 外的 Toast 反馈组件 */
 /* 工具栏与空状态样式已内联至 Shadow DOM (见 src/ui/styles.js _getInlineStyles) */
 /* 维护约定：下方 :root 令牌须与 src/ui/tokens.js 的 _getTokensCss 保持同步，

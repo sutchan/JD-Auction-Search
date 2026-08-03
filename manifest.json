@@ -4,7 +4,9 @@
   "version": "1.5.3",
   "description": "为京东夺宝页面增加商品关键词搜索和分类过滤功能",
   "default_locale": "zh_CN",
-  "permissions": [],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "*://1paipai.jd.com/*",
     "*://*.jd.com/*"
