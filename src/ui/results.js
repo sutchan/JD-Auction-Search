@@ -57,7 +57,18 @@
         </svg>
         </div>
         <div class="jds-empty-title">${getMessage('emptyTitle')}</div>
-        <div class="jds-empty-desc">${getMessage('emptyDesc')}</div>`;
+        <div class="jds-empty-desc">${getMessage('emptyDesc')}</div>
+        <button type="button" class="jds-empty-action">${getMessage('emptyAction')}</button>`;
+      // 清除搜索：复用工具栏已验证的 .jds-clear 逻辑（清空输入 + 退出搜索态），
+      // 避免在此重复实现清空/过滤流程，保持单一行为来源
+      const actionBtn = this.emptyElement.querySelector('.jds-empty-action');
+      if (actionBtn) {
+        actionBtn.addEventListener('click', () => {
+          const clearBtn = document.querySelector('#jds-search-wrapper .jds-clear');
+          if (clearBtn) clearBtn.click();
+          else this.hideEmptyState();
+        });
+      }
       root.appendChild(this.emptyElement);
     }
     this.emptyElement.style.display = '';

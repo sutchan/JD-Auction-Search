@@ -130,6 +130,11 @@
         Object.assign(headers, tpl.headers);
       }
     }
+    // 京东拍拍列表接口常校验 Referer，缺失会返回 403/空导致翻页失败；
+    // 模板 headers 未含 Referer 时，用当前页面地址兜底（同源重放必带）
+    if (!headers.Referer && !headers.referer && typeof location !== 'undefined') {
+      headers.Referer = location.href;
+    }
     const options = {
       method: tpl.method || 'GET',
       credentials: 'include',

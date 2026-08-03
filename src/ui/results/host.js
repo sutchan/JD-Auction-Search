@@ -69,6 +69,13 @@
     #jds-results-host .jds-empty-icon svg { width: 26px; height: 26px; }
     #jds-results-host .jds-empty-title { font-size: 20px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
     #jds-results-host .jds-empty-desc { font-size: 14px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
+    #jds-results-host .jds-empty-action {
+      margin-top: 8px; padding: 9px 22px; border: 1px solid var(--border);
+      border-radius: var(--radius-md); background: var(--card); color: var(--primary);
+      font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans);
+      transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+    }
+    #jds-results-host .jds-empty-action:hover { border-color: var(--primary); background: var(--secondary); }
 
     /* Product Card 商品卡片（对齐 prototype .product-card） */
     #jds-results-host .jds-product-card {
@@ -124,7 +131,7 @@
     #jds-results-host .jds-product-bid {
       display: inline-flex; align-items: center; padding: 2px 9px;
       background: var(--secondary); color: var(--muted-foreground);
-      font-size: 11px; border-radius: var(--radius-full);
+      font-size: 12px; border-radius: var(--radius-full);
     }
     #jds-results-host .jds-load-more {
       grid-column: 1 / -1; justify-self: center; margin: 8px auto 24px;
@@ -196,6 +203,13 @@
     if (wrapper) {
       const rect = wrapper.getBoundingClientRect();
       top = Math.max(0, Math.round(rect.bottom));
+    }
+    // 避免遮挡页面原生导航 auction_nav：若其位于工具栏之下，面板顶部下移到导航底部，
+    // 保证导航始终可见可点击（否则 fixed 覆盖层会盖住整页导航）
+    const navEl = document.querySelector('#auction_nav, [class*="auction_nav" i], [class*="auction-nav" i]');
+    if (navEl) {
+      const navRect = navEl.getBoundingClientRect();
+      if (navRect.bottom > top) top = Math.round(navRect.bottom);
     }
     panel.style.top = top + 'px';
 
