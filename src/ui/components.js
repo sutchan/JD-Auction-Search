@@ -65,7 +65,12 @@
         background: var(--card); border: 1px solid var(--border);
         border-radius: var(--radius-md); box-shadow: var(--shadow-md);
         overflow: hidden; font-size: 14px; text-align: left;
+        transform-origin: top center;
+        opacity: 0; transform: translateY(-6px) scale(0.98);
+        transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+        pointer-events: none;
       }
+      .jds-history.jds-history-open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
       .jds-history[hidden] { display: none; }
       .jds-history-head {
         display: flex; align-items: center; justify-content: space-between;
@@ -75,19 +80,26 @@
       .jds-history-clear {
         border: none; background: transparent; color: var(--muted-foreground);
         font-size: 12px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);
+        transition: all var(--dur-fast) var(--ease-out);
       }
       .jds-history-clear:hover { color: var(--primary); background: var(--secondary); }
       .jds-history-list { list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow-y: auto; }
       .jds-history-item {
         display: flex; align-items: center; gap: 8px; padding: 8px 10px;
         border-radius: var(--radius-sm); cursor: pointer; color: var(--foreground);
+        transition: background var(--dur-fast) var(--ease-out);
       }
-      .jds-history-item:hover { background: var(--secondary); }
+      .jds-history-item:hover,
+      .jds-history-item.is-active { background: var(--secondary); }
+      .jds-history-item.is-active { box-shadow: inset 2px 0 0 var(--primary); }
       .jds-history-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .jds-history-del {
         flex-shrink: 0; border: none; background: transparent; color: var(--subtle-foreground);
         font-size: 16px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: var(--radius-sm);
+        opacity: 0; transition: opacity var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
       }
+      .jds-history-item:hover .jds-history-del,
+      .jds-history-item.is-active .jds-history-del { opacity: 1; }
       .jds-history-del:hover { color: var(--destructive); }
       .jds-history-empty { padding: 14px 12px; color: var(--muted-foreground); font-size: 13px; text-align: center; }
       .jds-history-empty[hidden] { display: none; }

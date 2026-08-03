@@ -140,7 +140,6 @@
     const input = container.querySelector('.jds-search-input');
     const clearBtn = container.querySelector('.jds-clear');
     const searchBtn = container.querySelector('.jds-search-btn');
-    const historyEl = container.querySelector('.jds-history');
     const historyList = container.querySelector('.jds-history-list');
     const historyEmpty = container.querySelector('.jds-history-empty');
     const historyClear = container.querySelector('.jds-history-clear');
@@ -178,13 +177,50 @@
 
     // 搜索框回车
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // 若有键盘选中的历史项，则以其作为关键词
+        const active = historyList.querySelector('.jds-history-item.is-active .jds-history-text');
+        if (active) {
+          input.value = active.textContent;
+          if (this._historyCtx && this._historyCtx.clearBtn) this._historyCtx.clearBtn.classList.add('is-visible');
+          if (this._historyCtx && this._historyCtx.state) this._historyCtx.state.keyword = active.textContent;
+        }
+        submit();
+        return;
+      }
+      // 键盘上下导航历史项
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const items = Array.from(historyList.querySelectorAll('.jds-history-item'));
+        if (items.length === 0) return;
+        e.preventDefault();
+        const active = historyList.querySelector('.jds-history-item.is-active');
+        let next = 0;
+        if (active) {
+          const curIdx = items.indexOf(active);
+          active.classList.remove('is-active');
+          next = e.key === 'ArrowDown'
+            ? (curIdx + 1) % items.length
+            : (curIdx - 1 + items.length) % items.length;
+        }
+        items[next].classList.add('is-active');
+        items[next].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Escape') {
+        this._hideHistory();
+        input.blur();
+      }
     });
 
-    // 外部点击关闭下拉
-    document.addEventListener('click', (e) => {
-      if (historyEl && !historyEl.contains(e.target) && e.target !== input) this._hideHistory();
-    });
+    // 外部点击关闭下拉：基于 Shadow 边界判定，避免 closed Shadow DOM
+    // retargeting 导致 historyEl.contains(e.target) 始终为 false 而一闪即逝
+    const onDocPointerDown = (e) => {
+      const path = e.composedPath ? e.composedPath() : [];
+      // 点击落在工具栏 Shadow 内部（含历史项）则不关闭
+      if (path.indexOf(this.shadowRoot) >= 0) return;
+      this._hideHistory();
+    };
+    document.addEventListener('pointerdown', onDocPointerDown, true);
+    this._onDocPointerDown = onDocPointerDown;
 
     // 清除按钮
     clearBtn.addEventListener('click', () => {
@@ -299,10 +335,21 @@
    */
   JDSUI._showHistory = function _showHistory() {
     const el = this.shadowRoot && this.shadowRoot.querySelector('.jds-history');
-    if (el) el.hidden = false;
+    if (!el) return;
+    if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null; }
+    el.hidden = false;
+    // 触发入场过渡动画
+    requestAnimationFrame(() => el.classList.add('jds-history-open'));
   };
   JDSUI._hideHistory = function _hideHistory() {
     const el = this.shadowRoot && this.shadowRoot.querySelector('.jds-history');
-    if (el) el.hidden = true;
+    if (!el) return;
+    el.classList.remove('jds-history-open');
+    // 延迟隐藏以便收起动画播放完毕
+    if (this._hideTimer) clearTimeout(this._hideTimer);
+    this._hideTimer = setTimeout(() => {
+      if (el && !el.classList.contains('jds-history-open')) el.hidden = true;
+      this._hideTimer = null;
+    }, 160);
   };
 })(window);
