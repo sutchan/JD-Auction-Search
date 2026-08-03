@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/i18n.js v1.5.0
+// JD-Auction-Search/src/utils/i18n.js v1.5.1
 // 国际化：优先使用 chrome.i18n API，回退到硬编码简繁中文
 
 (function(global) {

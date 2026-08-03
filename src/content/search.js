@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/search.js v1.5.0
+// JD-Auction-Search/src/content/search.js v1.5.1
 // 搜索编排：API 响应处理、过滤与跨页自动加载
 
 (function (global) {
@@ -85,7 +85,12 @@
       filtered = filtered.filter(p => {
         const name = JDSUtils.getProductName(p).toLowerCase();
         const id = String(JDSUtils.getProductId(p) || '');
-        return name.includes(kw) || id.includes(kw);
+        // 扩展匹配字段：名称/ID/分类名/店铺名/副标题，提升搜索召回（如搜"数码""某店铺"）
+        const category = String(p.categoryName || p.catName || p.category || '').toLowerCase();
+        const shop = String(p.shopName || p.storeName || p.shop || '').toLowerCase();
+        const subTitle = String(p.subTitle || p.skuName || p.skuTitle || '').toLowerCase();
+        return name.includes(kw) || id.includes(kw) ||
+          category.includes(kw) || shop.includes(kw) || subTitle.includes(kw);
       });
     }
 
@@ -125,13 +130,17 @@
       if (isDetail) {
         // 详情页：保持全局一致，严禁回退“搜索当前页”。
         // 相关拍卖等列表接口可能较晚到达，延时重试一次以拿到全局数据；
-        // 仍无则静默留空（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
+        // 仍无则展示空态（与全局搜索一致的空态），不弹错误也不抓当前页 DOM。
         if (!this._detailRetry) {
           this._detailRetry = true;
           // 详情页相关拍卖列表接口可能较晚到达：延时 1500ms 重试一次以拿到全局数据
           setTimeout(() => this._autoLoadProducts(), 1500);
+          // 重试进行中：保持 isLoading=true（搜索态将看到骨架屏），先刷新一次展示
+          this._applyFilterAndUpdate();
+          return;
         }
-        // 重试进行中：保持 isLoading=true（搜索态将看到骨架屏），先刷新一次展示
+        // 重试后仍无全局数据：复位加载态并展示空态，避免白屏无反馈
+        this.state.isLoading = false;
         this._applyFilterAndUpdate();
         return;
       }

@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.5.1
+- 修复分页重放缺 Referer：京东拍拍列表接口常校验 Referer，缺失会 403/空导致翻页失败、搜索只命中首页；`_buildPageRequest` 在模板 headers 未含 Referer 时以当前页面地址兜底
+- 修复样式重复注入：`injectStyles` 增加幂等（同路径只注入一次 `<link[jds-style]>`），并将调用移入 `enhancer.init` 的 `_inited` 守卫内，避免 SPA 重渲染/多次 init 重复注入全局 css 与令牌
+- 详情页直达无全局数据时展示空态而非白屏：重试（1500ms）仍无数据则复位加载态并渲染空状态浮层
+- 修复重复 init 加载状态未复位：`enhancer.init` 重置 `_allLoaded/_loadingAll/_loadAttempts/_detailRetry`，避免销毁后重新 init 因旧 `_allLoaded=true` 跳过分页聚合
+- observer 回调增加 150ms 节流（合并京东列表 class/style 高频抖动），`stopObservation` 同步清理定时器，避免浏览态冗余重渲染卡顿
+- 优化 `getProductPriceText` 性能：首次调用构建 name→priceText 缓存（O(1) 命中），原生列表变化时失效缓存，消除每张结果卡渲染全量遍历所有原生卡片的 O(N²) 开销
+- 搜索匹配扩展字段：除名称/ID 外，新增分类名(categoryName/catName)、店铺名(shopName/storeName)、副标题(subTitle/skuName) 匹配，提升"数码""某店铺"类召回
+- 收敛令牌重复定义：`styles.css` 与 `tokens.js _getTokensCss` 为同一套令牌的两份定义（Toast 走浅 DOM 需独立声明），补维护约定注释，改值须两处同改
+- 测试增强：`.func.test.js` 新增分页请求 Referer 注入、`_listScore` 列表评分、`_findPageParam` URL/body JSON/body 表单三种分页参数识别断言
+- 版本同步：manifest/metadata 升至 1.5.1，构建脚本统一同步全部 src 文件头版本号
+
 ## v1.5.0
 - 工程化：新增 ESLint 配置(.eslintrc.json) 与 `npm run lint`，GitHub Actions CI（lint+test+build）接入 PR/推送校验
 - 测试增强：新增 `integration.test.js`（jsdom 集成测试，覆盖 DOM 兜底提取字段映射、未命中显式告警、搜索 searchMode 编排、结果分页渲染），`npm test` 串联单元+集成共 47 断言

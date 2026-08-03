@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/paginator.js v1.5.0
+// JD-Auction-Search/src/api/paginator.js v1.5.1
 // 分页重放：基于页面真实请求模板逐页重放，聚合全部分页商品（多页面搜索的数据基础）
 
 (function(global) {
@@ -132,7 +132,7 @@
     }
     // 京东拍拍列表接口常校验 Referer，缺失会返回 403/空导致翻页失败；
     // 模板 headers 未含 Referer 时，用当前页面地址兜底（同源重放必带）
-    if (!headers.Referer && !headers.referer && typeof location !== 'undefined') {
+    if (!('Referer' in headers) && typeof location !== 'undefined') {
       headers.Referer = location.href;
     }
     const options = {

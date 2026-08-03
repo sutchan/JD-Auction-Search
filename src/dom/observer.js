@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/observer.js v1.5.0
+// JD-Auction-Search/src/dom/observer.js v1.5.1
 // DOM 观察器：监听页面商品列表变化（搜索态下由面板接管，跳过原生更新）
 
 (function(global) {
@@ -13,6 +13,19 @@
    */
   JDSDom.observeDOM = function observeDOM(state, onChange) {
     const container = this._getObservedContainer();
+
+    // 节流：京东列表频繁切换 class/style（hover、懒加载 img 的 data-src→src 等）
+    // 会瞬时触发大量回调；debounce 150ms 合并抖动，避免浏览态高频冗余重渲染
+    let scheduled = false;
+    let timer = null;
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      timer = setTimeout(() => {
+        scheduled = false;
+        onChange();
+      }, 150);
+    };
 
     this.observer = new MutationObserver((mutations) => {
       let shouldUpdate = false;
@@ -30,9 +43,11 @@
         }
       }
       if (shouldUpdate) {
-        onChange();
+        schedule();
       }
     });
+
+    this.observer._jdsCancel = () => { if (timer) clearTimeout(timer); scheduled = false; };
 
     this.observer.observe(container, {
       childList: true,
@@ -57,6 +72,7 @@
    */
   JDSDom.stopObservation = function stopObservation() {
     if (this.observer) {
+      if (this.observer._jdsCancel) this.observer._jdsCancel();
       this.observer.disconnect();
       this.observer = null;
     }

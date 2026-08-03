@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/ui-shared.js v1.5.0
+// JD-Auction-Search/src/utils/ui-shared.js v1.5.1
 // UI 共享能力：Toast 反馈、样式注入、Shadow DOM 查询
 
 (function(global) {
@@ -81,8 +81,11 @@
    * @param {string} cssPath - CSS路径
    */
   JDSUtils.injectStyles = function injectStyles(cssPath) {
+    // 幂等：同路径样式只注入一次，避免 SPA 重渲染/多次 init 重复 append <link>
+    if (document.querySelector(`link[jds-style="${cssPath}"]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
+    link.setAttribute('jds-style', cssPath);
     link.href = chrome.runtime.getURL(cssPath);
     (document.head || document.documentElement).appendChild(link);
   };

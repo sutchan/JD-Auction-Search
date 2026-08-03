@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/styles.js v1.5.0
+// JD-Auction-Search/src/ui/styles.js v1.5.1
 // 内联样式聚合：组合 设计令牌(_getTokensCss) + 工具栏(动态) + 组件样式(_getComponentsCss)
 // 全部注入 Shadow DOM（:host）确保样式隔离
 

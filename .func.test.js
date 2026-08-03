@@ -214,6 +214,25 @@ console.log('\n[paginator] 跨页聚合');
   ok('fetch 调用3次(到末页停止)', fetchCalls === 3);
   ok('聚合结果均含 id', all.every(p => U.getProductId(p)));
 
+  // #1 分页重放补齐 Referer：京东接口常校验 Referer，缺失会 403/空
+  A._requestTemplate = { url: 'https://api.jd.com/list?page=1', method: 'GET', headers: {} };
+  const built = A._buildPageRequest('https://api.jd.com/list?page=1', A._requestTemplate,
+    { where: 'url', key: 'page' }, 2);
+  ok('分页请求补齐 Referer', !!built.options.headers.Referer &&
+    built.options.headers.Referer === 'https://1paipai.jd.com/auction-list');
+
+  // #2 拦截器列表评分：functionId=paipai.auction.list 加权最高
+  ok('_listScore 拍拍列表接口加权', A._listScore('https://api.jd.com/?functionId=paipai.auction.list') >= 20);
+  ok('_listScore 非列表接口为0', A._listScore('https://api.jd.com/?functionId=other') === 0);
+
+  // #2 分页参数识别（URL / body JSON / body 表单）
+  const ppUrl = A._findPageParam('https://api.jd.com/list?page=1', { url: 'x', method: 'GET', body: null });
+  ok('_findPageParam url', ppUrl && ppUrl.where === 'url' && ppUrl.key === 'page');
+  const ppBody = A._findPageParam('https://api.jd.com/list', { url: 'x', method: 'POST', body: { pageNo: 1, kw: 'a' } });
+  ok('_findPageParam body JSON', ppBody && ppBody.where === 'body' && ppBody.key === 'pageNo');
+  const ppForm = A._findPageParam('https://api.jd.com/list', { url: 'x', method: 'POST', body: 'pageNum=1&kw=a' });
+  ok('_findPageParam body 表单', ppForm && ppForm.where === 'body' && ppForm.key === 'pageNum');
+
   console.log('\n=== ' + (fail === 0 ? 'ALL PASS' : fail + ' FAILED') + ' ===');
   process.exit(fail === 0 ? 0 : 1);
 })();

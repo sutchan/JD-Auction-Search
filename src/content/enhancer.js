@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/enhancer.js v1.5.0
+// JD-Auction-Search/src/content/enhancer.js v1.5.1
 // 主增强器：状态、初始化、生命周期与页面类型判断
 
 (function (global) {
@@ -26,7 +26,15 @@
       }
       this._inited = true;
 
-      // 注入样式
+      // 重置加载标志（destroy 后将 _inited 置 false，重新 init 时需复位，
+      // 否则旧 _allLoaded=true 会阻止重新聚合分页数据）；已有 products 保留复用
+      this.state._allLoaded = false;
+      this.state._loadingAll = false;
+      this.state.isLoading = false;
+      this._loadAttempts = 0;
+      this._detailRetry = false;
+
+      // 注入样式（injectStyles 内部幂等，这里置于守卫内避免重复注入）
       JDSUtils.injectStyles('src/styles.css');
 
       // 渲染UI
@@ -43,6 +51,8 @@
       JDSDom.observeDOM(this.state, () => {
         // 搜索模式下原生列表已隐藏，结果由面板渲染，跳过原生显示更新
         if (this.state.searchMode) return;
+        // 原生列表变化（DOM 提取价格缓存基于页面结构）需失效缓存，下次渲染重新构建
+        global.JDSDom._priceTextCache = null;
         JDSDom.updateProductDisplay(this.state);
       });
 

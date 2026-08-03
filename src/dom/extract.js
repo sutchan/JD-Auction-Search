@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.5.0
+// JD-Auction-Search/src/dom/extract.js v1.5.1
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url），以及原生卡片模板获取与显隐
 
 (function(global) {
@@ -127,6 +127,28 @@
       return null;
     }
     if (!cards || typeof cards.forEach !== 'function') return null;
+    // 性能：首次调用构建 name→priceText 缓存（页面商品名基本唯一），
+    // 避免每张结果卡渲染都全量遍历所有原生卡片导致 O(N²) 卡顿
+    if (!this._priceTextCache) {
+      this._priceTextCache = new Map();
+      for (const card of cards) {
+        let cardName = '';
+        for (const sel of this.SELECTORS.NAME) {
+          const el = card.querySelector(sel);
+          const t = el ? (el.textContent || '').trim() : '';
+          if (t) { cardName = t; break; }
+        }
+        if (!cardName || cardName.length < 2) continue;
+        const pEl = card.querySelector('.p-price, [class*="p-price" i]');
+        const priceEl = pEl || (Array.from(card.querySelectorAll(this.SELECTORS.PRICE))
+          .find(e => !/origin/i.test(e.className))) || null;
+        if (!priceEl) continue;
+        const txt = priceEl.textContent.replace(/\s+/g, ' ').trim();
+        if (txt) this._priceTextCache.set(cardName, txt);
+      }
+    }
+    if (this._priceTextCache.has(target)) return this._priceTextCache.get(target);
+    // 缓存未命中（名称不完全一致）时回退精确/前缀后缀匹配（保持原有鲁棒性）
     for (const card of cards) {
       let cardName = '';
       for (const sel of this.SELECTORS.NAME) {
