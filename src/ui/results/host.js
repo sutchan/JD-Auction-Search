@@ -111,6 +111,9 @@
     #jds-results-host .jds-product-price .jds-price-label { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: center; }
     #jds-results-host .jds-product-price .jds-price-yen { font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: baseline; }
     #jds-results-host .jds-product-price .jds-price-amount { font-variant-numeric: tabular-nums; }
+    #jds-results-host .jds-product-price .jds-price-int { font-variant-numeric: tabular-nums; }
+    #jds-results-host .jds-product-price .jds-price-dec-sep { font-variant-numeric: tabular-nums; }
+    #jds-results-host .jds-product-price .jds-price-dec { font-size: 0.7em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
     #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
     #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
     #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }

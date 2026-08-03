@@ -156,13 +156,27 @@
 
     // 货币符号始终独立在 yenEl；金额容器只放数值（起拍价/当前价），不混入 ¥ 符号
     yenEl.textContent = '¥';
-    if (priceText) {
-      // p-price 原文可能含 ¥/￥，仅取其后的数值部分放入金额容器，货币由 yenEl 统一承载
-      amountEl.textContent = priceText.replace(/^[¥￥\s]+/, '').trim();
-    } else {
-      amountEl.textContent = U.formatPrice(current);
-    }
-    // 顺序：标签(起拍) → 货币符号 → 金额
+    const amountStr = priceText
+      ? priceText.replace(/^[¥￥\s]+/, '').trim()   // p-price 原文可能含 ¥/￥，剥离货币只留数值
+      : U.formatPrice(current);
+    // 金额拆成三部分：整数部分 / 小数点 / 小数部分，便于分别样式化（小数可更小）
+    const m = /^(\d[\d,]*)([.,]?)(\d*)$/.exec(amountStr);
+    const intPart = m ? m[1] : amountStr;
+    const sepPart = m ? m[2] : '';
+    const decPart = m ? m[3] : '';
+    const intEl = document.createElement('span');
+    intEl.className = 'jds-price-int';
+    intEl.textContent = intPart;
+    const sepEl = document.createElement('span');
+    sepEl.className = 'jds-price-dec-sep';
+    sepEl.textContent = sepPart;
+    const decEl = document.createElement('span');
+    decEl.className = 'jds-price-dec';
+    decEl.textContent = decPart;
+    amountEl.appendChild(intEl);
+    amountEl.appendChild(sepEl);
+    amountEl.appendChild(decEl);
+    // 顺序：标签(起拍) → 货币符号 → 金额(整数.小数)
     priceEl.appendChild(labelEl);
     priceEl.appendChild(yenEl);
     priceEl.appendChild(amountEl);
