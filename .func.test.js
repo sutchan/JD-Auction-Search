@@ -112,11 +112,30 @@ ok('formatPrice 小数', U.formatPrice(99.5) === '99.50');
 
 console.log('\n[i18n]');
 ok('zh-CN 兜底 toastNetworkError', U.getMessage('toastNetworkError') === '网络异常，请检查网络连接');
-sandbox.navigator = { language: 'zh-TW', userLanguage: 'zh-TW' };
-ok('zh-TW 兜底 toastRequestError', U.getMessage('toastRequestError') === '請求失敗，請稍後重試');
+sandbox.navigator = { language: 'en', userLanguage: 'en' };
+ok('en 兜底 toastRequestError', U.getMessage('toastRequestError') === 'Request failed, please try again later');
 sandbox.navigator = { language: 'zh-CN', userLanguage: 'zh-CN' };
 // 回归：之前缺失的键曾返回原始键，现在必须返回译文而非键名
 ok('缺失键已修复(非原始键)', U.getMessage('toastNetworkError') !== 'toastNetworkError');
+
+console.log('\n[search history] 下拉历史记录');
+UI._searchHistory = [];
+UI._addSearchHistory('手机');
+UI._addSearchHistory('电脑');
+UI._addSearchHistory('手机');   // 重复应置顶去重
+ok('历史去重并置顶', JSON.stringify(UI._searchHistory) === JSON.stringify(['手机', '电脑']));
+UI._addSearchHistory('a'); UI._addSearchHistory('b'); UI._addSearchHistory('c');
+UI._addSearchHistory('d'); UI._addSearchHistory('e'); UI._addSearchHistory('f');
+UI._addSearchHistory('g'); UI._addSearchHistory('h'); UI._addSearchHistory('i');
+UI._addSearchHistory('j'); UI._addSearchHistory('k'); // 第11条触发截断
+ok('历史上限 10 条', UI._searchHistory.length === 10 && UI._searchHistory[0] === 'k');
+UI._removeSearchHistory(0);
+ok('删除单条历史', UI._searchHistory.length === 9 && UI._searchHistory[0] === 'j');
+UI._clearSearchHistory();
+ok('清空历史', UI._searchHistory.length === 0);
+// 空关键词不记录
+UI._addSearchHistory('   ');
+ok('空关键词不记录', UI._searchHistory.length === 0);
 
 console.log('\n[tokens] 对齐 prototype 浅色令牌');
 const tokHost = UI._getTokensCss();
@@ -189,10 +208,13 @@ const cardNoText = UI._buildOwnCard({ id: 10, name: 'nt', currentPrice: 128800 }
 ok('无 priceText 回退 formatPrice', /128,800/.test(cardNoText.textContent));
 
 console.log('\n[price] 脏数据/异常回归');
-// 仅 cappedPrice 有值：此前现价回退 0 → 空价卡片；现应取封顶价作主价（仅显示现价，不标"封顶"）
+// 仅 cappedPrice 有值：主价回退 cappedPrice 会与划线原价重复，
+// 现仅渲染 .jds-product-orig（去划线），不渲染主价格行（jds-price-int 等），避免重复显示
 const cardCapOnly = UI._buildOwnCard({ id: 3, name: 'z', cappedPrice: 199 });
-ok('仅封顶价：主价非 ¥0', !/¥0/.test(cardCapOnly.textContent) && /199/.test(cardCapOnly.textContent));
-ok('仅封顶价：不标"封顶"也不标"起拍"', !/封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
+const bodyCap = cardCapOnly.childNodes.find(c => c.className === 'jds-product-body');
+ok('仅封顶价：不渲染主价格行(无 jds-product-price)', !bodyCap.childNodes.find(c => c.className === 'jds-product-price'));
+ok('仅封顶价：仅显示 jds-product-orig 价格 ¥199', !!bodyCap.childNodes.find(c => c.className === 'jds-product-subprice' && /¥199/.test(c.textContent)));
+ok('仅封顶价：orig-only 去划线(不标"封顶"也不标"起拍")', !/封顶/.test(cardCapOnly.textContent) && !/起拍/.test(cardCapOnly.textContent));
 // 流拍：currentPrice 为 0（有效现价）不应误判为未开拍标「起拍」
 const cardZero = UI._buildOwnCard({ id: 4, name: 'w', currentPrice: 0, cappedPrice: 100 });
 ok('流拍 currentPrice:0：不标"起拍"', !/起拍/.test(cardZero.textContent) && /¥\s*0/.test(cardZero.textContent));

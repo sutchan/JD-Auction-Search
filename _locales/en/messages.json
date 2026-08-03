@@ -1,0 +1,58 @@
+{
+  "extensionName": {
+    "message": "JD Auction Search Enhancer",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Add keyword search and category filtering to JD auction pages",
+    "description": "Extension description"
+  },
+  "searchPlaceholder": {
+    "message": "Search products by keyword...",
+    "description": "Search box placeholder"
+  },
+  "searchButton": {
+    "message": "Search",
+    "description": "Search button text"
+  },
+  "emptyTitle": {
+    "message": "No matching products",
+    "description": "Empty state title"
+  },
+  "emptyDesc": {
+    "message": "Try another keyword, or clear search to view all products",
+    "description": "Empty state description"
+  },
+  "emptyAction": {
+    "message": "Clear search",
+    "description": "Empty state clear-search button"
+  },
+  "historyTitle": {
+    "message": "Search history",
+    "description": "Search history title"
+  },
+  "historyClear": {
+    "message": "Clear",
+    "description": "Clear search history button"
+  },
+  "historyEmpty": {
+    "message": "No search history",
+    "description": "Search history empty hint"
+  },
+  "toastApiFailed": {
+    "message": "API failed to load, falling back to page content",
+    "description": "Hint when API fails"
+  },
+  "toastNetworkError": {
+    "message": "Network error, please check your connection",
+    "description": "Hint on network error"
+  },
+  "toastRequestError": {
+    "message": "Request failed, please try again later",
+    "description": "Hint on request error"
+  },
+  "toastDomExtractFailed": {
+    "message": "Failed to recognize products from page, it may have changed",
+    "description": "Hint when DOM fallback extraction fails"
+  }
+}

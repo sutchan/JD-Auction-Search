@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.5.1
+// JD-Auction-Search/src/dom/extract.js v1.5.2
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url），以及原生卡片模板获取与显隐
 
 (function(global) {
@@ -80,6 +80,13 @@
       if (urlMatch) id = urlMatch[1];
       if (!id) id = this._cardIdFallback(card, nameRaw);
 
+      const hasDetail = /^https?:|^\/\//i.test(url) && /\/auction-detail\//i.test(url);
+      const hasImg = /^https?:|^\/\//i.test(img);
+      // 商品性校验：分类导航/标签/文字项等虽有名称但无详情链接也无主图，
+      // 不应当作商品混入结果。必须有「详情链接」或「主图」其一才算商品卡
+      // （价格非硬要求，避免误杀暂未显示价的起拍卡）
+      if (!hasDetail && !hasImg) return;
+
       const product = {
         id,
         name: nameRaw,
@@ -88,7 +95,7 @@
         priceText,
         originalPrice,
         bidCount,
-        image: /^https?:|^\/\//i.test(img) ? img : '',
+        image: hasImg ? img : '',
         url: /^https?:|^\/\//i.test(url) ? url : ''
       };
       // 映射到接口路径的规范字段，使统一渲染层（extract.js / products.js）正确识别：
@@ -197,15 +204,28 @@
 
   /**
    * 隐藏原生商品列表 — 多页面搜索模式下，结果由扩展结果面板渲染
+   * 优先隐藏整个列表容器（而非逐张卡片）：京东为虚拟列表/懒加载，
+   * 仅隐藏卡片时京东可能不再维护这些卡片的可见性，导致清空搜索后即便恢复
+   * 卡片 display 原生列表仍空白；隐藏整个容器后，容器重新可见时京东会自行重渲染
    */
   JDSDom.hideNativeProducts = function hideNativeProducts() {
-    this._getProductContainers().forEach(el => { el.style.display = 'none'; });
+    const container = this.getProductListContainer();
+    if (container) {
+      container.style.display = 'none';
+    } else {
+      this._getProductContainers().forEach(el => { el.style.display = 'none'; });
+    }
   };
 
   /**
    * 恢复原生商品列表显示
    */
   JDSDom.showNativeProducts = function showNativeProducts() {
-    this._getProductContainers().forEach(el => { el.style.display = ''; });
+    const container = this.getProductListContainer();
+    if (container) {
+      container.style.display = '';
+    } else {
+      this._getProductContainers().forEach(el => { el.style.display = ''; });
+    }
   };
 })(window);

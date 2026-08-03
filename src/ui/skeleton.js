@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/skeleton.js v1.5.1
+// JD-Auction-Search/src/ui/skeleton.js v1.5.2
 // 骨架屏：结果面板 fallback 网格容器创建与 shimmer 占位渲染
 // 商品渲染见 products.js，面板生命周期见 results.js
 

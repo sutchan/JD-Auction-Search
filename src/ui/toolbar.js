@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.5.1
+// JD-Auction-Search/src/ui/toolbar.js v1.5.2
 // 工具栏：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）、事件绑定
 
 (function(global) {
@@ -106,6 +106,14 @@
             </svg>
           </button>
           <button class="jds-search-btn">${getMessage('searchButton')}</button>
+          <div class="jds-history" role="listbox" aria-label="搜索历史" hidden>
+            <div class="jds-history-head">
+              <span class="jds-history-title">${getMessage('historyTitle')}</span>
+              <button type="button" class="jds-history-clear" aria-label="清空搜索历史">${getMessage('historyClear')}</button>
+            </div>
+            <ul class="jds-history-list"></ul>
+            <div class="jds-history-empty" hidden>${getMessage('historyEmpty')}</div>
+          </div>
         </div>
         <span class="jds-count" aria-live="polite">共 <strong class="jds-count-num">0</strong> 件</span>
       </div>
@@ -132,6 +140,21 @@
     const input = container.querySelector('.jds-search-input');
     const clearBtn = container.querySelector('.jds-clear');
     const searchBtn = container.querySelector('.jds-search-btn');
+    const historyEl = container.querySelector('.jds-history');
+    const historyList = container.querySelector('.jds-history-list');
+    const historyEmpty = container.querySelector('.jds-history-empty');
+    const historyClear = container.querySelector('.jds-history-clear');
+
+    // 保存上下文供历史项点击复用（填充+搜索+同步状态）
+    this._historyCtx = { handlers, state, input, clearBtn };
+
+    // 统一提交搜索：记录历史 → 隐藏下拉 → 触发外层 handler
+    const submit = () => {
+      const kw = input.value.trim();
+      if (kw) this._addSearchHistory(kw);
+      this._hideHistory();
+      handlers.onSearch();
+    };
 
     // 搜索框输入 — 实时过滤 + 清除按钮显隐
     // 防抖：避免每键击都全量重过滤+重渲染全局商品（结果量多时卡顿）
@@ -142,13 +165,25 @@
       const val = e.target.value.trim();
       state.keyword = val;
       clearBtn.classList.toggle('is-visible', val.length > 0);
+      // 有输入时不展示历史下拉（避免与实时搜索结果混淆）
+      if (val.length > 0) this._hideHistory();
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => handlers.onInput(), DEBOUNCE_MS);
     });
 
+    // 聚焦且为空：展示历史下拉
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length === 0) this._renderHistory(historyList, historyEmpty, input);
+    });
+
     // 搜索框回车
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handlers.onSearch();
+      if (e.key === 'Enter') { e.preventDefault(); submit(); }
+    });
+
+    // 外部点击关闭下拉
+    document.addEventListener('click', (e) => {
+      if (historyEl && !historyEl.contains(e.target) && e.target !== input) this._hideHistory();
     });
 
     // 清除按钮
@@ -158,9 +193,116 @@
       clearBtn.classList.remove('is-visible');
       input.focus();
       handlers.onClear();
+      this._renderHistory(historyList, historyEmpty, input);
     });
 
     // 搜索按钮
-    searchBtn.addEventListener('click', () => handlers.onSearch());
+    searchBtn.addEventListener('click', submit);
+
+    // 清空历史
+    if (historyClear) {
+      historyClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._clearSearchHistory();
+        this._renderHistory(historyList, historyEmpty, input);
+      });
+    }
+  };
+
+  /**
+   * 添加搜索历史（去重、置顶、上限 10 条）
+   * @param {string} keyword
+   */
+  JDSUI._addSearchHistory = function _addSearchHistory(keyword) {
+    const kw = (keyword || '').trim();
+    if (!kw) return;
+    const hist = this._searchHistory || (this._searchHistory = []);
+    const idx = hist.indexOf(kw);
+    if (idx >= 0) hist.splice(idx, 1);
+    hist.unshift(kw);
+    if (hist.length > 10) hist.length = 10;
+  };
+
+  /**
+   * 删除单条历史
+   * @param {number} index
+   */
+  JDSUI._removeSearchHistory = function _removeSearchHistory(index) {
+    const hist = this._searchHistory || (this._searchHistory = []);
+    if (index >= 0 && index < hist.length) hist.splice(index, 1);
+  };
+
+  /**
+   * 清空全部历史
+   */
+  JDSUI._clearSearchHistory = function _clearSearchHistory() {
+    this._searchHistory = [];
+  };
+
+  /**
+   * 渲染历史下拉列表
+   * @private
+   */
+  JDSUI._renderHistory = function _renderHistory(listEl, emptyEl, input) {
+    if (!listEl) return;
+    const hist = this._searchHistory || (this._searchHistory = []);
+    listEl.innerHTML = '';
+    if (hist.length === 0) {
+      if (emptyEl) emptyEl.hidden = false;
+      this._showHistory();
+      return;
+    }
+    if (emptyEl) emptyEl.hidden = true;
+    hist.forEach((kw, i) => {
+      const li = document.createElement('li');
+      li.className = 'jds-history-item';
+      li.setAttribute('role', 'option');
+
+      const text = document.createElement('span');
+      text.className = 'jds-history-text';
+      text.textContent = kw;   // textContent 防 XSS
+      li.appendChild(text);
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'jds-history-del';
+      del.setAttribute('aria-label', '删除该历史');
+      del.textContent = '×';
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._removeSearchHistory(i);
+        this._renderHistory(listEl, emptyEl, input);
+      });
+      li.appendChild(del);
+
+      // 点击历史项：填入并搜索
+      li.addEventListener('click', () => {
+        const ctx = this._historyCtx || {};
+        input.value = kw;
+        if (ctx.clearBtn) ctx.clearBtn.classList.add('is-visible');
+        if (ctx.state) ctx.state.keyword = kw;
+        this._hideHistory();
+        // 触发外层搜索（已在历史中，无需重复记录）；同步刷新过滤/计数
+        if (ctx.handlers) {
+          if (ctx.handlers.onInput) ctx.handlers.onInput();
+          ctx.handlers.onSearch();
+        }
+      });
+      listEl.appendChild(li);
+    });
+    this._showHistory();
+  };
+
+  /**
+   * 显示/隐藏历史下拉
+   * @private
+   */
+  JDSUI._showHistory = function _showHistory() {
+    const el = this.shadowRoot && this.shadowRoot.querySelector('.jds-history');
+    if (el) el.hidden = false;
+  };
+  JDSUI._hideHistory = function _hideHistory() {
+    const el = this.shadowRoot && this.shadowRoot.querySelector('.jds-history');
+    if (el) el.hidden = true;
   };
 })(window);

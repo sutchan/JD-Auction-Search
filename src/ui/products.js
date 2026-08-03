@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/products.js v1.5.1
+// JD-Auction-Search/src/ui/products.js v1.5.2
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
 // 保证跨页搜索结果在任意京东页面都稳定可见（此前克隆原生卡片在真实页面常因京东 class 级 CSS
 // 表现为“尺寸正常却整片不可见”，难以可靠检测）。
@@ -140,56 +140,64 @@
     const current = isStarting ? startPrice
       : (hasCurrent ? rawCurrent : (hasPriceText ? null : U.getProductPrice(p)));
 
-    const priceEl = document.createElement('div');
-    priceEl.className = 'jds-product-price';
-
-    // 三个独立容器：标签 / 货币符号 / 金额，便于各自独立样式化
-    const labelEl = document.createElement('span');
-    labelEl.className = 'jds-price-label';
-    const yenEl = document.createElement('span');
-    yenEl.className = 'jds-price-yen';
-    const amountEl = document.createElement('span');
-    amountEl.className = 'jds-price-amount';
-
-    // 标签容器：仅未开拍（无当前价）时显示「起拍」
-    if (isStarting) labelEl.textContent = '起拍';
-
-    // 货币符号始终独立在 yenEl；金额容器只放数值（起拍价/当前价），不混入 ¥ 符号
-    yenEl.textContent = '¥';
-    const amountStr = priceText
-      ? priceText.replace(/^[¥￥\s]+/, '').trim()   // p-price 原文可能含 ¥/￥，剥离货币只留数值
-      : U.formatPrice(current);
-    // 金额拆成三部分：整数部分 / 小数点 / 小数部分，便于分别样式化（小数可更小）
-    const m = /^(\d[\d,]*)([.,]?)(\d*)$/.exec(amountStr);
-    const intPart = m ? m[1] : amountStr;
-    const sepPart = m ? m[2] : '';
-    const decPart = m ? m[3] : '';
-    const intEl = document.createElement('span');
-    intEl.className = 'jds-price-int';
-    intEl.textContent = intPart;
-    const sepEl = document.createElement('span');
-    sepEl.className = 'jds-price-dec-sep';
-    sepEl.textContent = sepPart;
-    const decEl = document.createElement('span');
-    decEl.className = 'jds-price-dec';
-    decEl.textContent = decPart;
-    amountEl.appendChild(intEl);
-    amountEl.appendChild(sepEl);
-    amountEl.appendChild(decEl);
-    // 顺序：标签(起拍) → 货币符号 → 金额(整数.小数)
-    priceEl.appendChild(labelEl);
-    priceEl.appendChild(yenEl);
-    priceEl.appendChild(amountEl);
-    body.appendChild(priceEl);
-
-    // 划线原价：有封顶/原价且大于现价时展示（灰色、划线、较小字号），与现价明显区分
+    // 划线原价（封顶/参考价）：京东拍拍接口对应 cappedPrice（页面 class=origin-price）
     const origPrice = (p && p.cappedPrice != null) ? Number(p.cappedPrice) : null;
+    // 主价若与划线原价相同（说明主价是从 cappedPrice 封顶价回退而来），
+    // 两者属同一价格，仅保留划线原价 .jds-product-orig，不再渲染主价格行以避免重复显示
+    const priceEqualsOrig = origPrice != null && origPrice > 0 && current === origPrice;
+
+    if (!priceEqualsOrig) {
+      const priceEl = document.createElement('div');
+      priceEl.className = 'jds-product-price';
+
+      // 三个独立容器：标签 / 货币符号 / 金额，便于各自独立样式化
+      const labelEl = document.createElement('span');
+      labelEl.className = 'jds-price-label';
+      const yenEl = document.createElement('span');
+      yenEl.className = 'jds-price-yen';
+      const amountEl = document.createElement('span');
+      amountEl.className = 'jds-price-amount';
+
+      // 标签容器：仅未开拍（无当前价）时显示「起拍」
+      if (isStarting) labelEl.textContent = '起拍';
+
+      // 货币符号始终独立在 yenEl；金额容器只放数值（起拍价/当前价），不混入 ¥ 符号
+      yenEl.textContent = '¥';
+      const amountStr = priceText
+        ? priceText.replace(/^[¥￥\s]+/, '').trim()   // p-price 原文可能含 ¥/￥，剥离货币只留数值
+        : U.formatPrice(current);
+      // 金额拆成三部分：整数部分 / 小数点 / 小数部分，便于分别样式化（小数可更小）
+      const m = /^(\d[\d,]*)([.,]?)(\d*)$/.exec(amountStr);
+      const intPart = m ? m[1] : amountStr;
+      const sepPart = m ? m[2] : '';
+      const decPart = m ? m[3] : '';
+      const intEl = document.createElement('span');
+      intEl.className = 'jds-price-int';
+      intEl.textContent = intPart;
+      const sepEl = document.createElement('span');
+      sepEl.className = 'jds-price-dec-sep';
+      sepEl.textContent = sepPart;
+      const decEl = document.createElement('span');
+      decEl.className = 'jds-price-dec';
+      decEl.textContent = decPart;
+      amountEl.appendChild(intEl);
+      amountEl.appendChild(sepEl);
+      amountEl.appendChild(decEl);
+      // 顺序：标签(起拍) → 货币符号 → 金额(整数.小数)
+      priceEl.appendChild(labelEl);
+      priceEl.appendChild(yenEl);
+      priceEl.appendChild(amountEl);
+      body.appendChild(priceEl);
+    }
+
+    // 划线原价：有封顶/原价且主价不同时展示（灰色、划线、较小字号），与现价明显区分
     if (origPrice != null && isFinite(origPrice) && origPrice > 0 &&
         (!hasCurrent || origPrice > rawCurrent)) {
       const sub = document.createElement('div');
       sub.className = 'jds-product-subprice';
       const origEl = document.createElement('span');
-      origEl.className = 'jds-product-orig';
+      // 仅显示 orig（无主价行）时去划线，作为唯一实际价格正常呈现；否则保留划线对比样式
+      origEl.className = 'jds-product-orig' + (priceEqualsOrig ? ' jds-product-orig-only' : '');
       origEl.textContent = '¥' + U.formatPrice(origPrice);
       sub.appendChild(origEl);
       body.appendChild(sub);

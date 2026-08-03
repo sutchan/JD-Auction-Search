@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.5.3
+- 恢复国际化功能：getMessage 优先 `chrome.i18n`（_locales 多语言），缺失时回退内置双语字典
+- 仅保留简体中文（zh_CN）与英文（en）两种语言，移除繁体中文（zh_TW）
+- `_locales` 重建：zh_CN 补齐 historyTitle/historyClear/historyEmpty 三键；新增 en/messages.json
+- manifest 增加 `default_locale`: "zh_CN"
+- 测试对齐：func 测试 zh-TW 断言改为 en 兜底校验
+
+## v1.5.2
+- 修复搜索后清空原生列表空白：京东为虚拟列表/懒加载，仅隐藏卡片时其不再维护卡片可见性，导致清空搜索恢复 display 后原生列表仍空白；现 `hideNativeProducts` 优先隐藏整个列表容器（`getProductListContainer`），容器重见时京东自行重渲染，清空后原生列表稳定恢复
+- DOM 提取商品性校验：`extractProductsFromDOM` 对无详情链接（`/auction-detail/`）且无主图的「分类导航/标签/文字项」直接跳过，不再混入结果导致误召回（价格非硬要求，避免误杀暂未显示价的起拍卡）
+- 修复价格重复显示：当主价等于划线原价（主价由封顶价 `cappedPrice` 回退而来）时，仅保留划线原价行并去 `line-through` 作为唯一实际价格正常呈现，避免同一金额同时显示主价与划线原价；新增 `.jds-product-orig-only` 样式（`host.js`）
+- 集成测试增强：`integration.test.js` 新增「非商品项过滤」「搜索态隐藏整个列表容器 / 清空后恢复可见」断言，覆盖 DOM 校验与隐藏容器策略
+
 ## v1.5.1
 - 修复分页重放缺 Referer：京东拍拍列表接口常校验 Referer，缺失会 403/空导致翻页失败、搜索只命中首页；`_buildPageRequest` 在模板 headers 未含 Referer 时以当前页面地址兜底
 - 修复样式重复注入：`injectStyles` 增加幂等（同路径只注入一次 `<link[jds-style]>`），并将调用移入 `enhancer.init` 的 `_inited` 守卫内，避免 SPA 重渲染/多次 init 重复注入全局 css 与令牌

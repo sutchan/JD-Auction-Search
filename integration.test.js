@@ -77,6 +77,25 @@ document.body.innerHTML = `
 ok('getProductPriceText 命中 p-price 文本', D.getProductPriceText('价格回查商品') === '¥1,288.00');
 ok('getProductPriceText 无匹配返回 null', D.getProductPriceText('不存在的商品XYZ') === null);
 
+// 非商品项（分类导航/标签：有名称但无详情链接也无主图）不应混入结果
+document.body.innerHTML = `
+  <div class="goods-list">
+    <div class="auction-item">
+      <a href="https://1paipai.jd.com/auction-detail/999001" title="真商品">
+        <img src="https://img.jd.com/real.jpg" />
+        <div class="product-name">真商品手机</div>
+      </a>
+    </div>
+    <div class="auction-item">
+      <div class="name">手机数码分类</div>
+    </div>
+    <div class="auction-item">
+      <div class="name">家用电器标签</div>
+    </div>
+  </div>`;
+let mixed = D.extractProductsFromDOM();
+ok('过滤非商品：仅提取到 1 个真实商品', mixed.length === 1 && mixed[0].name === '真商品手机');
+
 console.log('\n[dom extract] 未命中显式告警');
 document.body.innerHTML = '<div class="unknown-page">无商品</div>';
 let warned = false;
@@ -98,6 +117,25 @@ enhancer.state.keyword = '手机';
 enhancer._applyFilterAndUpdate();
 ok('进入 searchMode', enhancer.state.searchMode === true);
 ok('过滤命中 2 条', enhancer.state.filteredProducts.length === 2);
+
+// 构造原生列表容器与卡片，验证"搜索隐藏→清空恢复"不破坏原生列表可见性
+const listWrap = document.createElement('div');
+listWrap.className = 'goods-list';
+listWrap.innerHTML = `
+  <div class="auction-item"><div class="product-name">原生商品X</div></div>
+  <div class="auction-item"><div class="product-name">原生商品Y</div></div>`;
+document.body.appendChild(listWrap);
+
+// 模拟搜索态：原生列表应被隐藏
+enhancer.state.keyword = '华为';
+enhancer._applyFilterAndUpdate();
+ok('搜索态隐藏原生列表容器', listWrap.style.display === 'none');
+
+// 清空搜索：原生列表应恢复可见
+enhancer.state.keyword = '';
+enhancer._applyFilterAndUpdate();
+ok('清空后退出 searchMode', enhancer.state.searchMode === false);
+ok('清空后恢复原生列表容器显示', listWrap.style.display === '');
 
 console.log('\n[products] 分页渲染');
 const host = document.createElement('div');

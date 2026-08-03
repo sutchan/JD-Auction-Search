@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/extract.js v1.5.1
+// JD-Auction-Search/src/utils/extract.js v1.5.2
 // 商品字段提取：从多态 API 对象中兼容取 id/name/状态/主图/价格/链接
 
 (function(global) {

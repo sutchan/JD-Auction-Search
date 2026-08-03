@@ -2,6 +2,14 @@
 
 ## 已完成任务
 
+### v1.5.2
+- [x] 修复搜索后清空原生列表空白：`hideNativeProducts` 优先隐藏整个列表容器（`getProductListContainer`），容器重见时京东自行重渲染，清空后原生列表稳定恢复
+- [x] DOM 提取商品性校验：`extractProductsFromDOM` 跳过无详情链接且无主图的非商品项（分类导航/标签/文字项），不再误混入结果
+- [x] 修复价格重复显示：主价等于划线原价时仅保留划线原价行并去 `line-through`（`.jds-product-orig-only`），避免同一金额双重显示
+- [x] `host.js` 新增 `.jds-product-subprice .jds-product-orig-only` 样式
+- [x] 集成测试增强：`integration.test.js` 新增非商品项过滤、搜索态隐藏/清空恢复列表容器断言
+- [x] 版本统一升至 v1.5.2（manifest / metadata / package / 各文件头 / prototype 徽标 / README 打包名 / CHANGELOG/spec/tasks）
+
 ### v1.4.0
 - [x] 拆分超 200 行模块：`content.js`(218)→`content.js`+`content/enhancer.js`+`content/search.js`；`results.js`(230)→`results.js`+`results/host.js`，manifest content_scripts 同步
 - [x] 国际化修复：补齐 `toastNetworkError`/`toastRequestError` 翻译键并清除语言包死键（logoText/tabAll 等），扩展可翻译 Toast 键集合，chrome.i18n 不可用时简繁文案仍全覆盖

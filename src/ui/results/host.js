@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/host.js v1.5.1
+// JD-Auction-Search/src/ui/results/host.js v1.5.2
 // 结果面板宿主：覆盖层外壳、面板定位、显隐前置与网格容器
 // 商品渲染见 products.js，骨架屏见 skeleton.js
 
@@ -126,6 +126,8 @@
     #jds-results-host .jds-product-price .jds-price-dec { font-size: 0.7em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
     #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
     #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
+    /* 仅显示划线原价（无主价行，主价与之重复）时去划线，作为唯一实际价格正常呈现 */
+    #jds-results-host .jds-product-subprice .jds-product-orig-only { text-decoration: none; color: var(--foreground); }
     #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
     #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
     #jds-results-host .jds-product-bid {

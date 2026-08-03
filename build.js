@@ -1,10 +1,9 @@
-// JD-Auction-Search/build.js v1.4.0
+// JD-Auction-Search/build.js v1.5.2
 // 构建脚本：打包扩展为 zip 发布包
-// 设计原则：默认打包 zh-CN，遵循 Chrome Web Store 规范（_locales 含多语言，浏览器按区域自动选择）
+// 设计原则：仅简体中文，单一语言打包
 // 用法：
-//   node build.js           默认构建（zh-CN）
-//   node build.js --tw      以 zh-TW 本地化命名输出（jd-auction-search-vX.Y.Z-zh-TW.zip）
-//   node build.js --firefox 对 messages.json 做 Firefox 字符串转义（' -> \'、\ -> \\）
+//   node build.js           默认构建
+//   node build.js --firefox 对文件做 Firefox 字符串转义（' -> \'、\ -> \\）
 //   node build.js --no-preview 跳过构建产物预览
 
 const fs = require('fs');
@@ -26,12 +25,11 @@ function syncHeader(raw, relPath) {
 
 // 解析命令行参数
 const args = process.argv.slice(2);
-const BUILD_LOCALE = args.includes('--tw') ? 'zh-TW' : 'zh-CN';
 const FIREFOX = args.includes('--firefox');
 const PREVIEW = !args.includes('--no-preview');
+const BUILD_LOCALE = manifest.default_locale || 'zh_CN';
 
-const localeSuffix = BUILD_LOCALE === 'zh-TW' ? '-zh-TW' : '';
-const OUTPUT_ZIP = path.join(ROOT, `jd-auction-search-v${VERSION}${localeSuffix}.zip`);
+const OUTPUT_ZIP = path.join(ROOT, `jd-auction-search-v${VERSION}.zip`);
 
 // 打包根目录文件（排除开发与构建产物）
 const ROOT_FILES = [
@@ -51,18 +49,6 @@ function ensureDist() {
   fs.mkdirSync(DIST_DIR, { recursive: true });
 }
 
-// Firefox 的 messages.json 要求单引号转义为 \'、反斜杠转义为 \\
-function escapeFirefoxMessages(raw) {
-  const obj = JSON.parse(raw);
-  for (const key of Object.keys(obj)) {
-    const entry = obj[key];
-    if (entry && typeof entry.message === 'string') {
-      entry.message = entry.message.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    }
-  }
-  return JSON.stringify(obj, null, 2);
-}
-
 function copyDir(srcDir, destDir, filter) {
   if (!fs.existsSync(srcDir)) return;
   fs.mkdirSync(destDir, { recursive: true });
@@ -80,20 +66,6 @@ function copyDir(srcDir, destDir, filter) {
       } else {
         fs.copyFileSync(srcPath, destPath);
       }
-    }
-  }
-}
-
-function processLocaleDir(localeDir, destRoot) {
-  const src = path.join(ROOT, '_locales', localeDir);
-  if (!fs.existsSync(src)) return;
-  const dest = path.join(destRoot, '_locales', localeDir);
-  fs.mkdirSync(dest, { recursive: true });
-  for (const f of fs.readdirSync(src)) {
-    if (f.endsWith('.json')) {
-      const raw = fs.readFileSync(path.join(src, f), 'utf8');
-      const out = FIREFOX ? escapeFirefoxMessages(raw) : raw;
-      fs.writeFileSync(path.join(dest, f), out);
     }
   }
 }
@@ -128,11 +100,7 @@ function build() {
   // 2. 复制 src 目录（保持相对结构，排除 node_modules）
   copyDir(path.join(ROOT, 'src'), path.join(DIST_DIR, 'src'), (name) => name !== 'node_modules');
 
-  // 3. 处理多语言（默认 zh-CN；Chrome 按浏览器区域自动回退 zh_TW，无需单独打包）
-  processLocaleDir('zh_CN', DIST_DIR);
-  processLocaleDir('zh_TW', DIST_DIR);
-
-  // 4. 打包 zip
+  // 3. 打包 zip
   const output = fs.createWriteStream(OUTPUT_ZIP);
   const archive = archiver('zip', { zlib: { level: 9 } });
   output.on('close', () => {

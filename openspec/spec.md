@@ -3,7 +3,7 @@
 ## 项目概述
 
 **项目名称**: JD-Auction-Search  
-**版本**: 1.4.0 
+**版本**: 1.5.2 
 **类型**: 浏览器扩展插件
 
 为京东夺宝页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
@@ -154,6 +154,44 @@ JD-Auction-Search/
 - 函数必须有注释
 
 ## 版本历史
+
+### v1.5.2
+- 修复搜索后清空原生列表空白：`hideNativeProducts` 优先隐藏整个列表容器（虚拟列表/懒加载下，仅隐藏卡片会导致清空后原生列表仍空白），容器重见时京东自行重渲染
+- DOM 提取商品性校验：无详情链接且无主图的导航/标签类非商品项不再混入结果（价格非硬要求）
+- 修复价格重复显示：主价等于划线原价时仅保留划线原价行并去划线，新增 `.jds-product-orig-only`
+- 集成测试增强：新增非商品项过滤、搜索态隐藏/恢复列表容器断言
+
+### v1.5.1
+- 修复分页重放缺 Referer（`_buildPageRequest` 以当前页地址兜底）导致翻页失败、搜索只命中首页
+- 样式幂等注入（`injectStyles` 同路径只注入一次），避免 SPA 重渲染重复注入
+- 详情页直达无全局数据时展示空态而非白屏
+- observer 回调 150ms 节流，避免京东列表高频抖动冗余重渲染
+- 性能优化：`getProductPriceText` 首调构建 name→priceText 缓存（O(1)），消除 O(N²) 开销
+- 搜索匹配扩展：新增分类名/店铺名/副标题字段召回
+- 测试增强：`.func.test.js` 新增分页 Referer、列表评分、分页参数识别断言
+- 版本同步：manifest/metadata 升至 1.5.1，构建脚本统一同步 src 文件头版本号
+
+### v1.5.0
+- 工程化：新增 ESLint 配置与 `npm run lint`，GitHub Actions CI（lint+test+build）接入 PR/推送校验
+- 测试增强：新增 `integration.test.js`（jsdom 集成测试，47 断言）
+- 选择器集中化：新建 `src/dom/selectors.js` 统一维护京东 DOM 选择器
+- DOM 提取健壮性：名称精确类优先再回退模糊类；未命中显式 Toast 告警
+- 结果渲染分页：移除 200 条硬截断，改为首屏 60 条 + 加载更多
+- 拦截器模板锁定：首次聚合后锁定列表模板，避免被相关推荐误替
+- i18n 收敛单一来源：优先 `chrome.i18n`，移除占位符双格式死代码
+- 资源清理：`destroy()` 解绑 window scroll/resize 监听
+- UI 易用性：整体放大字号、卡片图片高度 120→140、工具栏实时匹配计数
+- 价格展示修复：仅现价值回退 ¥0 修复、流拍不再误标「起拍」、价格单位归一、原生卡片 p-price 回查
+- UI 布局修复：结果网格响应式 `auto-fill minmax(200px,1fr)`、卡片间距/焦点环优化
+
+## 代码审查与健壮性改进
+- 焦点令牌补全：`tokens.js` 新增 `--ring`
+- 幂等初始化与资源还原：`enhancer.init()` 增加 `_inited` 守卫；`destroy()` 调用 `JDSApi.restoreApi()` 还原原生 fetch/XHR
+- 详情链接回退基于 `location.origin` 拼接，修复子域下 404
+- 价格单位归一：疑似「分」的大整数 ÷100 还原为元
+- 卡片 id 稳定性：无商品 id 时改用自增序号 `jds-card-n{n}`
+- 浏览态原生过滤精确化：优先按 `filteredProducts` id 集合 + 卡片链接比对，回退关键词全文匹配
+- 价格行三容器拆分：`.jds-price-label` / `.jds-price-yen` / `.jds-price-amount`
 
 ### v1.4.0
 - 拆分超 200 行模块：`content.js`(218) 拆分为 `content.js`(入口) + `content/enhancer.js`(增强器) + `content/search.js`(搜索编排)；`results.js`(230) 拆分为 `results.js`(公开 API) + `results/host.js`(宿主/定位/网格)，`manifest` content_scripts 同步

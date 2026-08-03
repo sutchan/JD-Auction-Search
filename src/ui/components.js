@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/components.js v1.5.1
+// JD-Auction-Search/src/ui/components.js v1.5.2
 // 组件样式：仅包含 Shadow DOM 工具栏所需的 SearchBar 与响应式
 // 商品卡片 / 骨架屏 / 空状态 / 网格等组件样式已迁至 results/host.js 的 RESULTS_COMPONENT_CSS（注入浅 DOM 结果面板）
 // 由 ui/styles.js 的 _getInlineStyles 组合注入 Shadow DOM（工具栏样式由 _getInlineStyles 动态拼入）
@@ -23,6 +23,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
         transition: all var(--dur-base) var(--ease-out);
+        position: relative;
       }
       .jds-search:focus-within { border-color: var(--primary); box-shadow: var(--shadow-ring); }
       .jds-search > svg { width: 18px; height: 18px; color: var(--muted-foreground); flex-shrink: 0; }
@@ -57,6 +58,39 @@
         white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: auto;
       }
       .jds-count strong { color: var(--primary); font-weight: 600; }
+
+      /* ===== 搜索历史下拉 ===== */
+      .jds-history {
+        position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+        overflow: hidden; font-size: 14px; text-align: left;
+      }
+      .jds-history[hidden] { display: none; }
+      .jds-history-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 12px; border-bottom: 1px solid var(--border);
+      }
+      .jds-history-title { color: var(--muted-foreground); font-size: 12px; }
+      .jds-history-clear {
+        border: none; background: transparent; color: var(--muted-foreground);
+        font-size: 12px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);
+      }
+      .jds-history-clear:hover { color: var(--primary); background: var(--secondary); }
+      .jds-history-list { list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow-y: auto; }
+      .jds-history-item {
+        display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+        border-radius: var(--radius-sm); cursor: pointer; color: var(--foreground);
+      }
+      .jds-history-item:hover { background: var(--secondary); }
+      .jds-history-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .jds-history-del {
+        flex-shrink: 0; border: none; background: transparent; color: var(--subtle-foreground);
+        font-size: 16px; line-height: 1; cursor: pointer; padding: 0 4px; border-radius: var(--radius-sm);
+      }
+      .jds-history-del:hover { color: var(--destructive); }
+      .jds-history-empty { padding: 14px 12px; color: var(--muted-foreground); font-size: 13px; text-align: center; }
+      .jds-history-empty[hidden] { display: none; }
 
       /* ===== RESPONSIVE (仅工具栏，Shadow 内) ===== */
       @media (max-width: 768px) {

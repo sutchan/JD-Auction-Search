@@ -27,6 +27,18 @@
     "message": "清除搜索",
     "description": "空状态清除搜索按钮"
   },
+  "historyTitle": {
+    "message": "搜索历史",
+    "description": "搜索历史标题"
+  },
+  "historyClear": {
+    "message": "清空",
+    "description": "清空搜索历史按钮"
+  },
+  "historyEmpty": {
+    "message": "暂无搜索历史",
+    "description": "搜索历史为空提示"
+  },
   "toastApiFailed": {
     "message": "API加载失败，将依赖页面内容",
     "description": "API失败时提示"
