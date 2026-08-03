@@ -9,6 +9,7 @@
 - 搜索历史持久化（修复刷新后消失）：`manifest.json` 新增 `storage` 权限；`toolbar.js` 用 `chrome.storage.local`（`_STORAGE_KEY='jds_search_history'`）在增/删/清空时 `_persistHistory()`、渲染时 `_loadSearchHistory()` 回填，无 storage 环境（测试桩）自动回退纯内存
 - 历史下拉关闭逻辑由 document pointerdown 改为 Shadow `focusout`：彻底规避 closed Shadow DOM 下 composedPath/retarget 不可靠导致的误关/吞点击，点击不可聚焦的历史项也不会令 input 失焦、下拉保持且 click 正常生效
 - 文档与 SEO/GEO 优化：重写 README/README_EN，突出「三步上手」与表格化使用说明，新增关键词区块；`manifest.json`/`metadata.json` 的 description 扩充功能关键词（京东夺宝岛搜索、跨页聚合、分类筛选、接口兜底）以提升应用商店与生成式引擎检索命中
+- GitHub 展示美化：README 顶部加 shields.io 徽章（版本/License/构建/Manifest v3/平台）；新增「效果预览」截图区与 `docs/screenshots/` 规范；新增 `docs/README.md` 说明社交预览图（social-preview.png，1280×640）与截图命名约定
 
 ## v1.5.2
 - 修复搜索后清空原生列表空白：京东为虚拟列表/懒加载，仅隐藏卡片时其不再维护卡片可见性，导致清空搜索恢复 display 后原生列表仍空白；现 `hideNativeProducts` 优先隐藏整个列表容器（`getProductListContainer`），容器重见时京东自行重渲染，清空后原生列表稳定恢复

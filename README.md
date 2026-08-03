@@ -1,10 +1,27 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
+[![Version](https://img.shields.io/badge/version-1.5.3-blue.svg)](./CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](./package.json)
+[![Manifest](https://img.shields.io/badge/manifest%20v3-FF9800.svg)](./manifest.json)
+[![Platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Edge%20%7C%20Firefox-cyan.svg)](./README.md#安装)
+
 > 京东夺宝岛（拍拍）列表页商品搜索浏览器插件 · 关键词实时过滤 · 跨页聚合 · 自动兜底
 
 **京东夺宝岛怎么搜索商品？** 京东夺宝岛（1paipai.jd.com）原生列表页不支持关键词搜索，只能手动翻页找商品。本扩展为夺宝岛列表页注入一个搜索栏，输入关键词即可**跨页聚合、实时过滤**所有夺宝商品——手机、华为、数码、显卡……一搜即得，无需逐页翻找。
 
 [English](./README_EN.md) · [更新日志](./CHANGELOG.md) · [项目规范](./openspec/spec.md)
+
+---
+
+## 效果预览
+
+> 将扩展运行截图放入 `docs/screenshots/`（建议 `search.png`、`empty.png`、`history.png`），
+> 并在下方替换路径即可在仓库主页展示。
+
+| 搜索过滤 | 空状态 | 搜索历史 |
+|----------|--------|----------|
+| ![搜索](./docs/screenshots/search.png) | ![空状态](./docs/screenshots/empty.png) | ![历史](./docs/screenshots/history.png) |
 
 ---
 
