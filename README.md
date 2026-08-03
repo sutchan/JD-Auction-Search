@@ -85,9 +85,9 @@ npm run build
 将在项目根目录生成 `jd-auction-search-v1.5.3.zip`，可直接发布。
 
 可选构建参数：
-- `node build.js --tw`：以繁体中文（zh-TW）命名输出 `jd-auction-search-v1.5.3-zh-TW.zip`
-- `node build.js --firefox`：对 `messages.json` 做 Firefox 字符串转义（`'` → `\'`、`\` → `\\`）
 - `node build.js --no-preview`：跳过构建产物预览
+
+> 注：扩展仅打包简体中文（zh_CN）+ 英文（en）单包，`--tw` / `--firefox` 多语言变体参数已移除。
 
 ---
 

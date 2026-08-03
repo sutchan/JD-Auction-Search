@@ -111,18 +111,22 @@
 
       if (self._isAuctionUrl(urlStr)) {
         self._captureRequestTemplate(urlStr, options);
-        const clone = res.clone();
-        clone.json()
-          .then(data => {
-            self._captureFirstPage(urlStr, data);
-            handleResponse(data, urlStr);
-          })
-          .catch(err => {
-            // 解析失败不应阻断响应返回；仅记录便于排查接口形态变化
-            if (global.JDSUtils && global.JDSUtils.log) {
-              global.JDSUtils.log('fetch json 解析失败: ' + urlStr, err);
-            }
-          });
+        // 仅对「像列表接口」的响应做商品提取：_listScore>=6 才当商品数据处理，
+        // 避免路径恰含 auction 的非列表接口（订单/促销等）被误当商品响应解析
+        if (self._listScore(urlStr) >= 6) {
+          const clone = res.clone();
+          clone.json()
+            .then(data => {
+              self._captureFirstPage(urlStr, data);
+              handleResponse(data, urlStr);
+            })
+            .catch(err => {
+              // 解析失败不应阻断响应返回；仅记录便于排查接口形态变化
+              if (global.JDSUtils && global.JDSUtils.log) {
+                global.JDSUtils.log('fetch json 解析失败: ' + urlStr, err);
+              }
+            });
+        }
       }
 
       return res;
@@ -160,7 +164,7 @@
       this.addEventListener('load', function() {
         try {
           const data = JSON.parse(this.responseText);
-          if (self._isAuctionUrl(self._jdsUrl)) {
+          if (self._isAuctionUrl(self._jdsUrl) && self._listScore(self._jdsUrl) >= 6) {
             self._captureRequestTemplate(self._jdsUrl, {
               method: self._jdsMethod,
               body,

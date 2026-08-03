@@ -5,7 +5,10 @@
   'use strict';
 
   const JDSContent = global.JDSContent = global.JDSContent || {};
+  // 判空：enhancer.js 未加载时 JDSContent.AuctionSearchEnhancer 为 undefined，
+  // 直接挂载方法会抛 TypeError；判空后本模块保持无害（后续 init 时由 content.js 兜底告警）
   const enhancer = JDSContent.AuctionSearchEnhancer;
+  if (!enhancer) return;
 
   /**
    * 处理API响应
@@ -52,13 +55,19 @@
       // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
       this.state.searchMode = true;
       JDSDom.hideNativeProducts();
-      // 全量数据尚未就绪：先触发一次全量加载（完成后会重新进入本函数渲染），
-      // 避免搜索只命中已加载的首页数据而漏掉后续页
-      if (!this.state._allLoaded && !this.state._loadingAll && (this._loadAttempts || 0) < 2) {
+      // 全量数据尚未就绪：触发一次全量加载（单飞，避免多次搜索并发重入），
+      // 完成后会重新进入本函数渲染，避免搜索只命中已加载的首页数据而漏掉后续页。
+      // 用 _loadDone 区分「已尝试过（成败都算）」与「仍在加载中」，替代原 _loadAttempts 计数，
+      // 原计数仅在 init 重置，用户多次搜索后第 3 次起会永久失效、只能命中首页数据
+      if (!this.state._loadDone && !this._loadPromise) {
         JDSUI.showLoading();
-        this._autoLoadProducts();
+        this._loadPromise = this._autoLoadProducts()
+          .catch(() => {})
+          .then(() => { this._loadPromise = null; });
         return;
       }
+      // 正在加载中：等其完成后再渲染（由 _autoLoadProducts 终点分支重新进入本函数）
+      if (this._loadPromise) return;
       if (filtered.length === 0 && this.state.isLoading) {
         // 全局商品仍在加载（如详情页延时抓取），先展示骨架屏而非空态
         JDSUI.showLoading();
@@ -106,8 +115,6 @@
     // 标记全局加载中；终点分支负责复位，详情页重试期间保持 true 以展示骨架屏
     this.state.isLoading = true;
     this.state._loadingAll = true;
-    // 全量重放尝试计数：限制重试次数，避免模板缺失（如 JSONP 接口）时无限重放
-    this._loadAttempts = (this._loadAttempts || 0) + 1;
     try {
       // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
       const products = await JDSApi.loadAllProducts();
@@ -158,8 +165,11 @@
       this.state.isLoading = false;
       this._applyFilterAndUpdate();
     } finally {
-      // 无论成功/失败/重试，结束本次加载过程（_allLoaded 仅在真正全量成功时置位）
+      // 无论成功/失败/重试，结束本次加载过程（_allLoaded 仅在真正全量成功时置位；
+      // _loadDone 表示「已尝试过一次全量加载」，成败都置位，避免原 _loadAttempts 仅在
+      // init 重置导致多次搜索后分页重放永久失效）
       this.state._loadingAll = false;
+      this.state._loadDone = true;
     }
   };
 })(window);

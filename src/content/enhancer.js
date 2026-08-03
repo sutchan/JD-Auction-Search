@@ -31,7 +31,11 @@
       this.state._allLoaded = false;
       this.state._loadingAll = false;
       this.state.isLoading = false;
-      this._loadAttempts = 0;
+      // 重置全量加载状态：_loadDone 标记「已尝试过一次全量加载」（成败都算），
+      // _loadPromise 为进行中的加载单飞 Promise；destroy 后重新 init 需复位，
+      // 否则旧 _loadDone=true 会阻止重新聚合分页数据
+      this.state._loadDone = false;
+      this._loadPromise = null;
       this._detailRetry = false;
 
       // 注入样式（injectStyles 内部幂等，这里置于守卫内避免重复注入）
@@ -80,6 +84,7 @@
     destroy() {
       this._inited = false;
       if (this._autoLoadTimer) { clearTimeout(this._autoLoadTimer); this._autoLoadTimer = null; }
+      this._loadPromise = null;
       JDSDom.stopObservation();
       JDSUI.destroy();
       JDSApi.restoreApi();
