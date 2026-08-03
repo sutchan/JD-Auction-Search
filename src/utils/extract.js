@@ -6,6 +6,18 @@
 
   const JDSUtils = global.JDSUtils = global.JDSUtils || {};
 
+  /**
+   * 轻量日志：仅在扩展开发/调试态(JSDEBUG)输出，生产环境静默，避免噪音
+   * @param {string} msg
+   * @param {...*} args
+   */
+  JDSUtils.log = function log(msg, ...args) {
+    if (global.JDS_DEBUG || /[?&]jdsDebug=1/.test((global.location && global.location.search) || '')) {
+      // eslint-disable-next-line no-console
+      console.log('[JD-Auction-Search] ' + msg, ...args);
+    }
+  };
+
   // 京东拍拍/夺宝岛 auction.list 接口商品图主域（primaryPic 为 "jfs/..." 相对路径，需拼此前缀）
   const JD_IMG_CDN = 'https://m.360buyimg.com/n1/s220x220_';
 
@@ -169,6 +181,35 @@
       if (n !== null && n >= 0) return n;
     }
     return 0;
+  };
+
+  /**
+   * 从价格/金额文本解析为数值（单位：元），统一处理千分位、多小数点与分单位
+   * 兼容 "¥1,288.00" / "1,288.00" / "128800"(分) / "1288.00" 等形态；
+   * 去除所有非数字/小数点字符后，按最右小数点拆分整数与小数，再归一疑似「分」的大整数。
+   * @param {string|number} raw - 原始价格文本或数值
+   * @returns {number} 解析后的元单位数值，无法解析返回 0
+   */
+  JDSUtils.parsePrice = function parsePrice(raw) {
+    if (typeof raw === 'number') {
+      if (!isFinite(raw) || raw <= 0) return 0;
+      return (Number.isInteger(raw) && raw > 100000) ? raw / 100 : raw;
+    }
+    if (typeof raw !== 'string') return 0;
+    // 去掉千分位逗号与所有非数字/小数点字符
+    const cleaned = raw.replace(/,/g, '').replace(/[^\d.]/g, '');
+    if (!cleaned) return 0;
+    // 多小数点（如 "1.288.00"）仅保留最后一个作为小数分隔符
+    const dotIdx = cleaned.lastIndexOf('.');
+    let intPart = dotIdx < 0 ? cleaned : cleaned.slice(0, dotIdx);
+    let decPart = dotIdx < 0 ? '' : cleaned.slice(dotIdx + 1);
+    if (decPart.includes('.')) decPart = decPart.replace(/\./g, '');
+    intPart = intPart.replace(/\D/g, '');
+    if (!intPart) return 0;
+    const n = Number(decPart ? `${intPart}.${decPart}` : intPart);
+    if (!isFinite(n) || n <= 0) return 0;
+    // 疑似分单位：无小数且 >100000 的整数视为「分」→ 还原为元
+    return (decPart === '' && Number.isInteger(n) && n > 100000) ? n / 100 : n;
   };
 
   /**

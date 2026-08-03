@@ -45,15 +45,16 @@
         || priceEls[0] || null;
       // 保留 p-price 原始文本（如 "¥1,288.00"），供渲染层直接显示，避免单位/千分位/分单位误差
       const priceText = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '';
-      const priceRaw = priceEl ? priceEl.textContent.replace(/[^\d.]/g, '') : '';
-      const price = priceRaw ? Number(priceRaw) : 0;
+      // 解析数值：先去千分位逗号，再取数字/小数点；京东部分接口为「分」单位(>100000 整数)需 ÷100
+      const priceRaw = priceEl ? global.JDSUtils.parsePrice(priceEl.textContent) : 0;
+      const price = priceRaw;
 
       // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
       let originalPrice = 0;
       const origEl = card.querySelector(this.SELECTORS.ORIGIN);
       if (origEl && origEl !== priceEl) {
-        const oRaw = origEl.textContent.replace(/[^\d.]/g, '');
-        if (oRaw) originalPrice = Number(oRaw);
+        const o = global.JDSUtils.parsePrice(origEl.textContent);
+        if (o > 0) originalPrice = o;
       }
 
       // 出价人数：取 class 含 bid/apply/join/count/报名/出价 的数字片段
@@ -133,9 +134,14 @@
         const t = el ? (el.textContent || '').trim() : '';
         if (t) { cardName = t; break; }
       }
-      // 名称精确或包含匹配（短名防误匹配），确保对应到正确原生卡片
+      // 名称匹配：优先精确相等；模糊匹配仅接受「一端被另一端完整包裹前缀/后缀」，
+      // 且双向包含（避免 "iPhone 13" 误中 "iPhone 13 Pro" 等相邻卡片）
       const matched = cardName && cardName.length > 2 && (
-        cardName === target || target.includes(cardName) || cardName.includes(target)
+        cardName === target ||
+        (cardName.length >= target.length && cardName.startsWith(target)) ||
+        (target.length >= cardName.length && target.startsWith(cardName)) ||
+        (cardName.length >= target.length && cardName.endsWith(target)) ||
+        (target.length >= cardName.length && target.endsWith(cardName))
       );
       if (!matched) continue;
       const pEl = card.querySelector('.p-price, [class*="p-price" i]');

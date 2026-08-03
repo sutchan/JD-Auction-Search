@@ -117,7 +117,12 @@
             self._captureFirstPage(urlStr, data);
             handleResponse(data, urlStr);
           })
-          .catch(() => {});
+          .catch(err => {
+            // 解析失败不应阻断响应返回；仅记录便于排查接口形态变化
+            if (global.JDSUtils && global.JDSUtils.log) {
+              global.JDSUtils.log('fetch json 解析失败: ' + urlStr, err);
+            }
+          });
       }
 
       return res;

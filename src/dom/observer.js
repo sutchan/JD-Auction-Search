@@ -17,7 +17,14 @@
     this.observer = new MutationObserver((mutations) => {
       let shouldUpdate = false;
       for (const mutation of mutations) {
-        if (mutation.addedNodes.length > 0) {
+        // 新增/移除节点（如分页加载、列表重渲染）
+        if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
+          shouldUpdate = true;
+          break;
+        }
+        // 已有商品卡的价格/状态等文本或属性实时变化（无新增节点，如竞价刷新）
+        if ((mutation.type === 'characterData' || mutation.type === 'attributes') &&
+            mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) {
           shouldUpdate = true;
           break;
         }
@@ -29,7 +36,10 @@
 
     this.observer.observe(container, {
       childList: true,
-      subtree: true
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'data-*']
     });
   };
 
