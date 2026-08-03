@@ -100,10 +100,11 @@
     }
     #jds-results-host .jds-product-img {
       height: 140px; display: grid; place-items: center; font-size: 44px;
-      background: linear-gradient(135deg, var(--secondary) 0%, var(--muted) 100%);
+      background: var(--secondary);
       color: var(--subtle-foreground); position: relative; overflow: hidden;
     }
-    #jds-results-host .jds-product-img-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* contain 完整展示整张图（不裁切主体）；浅灰底避免透明 PNG 透出渐变 */
+    #jds-results-host .jds-product-img-el { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--secondary); }
     /* 图片悬停轻微放大（复刻原型 product-card 交互） */
     #jds-results-host .jds-product-card:hover .jds-product-img-el { transform: scale(1.06); transition: transform var(--dur-base) var(--ease-out); }
     #jds-results-host .jds-product-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }

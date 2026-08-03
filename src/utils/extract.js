@@ -19,7 +19,8 @@
   };
 
   // 京东拍拍/夺宝岛 auction.list 接口商品图主域（primaryPic 为 "jfs/..." 相对路径，需拼此前缀）
-  const JD_IMG_CDN = 'https://m.360buyimg.com/n1/s220x220_';
+  // 用 s400x400_ 提升清晰度，避免原 220px 小图被 cover 放大裁切导致主体显示不完整
+  const JD_IMG_CDN = 'https://m.360buyimg.com/n1/s400x400_';
 
   /**
    * 从多个可能的字段中获取商品ID
