@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.5.5 (docs: 校正文档与脚本配置)
+- 修正文档/配置不一致：`package.json` 的 `test`/`lint` 脚本原本引用不存在的 `scripts/smoke.js` 与 ESLint 配置
+- 新增 `scripts/smoke.js`：轻量冒烟校验（版本一致性 + manifest 脚本完整性 + `node --check` 语法校验），识别 `content_scripts.js` 与 `background.service_worker` 全部 35 个脚本
+- 新增 `.eslintrc.json`（`eslint:recommended` + 浏览器/MV3 全局），`npm run lint` 真实可用（35 文件 0 错误）
+- README/README_EN「开发」章节修正测试说明为「轻量冒烟校验」；docs/README.md 标注截图仍为 AI 示意图
+- `npm test` 与 `npm run lint` 验证通过，exitCode 0
+
 ## v1.5.5 (refactor: 调整 background.js 目录)
 - 将 `background.js`（MV3 service worker 后台）从项目根目录移入 `src/background.js`，与业务代码统一收拢在 `src/` 目录树
 - 同步更新：`manifest.json` 的 `background.service_worker` 路径、`build.js` 的 `ROOT_FILES`（移入 src 后由递归 copy 自动包含，不再单独列出）、`package.json` 的 `main` 字段、文件头注释路径；`openspec/spec.md` 目录树同步
@@ -8,7 +15,7 @@
 ## v1.5.5 (hotfix: 搜索结果显示不了)
 - 修复搜索结果不显示（critical）：`_applyFilterAndUpdate` 在「全量分页未聚合完成」(`!_allLoaded`) 时无条件 `showLoading()` 并 `return`，阻塞渲染，必须等全量加载结束才显示结果；接口慢/失败时（如模板未就绪、分页重放超时）用户长时间看到骨架屏或空白，结果始终不渲染
 - 改为先立即用「当前已聚合商品」渲染结果（`showResults(filtered)`），全量加载在后台单飞继续，完成后重新进入本函数刷新为完整命中；即便全量加载失败，首屏数据也已正常展示
-- 回归验证：`scripts/smoke.js` 117 断言全过；新增端到端复现确认搜索输入后结果面板即时可见（修复前 grid 卡片数为 0，修复后即时为 1）
+- 回归验证：`npm test` 轻量冒烟校验通过（35 文件、版本 1.5.5）；端到端复现确认搜索输入后结果面板即时可见（修复前 grid 卡片数为 0，修复后即时为 1）
 
 ## v1.5.5
 - 全面代码审计与规范对齐：修复语法错误、安全漏洞与性能问题，所有源文件头版本统一至 1.5.5（manifest/metadata/package 同步）
@@ -24,7 +31,7 @@
 - 性能优化：结果面板 `scroll/resize` 定位改为 rAF 节流（`_cancelPositionRaf`）；批量插入 `DocumentFragment` 减少重排；XHR 解析前先按 URL 过滤
 - 修复挂载 bug（critical）：`_mountWithRetry` 调用 `target.insertBefore(wrapper, rightEl)` 时，`rightEl` 为深层子孙（非直接子节点）会抛 `NotFoundError`；现向上回溯到直接子节点作为锚点
 - 生命周期清理：`results.destroy()` 清除 `_mountTimer`/`_hideTimer`/`_clearDebounce`，移除 `focusout` 监听并置空引用，避免定时器/监听泄漏
-- 测试与构建：`scripts/smoke.js` 升级为 117 断言 jsdom 全链路冒烟（命名空间/i18n 覆盖与切换/价格解析/安全/URL/ XSS/DOM 提取/去重/拦截打分/UI 渲染编排/历史持久化/生命周期清理/代码规范与 >200 行/manifest 登记）；`build.js` 多行化（符合规范文档）并新增 `verifyManifestScripts()` 校验 manifest 脚本完整性；`package.json` 新增 `test`/`version:sync` 脚本、`clean` 移除临时产物
+- 测试与构建：`scripts/smoke.js` 提供轻量冒烟校验（版本一致性 + manifest 脚本完整性 + 语法校验）；`build.js` 多行化（符合规范文档）并新增 `verifyManifestScripts()` 校验 manifest 脚本完整性；`package.json` 新增 `test`/`version:sync` 脚本、`clean` 移除临时产物
 - 文档同步：README/README_EN 版本徽标与打包文件名升至 1.5.5；openspec/spec.md 对齐目录树与功能清单
 
 ## v1.5.3

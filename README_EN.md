@@ -35,10 +35,9 @@ whatever you need, found instantly without paging.
 
 - [Preview](#preview)
 - [Get Started in 3 Steps](#get-started-in-3-steps-30-seconds)
-- [Usage](#usage)
 - [Core Features](#core-features)
+- [Usage](#usage)
 - [Installation](#installation)
-- [Build & Release](#build--release)
 - [How It Works](#how-it-works)
 - [FAQ](#faq)
 - [Contributing](#contributing)
@@ -98,32 +97,36 @@ That's it — no page reload, no login required.
 
 ---
 
+## Core Features
+
+This extension fills the native gap of "search" on the JD auction (Paipai) list page, making huge catalogs instantly queryable:
+
+- **🎯 Real-time keyword search**: filter instantly by product name, ID, category, shop, or subtitle — results appear as you type.
+- **📚 Cross-page aggregation**: auto-pages through every auction page; results cover **all paginated items** — no manual paging.
+- **🛡 API fallback**: when the auction API is unavailable, automatically degrades to on-page DOM extraction so search never breaks.
+- **🕘 Search history**: persists the last 10 keywords locally, kept across reloads; supports per-item delete and clear-all.
+- **➕ Load more**: the result panel supports paged loading to expand all matched items on demand.
+- **🌐 Multi-language**: Simplified Chinese / English UI, auto-switched by browser language.
+- **🔒 Style isolation**: the search bar uses a Shadow DOM and the result panel uses design tokens, immune to JD's page CSS.
+
+---
+
 ## Usage
 
-Once the JD auction list page is open, the extension takes over the search experience:
+Once the JD auction list page is open, the extension takes over the search experience with zero configuration:
 
 | Step | Action | Effect |
 |------|--------|--------|
 | ① Search bar appears | Enter the auction list page, wait ~2s | A search bar is injected at the top automatically |
 | ② Type a keyword | Enter a product name / ID / category / shop | Results filter **in real time**, aggregated across all pages |
-| ③ View results | Result panel overlays the native list | Supports "load more"; click a card to open detail in a **new tab** |
-| ④ Clear search | Click **×** on the right of the search box | Native auction list restores automatically, no reload |
-| ⑤ No match | Nothing matches | Panel shows a "No matching products" empty state |
+| ③ View results | Result panel overlays the native list | Supports **load more**; click a card to open detail in a **new tab** |
+| ④ Search history | Focus the empty search box | Shows a **history dropdown** (per-item delete / clear-all), kept across reloads |
+| ⑤ Clear search | Click **×** on the right of the search box | Native auction list restores automatically, no reload |
+| ⑥ No match | Nothing matches | Panel shows a "No matching products" empty state |
 
 > The native list hides automatically while searching and restores on clear;
-> no page reload is needed.
-> Focusing the empty search box shows a **history dropdown** (delete per item or
-> clear all), persisted across reloads.
-
----
-
-## Core Features
-
-- **🎯 Real-time keyword search**: filter instantly by product name, ID, category, shop, or subtitle.
-- **📚 Cross-page aggregation**: auto-pages through every auction page; results cover all paginated items — no manual paging.
-- **🛡 API fallback**: when the auction API is unavailable, automatically degrades to on-page DOM extraction so search never breaks.
-- **🕘 Search history**: persists the last 10 keywords locally, kept across reloads.
-- **🌐 Multi-language**: Simplified Chinese / English UI.
+> the whole flow needs **no page reload and no login**.
+> Keywords match multiple fields (name / ID / category / shop) — the more specific, the more precise.
 
 ---
 
@@ -139,23 +142,7 @@ Missing icons do not block loading.
 - **Firefox**: open `about:debugging#/runtime/this-firefox` → click
   "Load Temporary Add-on" → select `manifest.json`.
 
-> For store publishing, package as a zip via `npm run build` (see [Build & Release](#build--release)).
-
----
-
-## Build & Release
-
-```bash
-npm install
-npm run build
-```
-
-This produces `jd-auction-search-v1.5.5.zip` in the `releases/` directory, ready to publish.
-
-Optional build flags:
-- `node build.js --no-preview`: skip the build artifact preview
-
-> Note: the extension ships a single package with Simplified Chinese (zh_CN) + English (en) only. The `--tw` / `--firefox` locale variant flags have been removed.
+> The extension ships a single package with Simplified Chinese (zh_CN) + English (en) only.
 
 ---
 
@@ -194,9 +181,9 @@ graph LR
 
 Issues and PRs are welcome. Development conventions:
 
-- Code style follows ESLint + Prettier; run `npm run lint` before committing.
-- Tests: `npm test` (functional + integration).
-- Build: `npm run build`.
+- Code style follows ESLint (`.eslintrc.json`); run `npm run lint` before committing.
+- Tests: `npm test` (lightweight smoke check: version consistency + manifest script completeness + syntax validation, see `scripts/smoke.js`).
+- Before releasing, sync all file-header versions with `node scripts/bump-version.js <new-version>`.
 
 ---
 
