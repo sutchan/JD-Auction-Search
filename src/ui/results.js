@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.5.3
+// JD-Auction-Search/src/ui/results.js v1.5.5
 // 结果面板公开 API：展示/隐藏、骨架屏、空状态、销毁
 // 面板宿主逻辑见 results/host.js
 
@@ -87,6 +87,18 @@
    * 销毁UI
    */
   JDSUI.destroy = function destroy() {
+    // 清理定时器与监听，避免 destroy 后回调仍执行导致内存泄漏 / 空引用
+    if (this._mountTimer) { clearTimeout(this._mountTimer); this._mountTimer = null; }
+    if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null; }
+    if (typeof this._clearDebounce === 'function') this._clearDebounce();
+    this._clearDebounce = null;
+    if (this.shadowRoot && this._onFocusOut) {
+      this.shadowRoot.removeEventListener('focusout', this._onFocusOut);
+    }
+    this._onFocusOut = null;
+    this._historyCtx = null;
+    this.clearSearch = null;
+
     const wrapper = document.getElementById('jds-search-wrapper');
     if (wrapper) wrapper.remove();
     if (this.resultsHost) this.resultsHost.remove();

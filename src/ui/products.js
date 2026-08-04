@@ -1,13 +1,22 @@
-// JD-Auction-Search/src/ui/products.js v1.5.3
+// JD-Auction-Search/src/ui/products.js v1.5.5
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
-// 保证跨页搜索结果在任意京东页面都稳定可见（此前克隆原生卡片在真实页面常因京东 class 级 CSS
-// 表现为“尺寸正常却整片不可见”，难以可靠检测）。
-// 面板生命周期见 results.js，骨架屏见 skeleton.js
+// 保证跨页搜索结果在任意京东页面都稳定可见。
+// 价格区渲染见 ./price-render.js，面板生命周期见 ./results.js，骨架屏见 ./skeleton.js
 
 (function(global) {
   'use strict';
 
   const JDSUI = global.JDSUI = global.JDSUI || {};
+  const getMessage = global.JDSUtils.getMessage;
+
+  // 首屏渲染条数：超出部分由「加载更多」按需追加，
+  // 避免全局命中上千条时一次性生成大量卡片导致页面卡死
+  const PAGE_SIZE = 60;
+  // 入场动画错位步长与封顶（秒），避免大列表等待过久
+  const ANIM_STEP = 0.03;
+  const ANIM_MAX = 0.4;
+  // 无图占位 emoji（📦）
+  const IMG_PLACEHOLDER = '\u{1F4E6}';
 
   /**
    * 渲染商品列表到结果面板
@@ -27,8 +36,6 @@
     }
     this.hideEmptyState();
 
-    // 分页渲染：首屏渲染 PAGE_SIZE 条，超出部分由“加载更多”按需追加，
-    // 避免全局命中上千条时一次性生成大量卡片导致页面卡死
     this._renderPage = 1;
     this._renderAll = products;
     const grid = this._createGrid(panel);
@@ -39,20 +46,25 @@
   /**
    * 追加一页商品卡片到网格（分页渲染核心）
    * @private
+   * @param {HTMLElement} grid - 网格容器
+   * @param {Array} products - 完整商品数组
    */
   JDSUI._appendPage = function _appendPage(grid, products) {
-    const PAGE_SIZE = 60;
     const start = (this._renderPage - 1) * PAGE_SIZE;
     const slice = products.slice(start, start + PAGE_SIZE);
 
     const total = products.length;
     const rendered = start + slice.length;
-    // 入场动画错位：按当前页内序号递增延迟，封顶 0.4s 避免大列表等待过久
+
+    // 批量插入减少重排
+    const frag = document.createDocumentFragment();
     slice.forEach((p, i) => {
       const card = this._buildOwnCard(p);
-      card.style.animationDelay = Math.min(i * 0.03, 0.4) + 's';
-      grid.appendChild(card);
+      card.style.animationDelay = Math.min(i * ANIM_STEP, ANIM_MAX) + 's';
+      frag.appendChild(card);
     });
+    grid.appendChild(frag);
+
     const oldBtn = grid.parentNode && grid.parentNode.querySelector('.jds-load-more');
     if (oldBtn) oldBtn.remove();
     if (rendered < total) {
@@ -60,7 +72,7 @@
       btn.id = 'jds-load-more';
       btn.className = 'jds-load-more';
       btn.type = 'button';
-      btn.textContent = `加载更多（已显示 ${rendered} / ${total}）`;
+      btn.textContent = getMessage('loadMore') + getMessage('loadMoreProgress', [rendered, total]);
       btn.addEventListener('click', () => {
         this._renderPage++;
         this._appendPage(grid, products);
@@ -70,9 +82,36 @@
   };
 
   /**
-   * 构建扩展自带商品卡片（类化标记，样式由浅 DOM 的 RESULTS_COMPONENT_CSS 驱动，
+   * 构建卡片图片区：有图用 <img>（referrerPolicy 规避防盗链），无图回退 emoji 占位
+   * @private
+   * @param {string|null} image - 主图 URL
+   * @param {string} name - 商品名称（作为 alt）
+   * @returns {HTMLElement}
+   */
+  JDSUI._buildCardImage = function _buildCardImage(image, name) {
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'jds-product-img';
+    if (!image) {
+      imgWrap.textContent = IMG_PLACEHOLDER;
+      return imgWrap;
+    }
+    const img = document.createElement('img');
+    img.className = 'jds-product-img-el';
+    img.src = image;
+    img.alt = name;
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+    // 属性方式绑定错误回退，规避 MV3 CSP 对 on* 属性的拦截
+    img.onerror = () => { imgWrap.textContent = IMG_PLACEHOLDER; };
+    imgWrap.appendChild(img);
+    return imgWrap;
+  };
+
+  /**
+   * 构建扩展自带商品卡片（类化标记，样式由浅 DOM 的 results/styles.js 驱动，
    * 对齐 prototype 的 .product-card 结构与设计令牌，保证跨页一致且不被京东 CSS 覆盖）
    * @private
+   * @param {Object} p - 商品对象
    * @returns {HTMLElement}
    */
   JDSUI._buildOwnCard = function _buildOwnCard(p) {
@@ -88,29 +127,19 @@
     // 语义化 id：优先用商品 id；无 id 时用稳定自增序号（避免用标题 encodeURIComponent 产生非法/重复 id）
     const cardId = (p && (p.id != null ? p.id : p.productId));
     card.id = 'jds-card-' + (cardId != null ? String(cardId) : 'n' + (JDSUI._cardSeq = (JDSUI._cardSeq || 0) + 1));
-    card.href = url || 'javascript:void(0)';
+
+    // 安全：仅在有合法 http(s) 链接时设置 href；无链接时不写 javascript: 伪协议
+    // （MV3 CSP 与安全审计均不建议），改为可聚焦的 button 语义
     if (url) {
+      card.href = url;
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
+    } else {
+      card.setAttribute('role', 'button');
+      card.tabIndex = 0;
     }
 
-    // 图片区：有图用 <img>（referrerPolicy 规避防盗链），无图回退 emoji 占位
-    const imgWrap = document.createElement('div');
-    imgWrap.className = 'jds-product-img';
-    if (image) {
-      const img = document.createElement('img');
-      img.className = 'jds-product-img-el';
-      img.src = image;
-      img.alt = name;
-      img.loading = 'lazy';
-      img.referrerPolicy = 'no-referrer';
-      // 属性方式绑定错误回退，规避 MV3 CSP 对 on* 属性的拦截
-      img.onerror = () => { imgWrap.textContent = '\u{1F4E6}'; };
-      imgWrap.appendChild(img);
-    } else {
-      imgWrap.textContent = '\u{1F4E6}';
-    }
-    card.appendChild(imgWrap);
+    card.appendChild(this._buildCardImage(image, name));
 
     const body = document.createElement('div');
     body.className = 'jds-product-body';
@@ -120,88 +149,8 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 主价格行：价格优先取自页面 span.p-price 实际文本（用户要求只显示 p-price 价格），
-    // 不再依赖接口字段名/单位猜测；无对应原生卡片时回退数字格式化(currentPrice/startPrice)。
-    // - hasCurrent: 接口/提取给出 currentPrice（含 0，流拍亦算有效现价）
-    // - priceText: 页面原生 .p-price 文本，代表当前价（优先展示）
-    // - isStarting: 既无 currentPrice 也无 priceText，仅有 startPrice → 未开拍「起拍价」
-    //   只要商品能显示出当前价（currentPrice 或 priceText 任一存在），就用当前价代替起拍价
-    const rawCurrent = (p && p.currentPrice != null) ? Number(p.currentPrice) : null;
-    const hasCurrent = rawCurrent != null;
-    const startPrice = (p && p.startPrice != null) ? Number(p.startPrice) : null;
-
-    // 优先用 p-price 原文（DOM 提取存的值 / 实时回查页面原生卡片），避免单位(分/元)误差
-    const priceText = (p && p.priceText)
-      || (global.JDSDom && global.JDSDom.getProductPriceText ? global.JDSDom.getProductPriceText(name) : null);
-    const hasPriceText = !!priceText;
-
-    // 仅当没有任何当前价可显示（无 currentPrice 且无 priceText）时，才用起拍价并标注「起拍」
-    const isStarting = !hasCurrent && !hasPriceText && startPrice != null && startPrice > 0;
-    const current = isStarting ? startPrice
-      : (hasCurrent ? rawCurrent : (hasPriceText ? null : U.getProductPrice(p)));
-
-    // 划线原价（封顶/参考价）：京东拍拍接口对应 cappedPrice（页面 class=origin-price）
-    const origPrice = (p && p.cappedPrice != null) ? Number(p.cappedPrice) : null;
-    // 主价若与划线原价相同（说明主价是从 cappedPrice 封顶价回退而来），
-    // 两者属同一价格，仅保留划线原价 .jds-product-orig，不再渲染主价格行以避免重复显示
-    const priceEqualsOrig = origPrice != null && origPrice > 0 && current === origPrice;
-
-    if (!priceEqualsOrig) {
-      const priceEl = document.createElement('div');
-      priceEl.className = 'jds-product-price';
-
-      // 三个独立容器：标签 / 货币符号 / 金额，便于各自独立样式化
-      const labelEl = document.createElement('span');
-      labelEl.className = 'jds-price-label';
-      const yenEl = document.createElement('span');
-      yenEl.className = 'jds-price-yen';
-      const amountEl = document.createElement('span');
-      amountEl.className = 'jds-price-amount';
-
-      // 标签容器：仅未开拍（无当前价）时显示「起拍」
-      if (isStarting) labelEl.textContent = '起拍';
-
-      // 货币符号始终独立在 yenEl；金额容器只放数值（起拍价/当前价），不混入 ¥ 符号
-      yenEl.textContent = '¥';
-      const amountStr = priceText
-        ? priceText.replace(/^[¥￥\s]+/, '').trim()   // p-price 原文可能含 ¥/￥，剥离货币只留数值
-        : U.formatPrice(current);
-      // 金额拆成三部分：整数部分 / 小数点 / 小数部分，便于分别样式化（小数可更小）
-      const m = /^(\d[\d,]*)([.,]?)(\d*)$/.exec(amountStr);
-      const intPart = m ? m[1] : amountStr;
-      const sepPart = m ? m[2] : '';
-      const decPart = m ? m[3] : '';
-      const intEl = document.createElement('span');
-      intEl.className = 'jds-price-int';
-      intEl.textContent = intPart;
-      const sepEl = document.createElement('span');
-      sepEl.className = 'jds-price-dec-sep';
-      sepEl.textContent = sepPart;
-      const decEl = document.createElement('span');
-      decEl.className = 'jds-price-dec';
-      decEl.textContent = decPart;
-      amountEl.appendChild(intEl);
-      amountEl.appendChild(sepEl);
-      amountEl.appendChild(decEl);
-      // 顺序：标签(起拍) → 货币符号 → 金额(整数.小数)
-      priceEl.appendChild(labelEl);
-      priceEl.appendChild(yenEl);
-      priceEl.appendChild(amountEl);
-      body.appendChild(priceEl);
-    }
-
-    // 划线原价：有封顶/原价且主价不同时展示（灰色、划线、较小字号），与现价明显区分
-    if (origPrice != null && isFinite(origPrice) && origPrice > 0 &&
-        (!hasCurrent || origPrice > rawCurrent)) {
-      const sub = document.createElement('div');
-      sub.className = 'jds-product-subprice';
-      const origEl = document.createElement('span');
-      // 仅显示 orig（无主价行）时去划线，作为唯一实际价格正常呈现；否则保留划线对比样式
-      origEl.className = 'jds-product-orig' + (priceEqualsOrig ? ' jds-product-orig-only' : '');
-      origEl.textContent = '¥' + U.formatPrice(origPrice);
-      sub.appendChild(origEl);
-      body.appendChild(sub);
-    }
+    // 价格区（主价格行 + 划线原价行）见 price-render.js
+    this._renderPriceSection(body, p, name);
 
     // 出价人数：独立 badge 行，较小灰色字，与价格数字明显区分
     const bidCount = U.getProductBidCount(p);
@@ -210,7 +159,7 @@
       meta.className = 'jds-product-meta';
       const bidEl = document.createElement('span');
       bidEl.className = 'jds-product-bid';
-      bidEl.textContent = bidCount + ' 人出价';
+      bidEl.textContent = bidCount + getMessage('bidCountSuffix');
       meta.appendChild(bidEl);
       body.appendChild(meta);
     }

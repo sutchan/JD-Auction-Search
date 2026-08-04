@@ -1,5 +1,6 @@
-// JD-Auction-Search/src/api/interceptor.js v1.5.3
-// API 拦截器：捕获页面真实列表请求作模板，并按"像不像列表接口"打分选优
+// JD-Auction-Search/src/api/interceptor.js v1.5.5
+// API 拦截器：包裹 fetch / XHR 捕获页面真实列表请求与响应
+// 模板打分与首页缓存见 ./template.js，分页重放见 ./paginator.js
 
 (function(global) {
   'use strict';
@@ -33,70 +34,10 @@
   };
 
   /**
-   * 记录页面真实发出的拍卖列表请求，作为后续分页重放的模板（避免硬编码端点猜测失败）
-   * 按“像不像列表接口”打分，保留分数最高者
-   * @private
-   */
-  JDSApi._captureRequestTemplate = function _captureRequestTemplate(url, options) {
-    if (!url || typeof url !== 'string') return;
-    const score = this._listScore(url);
-    if (score === 0) return;
-    const tpl = {
-      url,
-      method: (options && options.method) || 'GET',
-      body: options ? options.body : null,
-      headers: (options && options.headers) || null,
-      _score: score
-    };
-    // 模板锁定：首次成功拿到非空商品列表的模板后不再替换，避免后续其它接口（如相关推荐）
-    // 打分更高而覆盖掉正确的列表模板，导致分页重放拿到错误数据
-    if (this._requestTemplateLocked) return;
-    if (!this._requestTemplate || score > this._requestTemplate._score) {
-      this._requestTemplate = tpl;
-    }
-  };
-
-  /**
-   * 锁定当前列表模板（在 loadAllProducts 首次成功聚合后调用）
-   * @private
-   */
-  JDSApi._lockRequestTemplate = function _lockRequestTemplate() {
-    this._requestTemplateLocked = true;
-  };
-
-  /**
-   * 给请求 URL 打分，越像“列表接口”分数越高，用于挑出最佳模板
-   * 对已知拍拍列表 functionId 加权，降低被其它拍卖相关接口误替的风险
-   * @private
-   */
-  JDSApi._listScore = function _listScore(url) {
-    const u = url.toLowerCase();
-    let s = 0;
-    if (/functionid=paipai\.auction\.list/i.test(u)) s += 20;
-    if (u.includes('auction-list')) s += 10;
-    if (u.includes('auctionlist')) s += 8;
-    if (/\/list(\?|$)/.test(u)) s += 6;
-    if (u.includes('auction') && u.includes('list')) s += 6;
-    if (u.includes('auction')) s += 3;
-    if (u.includes('paimai') || u.includes('paipai')) s += 2;
-    return s;
-  };
-
-  /**
-   * 缓存拦截到的首页商品，作为无法分页时的兜底
-   * 仅采信“像列表接口”的响应，避免把推荐等其它接口误当首页数据
-   * @private
-   */
-  JDSApi._captureFirstPage = function _captureFirstPage(url, data) {
-    if (!data || !url || this._listScore(url) < 6) return;
-    if (this._firstPageProducts && this._firstPageProducts.length) return;
-    const products = global.JDSUtils.extractProductsFromResponse(data);
-    if (products.length) this._firstPageProducts = products;
-  };
-
-  /**
    * 拦截fetch请求
    * @private
+   * @param {Object} state - 应用状态
+   * @param {Function} handleResponse - 响应回调
    */
   JDSApi._interceptFetch = function _interceptFetch(state, handleResponse) {
     this._origFetch = window.fetch;
@@ -111,11 +52,10 @@
 
       if (self._isAuctionUrl(urlStr)) {
         self._captureRequestTemplate(urlStr, options);
-        // 仅对「像列表接口」的响应做商品提取：_listScore>=6 才当商品数据处理，
-        // 避免路径恰含 auction 的非列表接口（订单/促销等）被误当商品响应解析
-        if (self._listScore(urlStr) >= 6) {
-          const clone = res.clone();
-          clone.json()
+        // 仅对「像列表接口」的响应做商品提取，避免非列表接口被误当商品响应解析
+        if (self._isListResponse(urlStr)) {
+          // clone 后异步解析，绝不阻断原响应返回给页面
+          res.clone().json()
             .then(data => {
               self._captureFirstPage(urlStr, data);
               handleResponse(data, urlStr);
@@ -136,6 +76,8 @@
   /**
    * 拦截XMLHttpRequest请求
    * @private
+   * @param {Object} state - 应用状态
+   * @param {Function} handleResponse - 响应回调
    */
   JDSApi._interceptXHR = function _interceptXHR(state, handleResponse) {
     this._origXHROpen = XMLHttpRequest.prototype.open;
@@ -162,40 +104,22 @@
     XMLHttpRequest.prototype.send = function(...args) {
       const body = args.length ? args[0] : null;
       this.addEventListener('load', function() {
+        // 先做 URL 过滤再解析 JSON，避免对无关响应做无谓的 JSON.parse（性能）
+        if (!self._isAuctionUrl(self._jdsUrl) || !self._isListResponse(self._jdsUrl)) return;
         try {
           const data = JSON.parse(this.responseText);
-          if (self._isAuctionUrl(self._jdsUrl) && self._listScore(self._jdsUrl) >= 6) {
-            self._captureRequestTemplate(self._jdsUrl, {
-              method: self._jdsMethod,
-              body,
-              headers: self._jdsHeaders
-            });
-            self._captureFirstPage(self._jdsUrl, data);
-            handleResponse(data, self._jdsUrl);
-          }
+          self._captureRequestTemplate(self._jdsUrl, {
+            method: self._jdsMethod,
+            body,
+            headers: self._jdsHeaders
+          });
+          self._captureFirstPage(self._jdsUrl, data);
+          handleResponse(data, self._jdsUrl);
         } catch (e) {
-          // 忽略解析错误
+          // 非 JSON 响应属正常情况，静默忽略
         }
       });
       return origXHRSend.apply(this, args);
     };
-  };
-
-  /**
-   * 判断URL是否是拍卖相关API（放宽主机与路径，尽量捕获页面真实列表接口）
-   * @private
-   */
-  JDSApi._isAuctionUrl = function _isAuctionUrl(url) {
-    if (!url || typeof url !== 'string') return false;
-    const lower = url.toLowerCase();
-    const hostOk = lower.includes('1paipai.jd.com') ||
-                   lower.includes('paipai.jd.com') ||
-                   lower.includes('paimai.jd.com') ||
-                   lower.includes('api.m.jd.com') ||
-                   lower.includes('m.jd.com');
-    const pathOk = lower.includes('auction') ||
-                   lower.includes('paimai') ||
-                   lower.includes('paipai');
-    return hostOk && pathOk;
   };
 })(window);

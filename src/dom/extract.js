@@ -1,15 +1,137 @@
-// JD-Auction-Search/src/dom/extract.js v1.5.3
-// DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url），以及原生卡片模板获取与显隐
+// JD-Auction-Search/src/dom/extract.js v1.5.5
+// DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url）
+// 价格文本回查见 ./price-text.js，原生列表显隐见 ./native-list.js
 
 (function(global) {
   'use strict';
 
   const JDSDom = global.JDSDom = global.JDSDom || {};
 
+  // 名称长度合理区间（过短为图标/标签，过长为整卡文本污染）
+  const NAME_MIN = 2;
+  const NAME_MAX = 200;
+  // 安全链接/图片：仅 http(s) 与协议相对
+  const SAFE_URL_RE = /^https?:|^\/\//i;
+
+  /**
+   * 从卡片中提取商品名称：精确类优先，再回退 <a title>
+   * @private
+   * @param {HTMLElement} card - 商品卡片
+   * @returns {string} 未通过长度校验时返回空串
+   */
+  JDSDom._extractName = function _extractName(card) {
+    let nameRaw = '';
+    for (const sel of this.SELECTORS.NAME) {
+      const el = card.querySelector(sel);
+      const t = el ? (el.textContent || '').trim() : '';
+      if (t && t.length >= NAME_MIN && t.length <= NAME_MAX) { nameRaw = t; break; }
+    }
+    if (!nameRaw) {
+      // 避免匹配到包裹整张卡片的 <a>（其 textContent 为整卡文本，会污染名称）
+      const aEl = card.querySelector('a[title]');
+      nameRaw = aEl ? (aEl.getAttribute('title') || '').trim() : '';
+    }
+    if (!nameRaw || nameRaw.length < NAME_MIN || nameRaw.length > NAME_MAX) return '';
+    return nameRaw;
+  };
+
+  /**
+   * 从卡片中提取现价 / 原价 / 出价人数
+   * @private
+   * @param {HTMLElement} card - 商品卡片
+   * @returns {{price:number, priceText:string, originalPrice:number, bidCount:number}}
+   */
+  JDSDom._extractPrices = function _extractPrices(card) {
+    // 现价：优先京东精确现价元素 .p-price（页面实际显示现价），
+    // 其次取其它 class 含 price 且非 origin(划线原价) 的元素，保证价格等于 span.p-price
+    const pPriceEl = card.querySelector('.p-price, [class*="p-price" i]');
+    const priceEls = card.querySelectorAll(this.SELECTORS.PRICE);
+    const priceEl = (pPriceEl && !/origin/i.test(pPriceEl.className) ? pPriceEl
+      : Array.from(priceEls).find(e => !/origin/i.test(e.className)))
+      || priceEls[0] || null;
+    // 保留 p-price 原始文本（如 "¥1,288.00"），供渲染层直接显示，避免单位/千分位/分单位误差
+    const priceText = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '';
+    const price = priceEl ? global.JDSUtils.parsePrice(priceEl.textContent) : 0;
+
+    // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
+    let originalPrice = 0;
+    const origEl = card.querySelector(this.SELECTORS.ORIGIN);
+    if (origEl && origEl !== priceEl) {
+      const o = global.JDSUtils.parsePrice(origEl.textContent);
+      if (o > 0) originalPrice = o;
+    }
+
+    // 出价人数：取 class 含 bid/apply/join/count/报名/出价 的数字片段
+    let bidCount = 0;
+    const bidEl = card.querySelector(this.SELECTORS.BID);
+    if (bidEl) {
+      const bRaw = bidEl.textContent.replace(/[^\d]/g, '');
+      if (bRaw) bidCount = Number(bRaw);
+    }
+    return { price, priceText, originalPrice, bidCount };
+  };
+
+  /**
+   * 从单张卡片构建商品对象（含接口规范字段映射）
+   * @private
+   * @param {HTMLElement} card - 商品卡片
+   * @returns {Object|null} 非商品项返回 null
+   */
+  JDSDom._buildProductFromCard = function _buildProductFromCard(card) {
+    const nameRaw = this._extractName(card);
+    if (!nameRaw) return null;
+
+    const { price, priceText, originalPrice, bidCount } = this._extractPrices(card);
+
+    const imgEl = card.querySelector(this.SELECTORS.IMG);
+    const img = imgEl
+      ? (imgEl.getAttribute('src') ||
+        imgEl.getAttribute('data-src') ||
+        imgEl.getAttribute('data-original') || '')
+      : '';
+
+    const aEl = card.closest('a') || card.querySelector('a');
+    const url = aEl ? (aEl.href || '') : '';
+
+    let id = '';
+    const urlMatch = url && url.match(/(\d{6,})/);
+    if (urlMatch) id = urlMatch[1];
+    if (!id) id = this._cardIdFallback(card, nameRaw);
+
+    const hasDetail = SAFE_URL_RE.test(url) && /\/auction-detail\//i.test(url);
+    const hasImg = SAFE_URL_RE.test(img);
+    // 商品性校验：分类导航/标签/文字项等虽有名称但无详情链接也无主图，不应当作商品混入结果。
+    // 必须有「详情链接」或「主图」其一才算商品卡（价格非硬要求，避免误杀暂未显示价的起拍卡）
+    if (!hasDetail && !hasImg) return null;
+
+    const product = {
+      id,
+      name: nameRaw,
+      title: nameRaw,
+      price,
+      priceText,
+      originalPrice,
+      bidCount,
+      image: hasImg ? img : '',
+      url: SAFE_URL_RE.test(url) ? url : ''
+    };
+    // 映射到接口路径的规范字段，使统一渲染层（utils/price.js / ui/products.js）正确识别：
+    // - 有出价(bidCount>0) → 现价 currentPrice；无出价 → 起拍价 startPrice（currentPrice 留空）
+    // - 划线原价 originalPrice → cappedPrice；出价人数 bidCount → recordCount
+    if (bidCount > 0) {
+      product.currentPrice = price;
+      product.recordCount = bidCount;
+    } else {
+      product.startPrice = price;
+    }
+    if (originalPrice > 0) product.cappedPrice = originalPrice;
+    return product;
+  };
+
   /**
    * 从DOM中提取商品 — 仅从真实商品卡片提取完整字段（id/name/price/image/url）
    * 使 API 拦截失败时的搜索兜底也能渲染真实主图/价格/链接，而非仅文本
-   * @returns {Array}
+   * @returns {Array} 商品数组
    */
   JDSDom.extractProductsFromDOM = function extractProductsFromDOM() {
     const containers = this._getProductContainers();
@@ -22,171 +144,19 @@
     }
 
     containers.forEach(card => {
-      // 名称提取：精确类优先（product-name/title/.name 等），再回退模糊 class（已排除 username 等），
-      // 最后回退 <a title>；避免匹配到包裹整张卡片的 <a>（其 textContent 为整卡文本，会污染名称）
-      let nameRaw = '';
-      for (const sel of this.SELECTORS.NAME) {
-        const el = card.querySelector(sel);
-        const t = el ? (el.textContent || '').trim() : '';
-        if (t && t.length >= 2 && t.length <= 200) { nameRaw = t; break; }
-      }
-      if (!nameRaw) {
-        const aEl = card.querySelector('a[title]');
-        nameRaw = aEl ? (aEl.getAttribute('title') || '').trim() : '';
-      }
-      if (!nameRaw || nameRaw.length < 2 || nameRaw.length > 200) return;
-
-      // 现价：优先京东精确现价元素 .p-price（页面实际显示现价），
-      // 其次取其它 class 含 price 且非 origin(划线原价) 的元素，保证价格等于 span.p-price
-      const pPriceEl = card.querySelector('.p-price, [class*="p-price" i]');
-      const priceEls = card.querySelectorAll(this.SELECTORS.PRICE);
-      const priceEl = (pPriceEl && !/origin/i.test(pPriceEl.className) ? pPriceEl
-        : Array.from(priceEls).find(e => !/origin/i.test(e.className)))
-        || priceEls[0] || null;
-      // 保留 p-price 原始文本（如 "¥1,288.00"），供渲染层直接显示，避免单位/千分位/分单位误差
-      const priceText = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '';
-      // 解析数值：先去千分位逗号，再取数字/小数点；京东部分接口为「分」单位(>100000 整数)需 ÷100
-      const priceRaw = priceEl ? global.JDSUtils.parsePrice(priceEl.textContent) : 0;
-      const price = priceRaw;
-
-      // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
-      let originalPrice = 0;
-      const origEl = card.querySelector(this.SELECTORS.ORIGIN);
-      if (origEl && origEl !== priceEl) {
-        const o = global.JDSUtils.parsePrice(origEl.textContent);
-        if (o > 0) originalPrice = o;
-      }
-
-      // 出价人数：取 class 含 bid/apply/join/count/报名/出价 的数字片段
-      let bidCount = 0;
-      const bidEl = card.querySelector(this.SELECTORS.BID);
-      if (bidEl) {
-        const bRaw = bidEl.textContent.replace(/[^\d]/g, '');
-        if (bRaw) bidCount = Number(bRaw);
-      }
-
-      const imgEl = card.querySelector(this.SELECTORS.IMG);
-      const img = imgEl
-        ? (imgEl.getAttribute('src') ||
-          imgEl.getAttribute('data-src') ||
-          imgEl.getAttribute('data-original') || '')
-        : '';
-
-      const aEl = card.closest('a') || card.querySelector('a');
-      const url = aEl ? (aEl.href || '') : '';
-
-      let id = '';
-      const urlMatch = url && url.match(/(\d{6,})/);
-      if (urlMatch) id = urlMatch[1];
-      if (!id) id = this._cardIdFallback(card, nameRaw);
-
-      const hasDetail = /^https?:|^\/\//i.test(url) && /\/auction-detail\//i.test(url);
-      const hasImg = /^https?:|^\/\//i.test(img);
-      // 商品性校验：分类导航/标签/文字项等虽有名称但无详情链接也无主图，
-      // 不应当作商品混入结果。必须有「详情链接」或「主图」其一才算商品卡
-      // （价格非硬要求，避免误杀暂未显示价的起拍卡）
-      if (!hasDetail && !hasImg) return;
-
-      const product = {
-        id,
-        name: nameRaw,
-        title: nameRaw,
-        price,
-        priceText,
-        originalPrice,
-        bidCount,
-        image: hasImg ? img : '',
-        url: /^https?:|^\/\//i.test(url) ? url : ''
-      };
-      // 映射到接口路径的规范字段，使统一渲染层（extract.js / products.js）正确识别：
-      // - 有出价(bidCount>0) → 现价 currentPrice；无出价 → 起拍价 startPrice（currentPrice 留空）
-      // - 划线原价 originalPrice → cappedPrice；出价人数 bidCount → recordCount
-      if (bidCount > 0) {
-        product.currentPrice = price;
-      } else {
-        product.startPrice = price;
-      }
-      if (originalPrice > 0) product.cappedPrice = originalPrice;
-      if (bidCount > 0) product.recordCount = bidCount;
-      products.push(product);
+      const product = this._buildProductFromCard(card);
+      if (product) products.push(product);
     });
 
     return products;
   };
 
   /**
-   * 按商品名称从页面原生卡片取 .p-price 实际价格文本
-   * 渲染结果卡片时用于以页面真实显示价为准（用户要求价格只显示 p-price），
-   * 避免接口字段名/单位（分/元）猜测导致的价格不准。原生列表隐藏(display:none)时
-   * textContent 仍可读取，故搜索态仍可命中。
-   * @param {string} name - 商品名称
-   * @returns {string|null} 如 "¥1,288.00"，无匹配返回 null
-   */
-  JDSDom.getProductPriceText = function getProductPriceText(name) {
-    if (!name || typeof name !== 'string') return null;
-    const target = name.trim();
-    if (target.length < 2) return null;
-    let cards;
-    try {
-      cards = this._getProductContainers();
-    } catch (e) {
-      // 非浏览器/测试环境下容器查询不可用时安全回退
-      return null;
-    }
-    if (!cards || typeof cards.forEach !== 'function') return null;
-    // 性能：首次调用构建 name→priceText 缓存（页面商品名基本唯一），
-    // 避免每张结果卡渲染都全量遍历所有原生卡片导致 O(N²) 卡顿
-    if (!this._priceTextCache) {
-      this._priceTextCache = new Map();
-      for (const card of cards) {
-        let cardName = '';
-        for (const sel of this.SELECTORS.NAME) {
-          const el = card.querySelector(sel);
-          const t = el ? (el.textContent || '').trim() : '';
-          if (t) { cardName = t; break; }
-        }
-        if (!cardName || cardName.length < 2) continue;
-        const pEl = card.querySelector('.p-price, [class*="p-price" i]');
-        const priceEl = pEl || (Array.from(card.querySelectorAll(this.SELECTORS.PRICE))
-          .find(e => !/origin/i.test(e.className))) || null;
-        if (!priceEl) continue;
-        const txt = priceEl.textContent.replace(/\s+/g, ' ').trim();
-        if (txt) this._priceTextCache.set(cardName, txt);
-      }
-    }
-    if (this._priceTextCache.has(target)) return this._priceTextCache.get(target);
-    // 缓存未命中（名称不完全一致）时回退精确/前缀后缀匹配（保持原有鲁棒性）
-    for (const card of cards) {
-      let cardName = '';
-      for (const sel of this.SELECTORS.NAME) {
-        const el = card.querySelector(sel);
-        const t = el ? (el.textContent || '').trim() : '';
-        if (t) { cardName = t; break; }
-      }
-      // 名称匹配：优先精确相等；模糊匹配仅接受「一端被另一端完整包裹前缀/后缀」，
-      // 且双向包含（避免 "iPhone 13" 误中 "iPhone 13 Pro" 等相邻卡片）
-      const matched = cardName && cardName.length > 2 && (
-        cardName === target ||
-        (cardName.length >= target.length && cardName.startsWith(target)) ||
-        (target.length >= cardName.length && target.startsWith(cardName)) ||
-        (cardName.length >= target.length && cardName.endsWith(target)) ||
-        (target.length >= cardName.length && target.endsWith(cardName))
-      );
-      if (!matched) continue;
-      const pEl = card.querySelector('.p-price, [class*="p-price" i]');
-      const priceEl = pEl || (Array.from(card.querySelectorAll(this.SELECTORS.PRICE))
-        .find(e => !/origin/i.test(e.className))) || null;
-      if (priceEl) {
-        const txt = priceEl.textContent.replace(/\s+/g, ' ').trim();
-        if (txt) return txt;
-      }
-    }
-    return null;
-  };
-
-  /**
    * 为 DOM 提取的商品生成稳定去重 id（优先 data-* 属性，其次 name+class 哈希）
    * @private
+   * @param {HTMLElement} card - 商品卡片
+   * @param {string} name - 商品名称
+   * @returns {string}
    */
   JDSDom._cardIdFallback = function _cardIdFallback(card, name) {
     const ds = card.getAttribute && (
@@ -200,32 +170,5 @@
     const s = name + (card.className || '');
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
     return 'dom-' + (h >>> 0);
-  };
-
-  /**
-   * 隐藏原生商品列表 — 多页面搜索模式下，结果由扩展结果面板渲染
-   * 优先隐藏整个列表容器（而非逐张卡片）：京东为虚拟列表/懒加载，
-   * 仅隐藏卡片时京东可能不再维护这些卡片的可见性，导致清空搜索后即便恢复
-   * 卡片 display 原生列表仍空白；隐藏整个容器后，容器重新可见时京东会自行重渲染
-   */
-  JDSDom.hideNativeProducts = function hideNativeProducts() {
-    const container = this.getProductListContainer();
-    if (container) {
-      container.style.display = 'none';
-    } else {
-      this._getProductContainers().forEach(el => { el.style.display = 'none'; });
-    }
-  };
-
-  /**
-   * 恢复原生商品列表显示
-   */
-  JDSDom.showNativeProducts = function showNativeProducts() {
-    const container = this.getProductListContainer();
-    if (container) {
-      container.style.display = '';
-    } else {
-      this._getProductContainers().forEach(el => { el.style.display = ''; });
-    }
   };
 })(window);

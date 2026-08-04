@@ -39,6 +39,58 @@
     "message": "No search history",
     "description": "Search history empty hint"
   },
+  "countPrefix": {
+    "message": "",
+    "description": "Toolbar match count prefix"
+  },
+  "countSuffix": {
+    "message": " results",
+    "description": "Toolbar match count suffix"
+  },
+  "priceStarting": {
+    "message": "Start",
+    "description": "Starting-price label for auctions not yet started"
+  },
+  "bidCountSuffix": {
+    "message": " bids",
+    "description": "Bid count suffix"
+  },
+  "loadMore": {
+    "message": "Load more",
+    "description": "Load-more button for paginated results"
+  },
+  "loadMoreProgress": {
+    "message": " ($RENDERED$ / $TOTAL$ shown)",
+    "description": "Progress hint on the load-more button",
+    "placeholders": {
+      "rendered": { "content": "$1", "example": "60" },
+      "total": { "content": "$2", "example": "320" }
+    }
+  },
+  "a11yToolbar": {
+    "message": "Auction search toolbar",
+    "description": "Toolbar accessible label"
+  },
+  "a11ySearchInput": {
+    "message": "Search products",
+    "description": "Search input accessible label"
+  },
+  "a11yClearSearch": {
+    "message": "Clear search",
+    "description": "Clear button accessible label"
+  },
+  "a11yHistoryClear": {
+    "message": "Clear search history",
+    "description": "Clear-history button accessible label"
+  },
+  "a11yHistoryDelete": {
+    "message": "Remove this history item",
+    "description": "Remove single history item accessible label"
+  },
+  "a11yResultsPanel": {
+    "message": "Search results",
+    "description": "Results panel accessible label"
+  },
   "toastApiFailed": {
     "message": "API failed to load, falling back to page content",
     "description": "Hint when API fails"

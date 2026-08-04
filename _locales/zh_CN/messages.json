@@ -39,6 +39,58 @@
     "message": "暂无搜索历史",
     "description": "搜索历史为空提示"
   },
+  "countPrefix": {
+    "message": "共 ",
+    "description": "工具栏匹配计数前缀"
+  },
+  "countSuffix": {
+    "message": " 件",
+    "description": "工具栏匹配计数后缀"
+  },
+  "priceStarting": {
+    "message": "起拍",
+    "description": "未开拍商品的起拍价标签"
+  },
+  "bidCountSuffix": {
+    "message": " 人出价",
+    "description": "出价人数后缀"
+  },
+  "loadMore": {
+    "message": "加载更多",
+    "description": "结果分页加载更多按钮"
+  },
+  "loadMoreProgress": {
+    "message": "（已显示 $RENDERED$ / $TOTAL$）",
+    "description": "加载更多按钮的进度提示",
+    "placeholders": {
+      "rendered": { "content": "$1", "example": "60" },
+      "total": { "content": "$2", "example": "320" }
+    }
+  },
+  "a11yToolbar": {
+    "message": "夺宝搜索工具栏",
+    "description": "工具栏无障碍标签"
+  },
+  "a11ySearchInput": {
+    "message": "搜索商品",
+    "description": "搜索输入框无障碍标签"
+  },
+  "a11yClearSearch": {
+    "message": "清除搜索",
+    "description": "清除按钮无障碍标签"
+  },
+  "a11yHistoryClear": {
+    "message": "清空搜索历史",
+    "description": "清空历史按钮无障碍标签"
+  },
+  "a11yHistoryDelete": {
+    "message": "删除该历史",
+    "description": "删除单条历史按钮无障碍标签"
+  },
+  "a11yResultsPanel": {
+    "message": "搜索结果",
+    "description": "结果面板无障碍标签"
+  },
   "toastApiFailed": {
     "message": "API加载失败，将依赖页面内容",
     "description": "API失败时提示"

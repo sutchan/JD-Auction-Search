@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content.js v1.5.3
+// JD-Auction-Search/src/content.js v1.5.5
 // 主模块入口：引导增强器初始化
 
 (function () {

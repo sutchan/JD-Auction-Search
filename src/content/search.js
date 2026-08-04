@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/search.js v1.5.3
+// JD-Auction-Search/src/content/search.js v1.5.5
 // 搜索编排：API 响应处理、过滤与跨页自动加载
 
 (function (global) {
@@ -57,9 +57,11 @@
       JDSDom.hideNativeProducts();
       // 全量数据尚未就绪：触发一次全量加载（单飞，避免多次搜索并发重入），
       // 完成后会重新进入本函数渲染，避免搜索只命中已加载的首页数据而漏掉后续页。
-      // 用 _loadDone 区分「已尝试过（成败都算）」与「仍在加载中」，替代原 _loadAttempts 计数，
-      // 原计数仅在 init 重置，用户多次搜索后第 3 次起会永久失效、只能命中首页数据
-      if (!this.state._loadDone && !this._loadPromise) {
+      // 仅在「尚未成功全量聚合」( !_allLoaded ) 且「无进行中加载」时触发；
+      // 不依赖「成败都置位」的标志，否则首次全量加载失败（模板未就绪/接口慢）后
+      // 后续捕获到模板或首页数据也不会重试 → 只渲染残缺的 state.products → 结果不全。
+      // _loadRetries 限制真实重放次数上限（最多 3 次），防止模板永久缺失时无限重放。
+      if (!this.state._allLoaded && !this._loadPromise && (this._loadRetries || 0) < 3) {
         JDSUI.showLoading();
         this._loadPromise = this._autoLoadProducts()
           .catch(() => {})
@@ -165,11 +167,16 @@
       this.state.isLoading = false;
       this._applyFilterAndUpdate();
     } finally {
-      // 无论成功/失败/重试，结束本次加载过程（_allLoaded 仅在真正全量成功时置位；
-      // _loadDone 表示「已尝试过一次全量加载」，成败都置位，避免原 _loadAttempts 仅在
-      // init 重置导致多次搜索后分页重放永久失效）
+      // 结束本次加载过程（_loadingAll 复位，单飞 Promise 由调用处 .then 清空）
       this.state._loadingAll = false;
-      this.state._loadDone = true;
+      // 仅在「真正全量成功聚合」时标记完成（_allLoaded=true），此后不再触发整页重放；
+      // 失败/未拿到数据时【不】置完成标志，允许拦截器后续捕获到模板或首页数据后
+      // 由 _handleApiResponse → _applyFilterAndUpdate 再次触发全量重放（受 _loadRetries<3 限制），
+      // 避免首轮因模板未就绪/接口慢而失败 → 永久用残缺数据渲染（搜索结果不全）。
+      if (!this.state._allLoaded) {
+        this._loadRetries = (this._loadRetries || 0) + 1;
+        this.state.isLoading = false;
+      }
     }
   };
 })(window);

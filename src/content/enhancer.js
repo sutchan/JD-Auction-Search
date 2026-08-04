@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/enhancer.js v1.5.3
+// JD-Auction-Search/src/content/enhancer.js v1.5.5
 // 主增强器：状态、初始化、生命周期与页面类型判断
 
 (function (global) {
@@ -31,11 +31,13 @@
       this.state._allLoaded = false;
       this.state._loadingAll = false;
       this.state.isLoading = false;
-      // 重置全量加载状态：_loadDone 标记「已尝试过一次全量加载」（成败都算），
-      // _loadPromise 为进行中的加载单飞 Promise；destroy 后重新 init 需复位，
-      // 否则旧 _loadDone=true 会阻止重新聚合分页数据
-      this.state._loadDone = false;
+      // 重置全量加载状态：_allLoaded 标记「已成功全量聚合」（成功才置位）；
+      // _loadRetries 限制全量重放重试次数（最多 3 次，防止模板永久缺失时无限重放）；
+      // _loadPromise 为进行中的加载单飞 Promise。destroy 后重新 init 需全部复位，
+      // 否则旧 _allLoaded=true 会阻止重新聚合分页数据。
+      this.state._allLoaded = false;
       this._loadPromise = null;
+      this._loadRetries = 0;
       this._detailRetry = false;
 
       // 注入样式（injectStyles 内部幂等，这里置于守卫内避免重复注入）

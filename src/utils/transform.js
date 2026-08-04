@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/transform.js v1.5.3
+// JD-Auction-Search/src/utils/transform.js v1.5.5
 // 响应转换：从多态 API 响应中提取商品数组并去重
 
 (function(global) {
@@ -117,10 +117,18 @@
     const seen = new Set();
     return products.filter(product => {
       const id = this.getProductId(product);
-      if (!id || seen.has(id)) {
-        return false;
-      }
-      seen.add(id);
+      // 有 id 用 id 去重（精确）；无 id 的商品（接口部分对象不带 id 字段）不能用「无 id 即丢弃」，
+      // 否则会被整条静默丢失 → 搜索结果不全。改用内容指纹（名称+价格+主图）兜底去重，
+      // 既避免重复渲染，又不误杀真实无 id 商品。
+      const key = id != null
+        ? 'id:' + id
+        : 'fp:' + [
+            this.getProductName(product) || '',
+            this.getProductPrice(product) || '',
+            this.getProductImage(product) || ''
+          ].join('|');
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
   };
