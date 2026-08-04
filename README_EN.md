@@ -60,7 +60,7 @@ whatever you need, found instantly without paging.
 Search bar: [ phone_______ ] ✕  Search   128 items
 Grid:       [card][card][card][card][card]   ← 5 per row, red price + gray bid badge
             [card][card][card][card][card]
-            Load more (60 / 128 shown)
+            (128 aggregated, still loading…)
 ```
 
 **Search history**
@@ -103,9 +103,11 @@ This extension fills the native gap of "search" on the JD auction (Paipai) list 
 
 - **🎯 Real-time keyword search**: filter instantly by product name, ID, category, shop, or subtitle — results appear as you type.
 - **📚 Cross-page aggregation**: auto-pages through every auction page; results cover **all paginated items** — no manual paging.
+- **🔍 Deep background search**: shows current results while continuing to search more pages in the background — each page is merged and the panel refreshes incrementally (hit count grows live); 20 pages per chunk, continuingly replayed until the last page (capped at 200 pages).
+- **🧭 Sort-axis deep search**: auto-detects the list's sort parameter, replays other sort values after the default, and aggregates items only exposed under certain sort orders.
 - **🛡 API fallback**: when the auction API is unavailable, automatically degrades to on-page DOM extraction so search never breaks.
 - **🕘 Search history**: persists the last 10 keywords locally, kept across reloads; supports per-item delete and clear-all.
-- **➕ Load more**: the result panel supports paged loading to expand all matched items on demand.
+- **➕ Loading hint**: while aggregation is incomplete, a "(N aggregated, still loading)" hint appears after the toolbar count.
 - **🌐 Multi-language**: Simplified Chinese / English UI, auto-switched by browser language.
 - **🔒 Style isolation**: the search bar uses a Shadow DOM and the result panel uses design tokens, immune to JD's page CSS.
 
@@ -119,12 +121,12 @@ Once the JD auction list page is open, the extension takes over the search exper
 |------|--------|--------|
 | ① Search bar appears | Enter the auction list page, wait ~2s | A search bar is injected at the top automatically |
 | ② Type a keyword | Enter a product name / ID / category / shop | Results filter **in real time**, aggregated across all pages |
-| ③ View results | Result panel overlays the native list | Supports **load more**; click a card to open detail in a **new tab** |
+| ③ View results | Result panel overlays the native list | Click a card to open detail in a **new tab**; more hits stream in live as background search continues |
 | ④ Search history | Focus the empty search box | Shows a **history dropdown** (per-item delete / clear-all), kept across reloads |
 | ⑤ Clear search | Click **×** on the right of the search box | Native auction list restores automatically, no reload |
 | ⑥ No match | Nothing matches | Panel shows a "No matching products" empty state |
 
-> The native list hides automatically while searching and restores on clear;
+> While searching, the result panel (a fixed overlay) covers the native list — the native list stays alive, so it restores instantly on clear;
 > the whole flow needs **no page reload and no login**.
 > Keywords match multiple fields (name / ID / category / shop) — the more specific, the more precise.
 
@@ -153,15 +155,15 @@ graph LR
   A[JD auction list page] --> B[Content Script injects search bar]
   B --> C[Intercept auction list API]
   C --> D[Capture request template + replay paging]
-  D --> E[Aggregate all pages]
+  D --> E[Aggregate all pages + sort-axis deep search]
   E --> F[Real-time keyword filter]
-  F --> G[Render result cards]
+  F --> G[Result panel renders cards]
   C -. API fails .-> H[DOM extraction fallback]
   H --> F
 ```
 
 - **Zero backend**: a pure front-end MV3 extension — no server; all data comes from the current page.
-- **API interception**: wraps `fetch` / `XHR`, captures the real list request as a template, and replays paging to aggregate items.
+- **API interception**: wraps `fetch` / `XHR`, captures the real list request as a template, and replays paging (with sort-axis deep search and chunked continuation) to aggregate items.
 - **Graceful degradation**: automatically falls back to on-page DOM extraction when the API fails.
 - **Style isolation**: the search bar uses a closed Shadow DOM; the result panel uses light DOM + design tokens to avoid JD's page CSS interference.
 
@@ -173,7 +175,7 @@ graph LR
 |-----------|--------|
 | Extension does nothing after page load | Refresh, or wait ~2s for auto-load |
 | No results / API failure | Extension auto-degrades to on-page extraction |
-| CORS interception | `host_permissions` is configured; usually no action needed |
+| CORS interception | `host_permissions` is configured (covers `*.jd.com`); usually no action needed |
 
 ---
 
@@ -182,7 +184,7 @@ graph LR
 Issues and PRs are welcome. Development conventions:
 
 - Code style follows ESLint (`.eslintrc.json`); run `npm run lint` before committing.
-- Tests: `npm test` (lightweight smoke check: version consistency + manifest script completeness + syntax validation, see `scripts/smoke.js`).
+- Tests: `npm test` (i.e. `node scripts/smoke.js`, a jsdom full-flow smoke test with ~97 assertions covering interception / i18n / price / security / DOM / deep-search, see `scripts/smoke.js`).
 - Before releasing, sync all file-header versions with `node scripts/bump-version.js <new-version>`.
 
 ---
@@ -197,4 +199,4 @@ Issues and PRs are welcome. Development conventions:
 
 JD auction search · Paipai search extension · JD auction item filter · browser
 extension · Chrome extension · Edge add-on · Firefox add-on · cross-page
-aggregation search · real-time filtering
+aggregation search · real-time filtering · deep background search
