@@ -30,6 +30,7 @@
         "src/api/index.js",
         "src/api/template.js",
         "src/api/interceptor.js",
+        "src/api/paginator-rules.js",
         "src/api/paginator.js",
         "src/ui/index.js",
         "src/ui/tokens.js",

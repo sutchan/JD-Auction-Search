@@ -47,6 +47,13 @@
     "message": " 件",
     "description": "工具栏匹配计数后缀"
   },
+  "loadingMore": {
+    "message": "（已聚合 $LOADED$ 条，继续加载中）",
+    "description": "全量分页加载进行中的提示",
+    "placeholders": {
+      "loaded": { "content": "$1", "example": "120" }
+    }
+  },
   "priceStarting": {
     "message": "起拍",
     "description": "未开拍商品的起拍价标签"

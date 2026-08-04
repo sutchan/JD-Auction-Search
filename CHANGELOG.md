@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.5.5 (fix: 清除搜索后商品列表不恢复)
+- 根因：搜索态 `_applyFilterAndUpdate` 调用 `JDSDom.hideNativeProducts()` 把京东原生列表容器 `display:none`。京东为虚拟列表/懒加载，容器不可见期间会卸载卡片，恢复 `display:''` 后京东也常不自动重绘 → 清除搜索后原生列表空白、商品不恢复。
+- 修复：搜索态**不再** `display:none` 隐藏原生列表，改由结果面板（fixed 白底覆盖层）遮挡原生列表；原生列表始终存活、京东持续维护，清除搜索后面板隐藏即天然恢复。同步移除清除分支冗余的 `showNativeProducts()`。
+- 回归验证：`scripts/smoke.js` 新增断言（36 文件 / 91 项全过）：搜索态原生列表 display 保持空、结果面板可见；清除后退出搜索态、面板隐藏、原生列表仍可见。
+
+## v1.5.5 (feat: 增强搜索召回，修复结果不完整)
+- 放宽 API 拦截主机白名单（`_isAuctionUrl`）：由固定 5 个子域改为「所有京东域（*.jd.com）且路径含 auction/paimai/paipai」。原白名单漏捕获发往 `auction.jd.com`/`wq.jd.com`/`api.jd.com`/`search.jd.com` 等子域的真实列表请求 → `_requestTemplate` 永远为空 → 全量分页失败 → 搜索只剩当前页 DOM → 大量符合关键字的后续页商品搜不到
+- 新增候选模板回退（`_candidateTemplates` + `_pushCandidateTemplate`）：拦截过程中按分数缓存若干「像列表接口」的请求，当最优模板无法分页重放时，遍历候选取聚合最多者，进一步提升全量召回
+- 分页重放重构（`paginator.js`）：`loadAllProducts` 改为按候选模板顺序回退重放并选优锁定；纯辅助函数（`_absUrl`/`_findPageParam`/`_buildPageRequest`）抽至 `src/api/paginator-rules.js`（降低 paginator.js 行数至规范内）
+- 全量加载进行中提示：搜索已即时渲染部分结果但全量未完时，工具栏计数后追加「（已聚合 N 条，继续加载中）」提示（`setLoadingHint`/`loadingMore` 文案），避免用户误以为已搜完
+- 测试增强：`scripts/smoke.js` 新增候选模板回退聚合、主机白名单放宽命中（4 个子域）、`loadingMore` 文案与加载提示显隐断言；拆分为 36 文件，全部通过
+
 ## v1.5.5 (docs: 校正文档与脚本配置)
 - 修正文档/配置不一致：`package.json` 的 `test`/`lint` 脚本原本引用不存在的 `scripts/smoke.js` 与 ESLint 配置
 - 新增 `scripts/smoke.js`：轻量冒烟校验（版本一致性 + manifest 脚本完整性 + `node --check` 语法校验），识别 `content_scripts.js` 与 `background.service_worker` 全部 35 个脚本

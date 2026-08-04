@@ -47,6 +47,13 @@
     "message": " results",
     "description": "Toolbar match count suffix"
   },
+  "loadingMore": {
+    "message": "($LOADED$ loaded, fetching more)",
+    "description": "Hint while full pagination is loading",
+    "placeholders": {
+      "loaded": { "content": "$1", "example": "120" }
+    }
+  },
   "priceStarting": {
     "message": "Start",
     "description": "Starting-price label for auctions not yet started"

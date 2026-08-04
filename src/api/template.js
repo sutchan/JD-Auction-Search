@@ -10,6 +10,9 @@
   // 判定为「列表接口」的最低分数：低于该分数的响应不做商品提取，
   // 避免路径恰含 auction 的非列表接口（订单/促销等）被误当商品响应解析
   JDSApi.LIST_SCORE_MIN = 6;
+  // 候选模板上限：拦截过程中按分数缓存若干「像列表接口」的请求，
+  // 当最优模板无法分页重放时，依次回退尝试，提升全量聚合召回
+  JDSApi.MAX_CANDIDATE_TPL = 5;
 
   /**
    * 给请求 URL 打分，越像"列表接口"分数越高，用于挑出最佳模板
@@ -64,6 +67,25 @@
       headers: (options && options.headers) || null,
       _score: score
     };
+    // 缓存候选模板：即使本请求未成为最优模板，仍按分数保留若干，
+    // 供 loadAllProducts 最优模板无法分页重放时回退尝试，提升全量召回
+    this._pushCandidateTemplate(this._requestTemplate);
+  };
+
+  /**
+   * 将请求模板按分数插入候选列表（去重 + 上限裁剪），供回退重放使用
+   * @private
+   * @param {Object} tpl - 请求模板
+   */
+  JDSApi._pushCandidateTemplate = function _pushCandidateTemplate(tpl) {
+    if (!this._candidateTemplates) this._candidateTemplates = [];
+    const exists = this._candidateTemplates.some(t => t.url === tpl.url && t._score === tpl._score);
+    if (exists) return;
+    this._candidateTemplates.push(tpl);
+    this._candidateTemplates.sort((a, b) => b._score - a._score);
+    if (this._candidateTemplates.length > this.MAX_CANDIDATE_TPL) {
+      this._candidateTemplates.length = this.MAX_CANDIDATE_TPL;
+    }
   };
 
   /**
@@ -90,7 +112,10 @@
 
   /**
    * 判断URL是否是拍卖相关API（放宽主机与路径，尽量捕获页面真实列表接口）
-   * 主机白名单限定京东域，防止拦截/解析第三方站点响应
+   * 主机白名单放宽到所有京东一级/二级域（*.jd.com），避免列表接口发往
+   * auction.jd.com / wq.jd.com / api.jd.com / search.jd.com 等子域时漏捕获，
+   * 否则 _requestTemplate 永远为空 → 全量分页失败 → 搜索只剩当前页 → 结果不全。
+   * 仅放行京东域，防止拦截/解析第三方站点响应（隐私/安全风险）。
    * @private
    * @param {string} url - 请求 URL
    * @returns {boolean}
@@ -98,11 +123,9 @@
   JDSApi._isAuctionUrl = function _isAuctionUrl(url) {
     if (!url || typeof url !== 'string') return false;
     const lower = url.toLowerCase();
-    const hostOk = lower.includes('1paipai.jd.com') ||
-                   lower.includes('paipai.jd.com') ||
-                   lower.includes('paimai.jd.com') ||
-                   lower.includes('api.m.jd.com') ||
-                   lower.includes('m.jd.com');
+    // 主机：仅京东域（*.jd.com），排除明显第三方（如 ali/alimama/bdimg 等广告/统计站）
+    const hostOk = /\.jd\.com(\/|$)/i.test(lower) ||
+                   /(^|\/\/)jd\.com(\/|$)/i.test(lower);
     const pathOk = lower.includes('auction') ||
                    lower.includes('paimai') ||
                    lower.includes('paipai');

@@ -9,4 +9,5 @@
   const JDSApi = global.JDSApi = global.JDSApi || {};
   JDSApi._requestTemplate = null;   // 页面真实列表请求模板: { url, method, body, headers, _score }
   JDSApi._firstPageProducts = null; // 拦截到的首页商品，作为无法分页时的兜底
+  JDSApi.MAX_SORT_AXES = 6;         // 排序维度深搜最多尝试的排序值个数（控制请求量）
 })(window);

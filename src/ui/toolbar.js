@@ -135,7 +135,7 @@
             <div class="jds-history-empty" hidden>${getMessage('historyEmpty')}</div>
           </div>
         </div>
-        <span class="jds-count" aria-live="polite">${getMessage('countPrefix')}<strong class="jds-count-num">0</strong>${getMessage('countSuffix')}</span>
+        <span class="jds-count" aria-live="polite">${getMessage('countPrefix')}<strong class="jds-count-num">0</strong>${getMessage('countSuffix')}<span class="jds-loading-hint" hidden></span></span>
       </div>
     `;
   };
@@ -147,5 +147,19 @@
   JDSUI.updateResultCount = function updateResultCount(n) {
     const num = this.shadowRoot && this.shadowRoot.querySelector('.jds-count-num');
     if (num) num.textContent = String(n);
+  };
+
+  /**
+   * 设置计数后的「加载中」提示 — 全量分页仍在进行时告知用户：
+   * 当前展示的是已聚合部分结果，后续页还在加载，避免误以为「已全部搜完」
+   * @param {boolean} visible - 是否显示加载提示
+   * @param {number} [loaded] - 已聚合商品总数（提示文案用）
+   */
+  JDSUI.setLoadingHint = function setLoadingHint(visible, loaded) {
+    const hint = this.shadowRoot && this.shadowRoot.querySelector('.jds-loading-hint');
+    if (!hint) return;
+    if (!visible) { hint.hidden = true; hint.textContent = ''; return; }
+    hint.hidden = false;
+    hint.textContent = getMessage('loadingMore', [String(loaded || 0)]);
   };
 })(window);

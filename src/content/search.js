@@ -52,15 +52,25 @@
     const hasFilter = !!this.state.keyword;
 
     if (hasFilter) {
-      // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
+      // 跨页搜索模式：基于聚合全部分页数据渲染结果面板
+      // 注意：不再把原生列表 display:none（旧实现）。京东为虚拟列表/懒加载，
+      // 整个列表容器被 display:none 期间会卸载卡片，恢复 display 后京东也常不自动重绘，
+      // 导致「清除搜索后原生列表空白、商品不恢复」。改为仅用结果面板（fixed 白底覆盖层）
+      // 遮挡原生列表，原生列表始终存活、京东持续维护，清除搜索后面板隐藏即天然恢复。
       this.state.searchMode = true;
-      JDSDom.hideNativeProducts();
 
       // 先立即用「当前已聚合的商品」渲染结果（首屏数据即可搜），
       // 避免卡在骨架屏等待全量分页加载完成才显示，导致接口慢/失败时结果长期不显示。
       // 全量加载完成后会重新进入本函数刷新为完整命中结果。
       if (this.state.products.length > 0) {
         JDSUI.showResults(filtered);
+        // 全量分页仍在进行（尚未成功聚合全部）：提示当前展示的是部分结果，
+        // 后续页还在加载，避免用户误以为「已全部搜完」而漏看更多命中
+        if (!this.state._allLoaded) {
+          JDSUI.setLoadingHint(true, this.state.products.length);
+        } else {
+          JDSUI.setLoadingHint(false);
+        }
       } else {
         JDSUI.showLoading();
       }
@@ -77,9 +87,11 @@
           .then(() => { this._loadPromise = null; });
       }
     } else {
-      // 浏览模式：恢复原生列表，隐藏结果面板
+      // 浏览模式：退出搜索态、隐藏结果面板。
+      // 原生列表始终存活（搜索态仅被结果面板覆盖层遮挡，从未 display:none），
+      // 隐藏面板后即天然恢复显示，无需额外 showNativeProducts，彻底规避
+      // 「清除搜索后原生列表空白/不恢复」的虚拟列表卸载问题。
       this.state.searchMode = false;
-      JDSDom.showNativeProducts();
       JDSUI.hideResults();
     }
   };
@@ -109,7 +121,22 @@
   };
 
   /**
-   * 自动加载商品
+   * 合并新商品到 state.products（去重），供后台增量刷新复用
+   * @private
+   * @param {Array} products - 新增商品数组
+   */
+  enhancer._mergeProducts = function (products) {
+    if (!products || !products.length) return;
+    this.state.products = JDSUtils.deduplicateProducts([
+      ...this.state.products,
+      ...products
+    ]);
+  };
+
+  /**
+   * 自动加载商品（后台深度搜索）
+   * 优先用页面真实请求做分页重放，并开启「排序维度深搜」聚合更多不同商品；
+   * 每翻完一页即通过 onPage 回调把新命中增量合并并刷新结果面板（边搜边显）。
    * @private
    */
   enhancer._autoLoadProducts = async function () {
@@ -119,12 +146,26 @@
     this.state._loadingAll = true;
     try {
       // 优先用页面真实请求做分页重放（多页面搜索的数据基础）
-      const products = await JDSApi.loadAllProducts();
+      // onPage 每聚合一页即增量合并+刷新，实现「边显示当前结果、边后台搜更多页」
+      const products = await JDSApi.loadAllProducts({
+        deep: true,
+        onPage: (prog) => {
+          // 本页新商品增量合并到全局数据，并即时刷新结果面板（当前搜索结果持续显示、数量增长）
+          if (prog.items && prog.items.length) this._mergeProducts(prog.items);
+          if (this.state.searchMode) {
+            this._applyFilterAndUpdate();
+          } else {
+            // 浏览态：更新工具栏计数（无需重渲染结果面板）
+            JDSUI.updateResultCount(this.state.products.length);
+          }
+        }
+      });
       if (products && products.length > 0) {
         this.state.products = JDSUtils.deduplicateProducts(products);
         // 全量加载成功：标记已就绪，后续搜索不再重复触发整页重放
         this.state._allLoaded = true;
         this.state.isLoading = false;
+        JDSUI.setLoadingHint(false);
         this._applyFilterAndUpdate();
         return;
       }
