@@ -3,7 +3,7 @@
 ## 项目概述
 
 **项目名称**: JD-Auction-Search  
-**版本**: 1.5.3 
+**版本**: 1.5.5 
 **类型**: 浏览器扩展插件
 
 为京东夺宝岛页面（1paipai.jd.com/auction-list/）增加商品关键词搜索功能（含 API 拦截缓存与 DOM 提取兜底）。
@@ -23,41 +23,51 @@ JD-Auction-Search/
 │   ├── check_list.md      # 检查清单
 │   └── tasks.md           # 任务列表
 ├── src/
-│   ├── utils/             # 工具函数（i18n/字段提取/格式化/响应转换/UI共享）
+│   ├── utils/             # 工具函数（i18n/字段提取/价格/格式化/响应转换/UI共享）
 │   │   ├── index.js       # 命名空间引导
-│   │   ├── i18n.js        # 国际化 getMessage（简繁中文兜底）
-│   │   ├── extract.js     # 商品字段提取（id/name/主图/价格/链接）
+│   │   ├── i18n.js        # 国际化 getMessage（zh_CN/en 双语兜底 + 占位符替换）
+│   │   ├── extract.js     # 商品基础字段提取（id/name/主图/链接）
+│   │   ├── price.js       # 价格提取（现价/原价/出价人数/parsePrice 单位归一）
 │   │   ├── format.js      # escapeHtml / formatPrice
-│   │   ├── transform.js   # 响应提取 / 去重
+│   │   ├── transform.js   # 响应提取 / 去重（id 或内容指纹）
 │   │   └── ui-shared.js   # Toast / 样式注入 / Shadow 查询
 │   ├── api/               # API 拦截与分页重放
 │   │   ├── index.js       # 命名空间引导 + 共享状态
-│   │   ├── interceptor.js # fetch/XHR 拦截、请求模板捕获、列表打分
+│   │   ├── interceptor.js # fetch/XHR 拦截、请求模板捕获
+│   │   ├── template.js    # 列表打分 / 模板捕获锁定 / 首页捕获 / URL 判定
 │   │   └── paginator.js   # 分页重放聚合全部分页商品
 │   ├── ui/                # UI 渲染（shadcn · Shadow DOM 内联样式）
 │   │   ├── index.js       # 命名空间引导 + 共享状态
 │   │   ├── tokens.js      # 设计令牌（语义令牌 CSS，注入 :host）
 │   │   ├── components.js   # 组件样式（SearchBar/Grid/Card/Badge/Empty/Skeleton）
 │   │   ├── styles.js      # 内联样式聚合（令牌 + 工具栏 + 组件）
-│   │   ├── toolbar.js     # 工具栏挂载与事件
-│   │   ├── results/           # 结果面板
-│   │   │   ├── host.js        # 宿主挂载/面板定位/网格容器
-│   │   │   └── results.js     # 公开 API（展示/隐藏/骨架/空状态/销毁）
+│   │   ├── toolbar.js     # 工具栏挂载（含 insertBefore 直接子节点锚定修复）
+│   │   ├── toolbar/        # 工具栏子模块
+│   │   │   ├── history.js  # 历史持久化（storage 回退内存）+ 下拉渲染
+│   │   │   └── events.js   # 事件绑定 + 历史导航
+│   │   ├── results/        # 结果面板
+│   │   │   ├── host.js     # 宿主挂载/面板定位（rAF 节流）/网格容器
+│   │   │   ├── styles.js   # 结果面板样式聚合 _getResultsCss()
+│   │   │   └── results.js  # 公开 API（展示/隐藏/骨架/空状态/销毁/清理定时器）
 │   │   ├── products.js    # 商品渲染（克隆卡片 / 填充 / 回退卡片）
+│   │   ├── price-render.js# 价格区块渲染（主价/原价/出价人数 国际化）
 │   │   └── skeleton.js    # 骨架屏（网格容器 / shimmer 占位）
 │   ├── dom/               # DOM 观察与处理
 │   │   ├── index.js       # 命名空间引导 + 共享状态
 │   │   ├── observer.js    # MutationObserver 监听
-│   │   ├── extract.js     # 从 DOM 提取商品
-│   │   └── filter.js      # 原生列表过滤与卡片定位
+│   │   ├── extract.js     # 从 DOM 提取商品（价格原文优先回查）
+│   │   ├── price-text.js  # 原生卡片现价文本回查
+│   │   ├── native-list.js # 原生列表显隐（_toggleNativeProducts）
+│   │   ├── filter.js      # 原生列表过滤与卡片定位
+│   │   └── selectors.js   # 京东 DOM 选择器集中维护
 │   ├── content/            # 主内容脚本（拆分后）
 │   │   ├── enhancer.js     # 增强器：状态/初始化/生命周期/页面类型
-│   │   ├── search.js       # 搜索编排：响应处理/过滤/跨页加载
-│   │   └── content.js      # 入口：引导增强器初始化
+│   │   └── search.js       # 搜索编排：响应处理/过滤/跨页加载
+│   ├── content.js          # 入口：引导增强器初始化
 │   └── styles.css         # Toast全局样式（Shadow DOM外）
-├── _locales/              # 国际化文件（v1.2.7 起仅保留简繁中文）
+├── _locales/              # 国际化文件（v1.5.3 起仅保留简体中文 + 英文）
 │   ├── zh_CN/messages.json
-│   └── zh_TW/messages.json
+│   └── en/messages.json
 ├── README.md              # 中文说明（默认）
 ├── README_EN.md           # 英文说明
 └── icons/                 # 插件图标目录（可选）
@@ -78,7 +88,7 @@ JD-Auction-Search/
 - **结果面板用浅 DOM** - 为继承京东原生卡片样式，结果面板覆盖层使用真实 DOM 承载；其组件样式（骨架/空状态/网格）严格作用域 `#jds-results-host`，不泄漏到京东页面
 - **MutationObserver** - DOM变化监听
 - **Fetch/XHR Interceptor** - API拦截
-- **Internationalization (i18n)** - 多语言支持
+- **Internationalization (i18n)** - 多语言支持（`getMessage` 优先 `chrome.i18n`，缺失回退内置双语字典；占位符 `$1/$2` 替换；UI 文案零硬编码）
 
 ## 设计系统
 
@@ -126,7 +136,7 @@ JD-Auction-Search/
 | API拦截缓存 | 自动拦截并缓存API响应 | ✅ |
 | DOM提取数据 | API不可用时从DOM提取 | ✅ |
 | 一键启停 | 已移除（简化 UI，默认常驻启用） | ❌ |
-| 国际化支持 | 简繁中文界面（zh_CN / zh_TW） | ✅ |
+| 国际化支持 | 简体中文 / 英文界面（zh_CN / en），内置双语兜底字典全覆盖 | ✅ |
 | 构建打包 | 支持一键打包发布 | ✅ |
 
 ## 代码规范
@@ -154,6 +164,16 @@ JD-Auction-Search/
 - 函数必须有注释
 
 ## 版本历史
+
+### v1.5.5
+- 全面代码审计与对齐：修复语法/安全/性能问题，所有源文件头版本统一至 v1.5.5
+- 超 200 行模块拆分：`toolbar.js`→`toolbar/history.js`+`toolbar/events.js`；`results/host.js` 样式抽至 `results/styles.js`；`utils/extract.js` 价格逻辑抽至 `utils/price.js`；`dom/extract.js` 拆 `dom/price-text.js`+`dom/native-list.js`；`ui/products.js` 价格渲染抽至 `ui/price-render.js`；`api/interceptor.js` 打分/模板抽至 `api/template.js`（manifest content_scripts 同步）
+- 国际化全覆盖：新增 13 个翻译键（计数/起拍/出价/加载更多/ARIA 等），`getMessage` 支持 `$N` 占位符替换，UI 渲染文件零硬编码中文字面量
+- 安全：移除 `javascript:void(0)` 回退（无链接卡片改 `role=button`+`tabIndex=0`），图片/链接 URL 白名单，无 `innerHTML` 拼接用户数据
+- 性能：结果面板定位 `scroll/resize` 改为 rAF 节流；批量插入 `DocumentFragment` 减少重排；XHR 解析前先按 URL 过滤
+- 修复挂载 bug：`_mountWithRetry` 的 `insertBefore` 在 `rightEl` 为深层子孙（非直接子节点）时抛 `NotFoundError`，现向上回溯到直接子节点作锚点
+- 生命周期清理：`results.destroy()` 清除所有定时器与 `focusout` 监听，避免泄漏
+- 测试与构建：`scripts/smoke.js` 升级为 117 断言全覆盖（命名空间/i18n/价格/安全/DOM/去重/拦截/渲染/历史/清理/规范）；`build.js` 多行化并校验 manifest 脚本完整性
 
 ### v1.5.3
 - 恢复国际化：`getMessage` 优先 `chrome.i18n`，缺失回退内置双语字典；仅保留 zh_CN 与 en，移除 zh_TW；`_locales` 重建（zh_CN 补 history 三键、新增 en/messages.json）；manifest 加 `default_locale`

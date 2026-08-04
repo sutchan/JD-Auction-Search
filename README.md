@@ -5,7 +5,7 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.3-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.5-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -140,7 +140,7 @@ npm install
 npm run build
 ```
 
-将在项目根目录生成 `jd-auction-search-v1.5.3.zip`，可直接发布。
+将在项目根目录生成 `jd-auction-search-v1.5.5.zip`，可直接发布。
 
 可选构建参数：
 - `node build.js --no-preview`：跳过构建产物预览

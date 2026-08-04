@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.5.5
+- 全面代码审计与规范对齐：修复语法错误、安全漏洞与性能问题，所有源文件头版本统一至 1.5.5（manifest/metadata/package 同步）
+- 拆分全部超 200 行模块，提升可维护性（manifest content_scripts 同步登记新文件）：
+  - `ui/toolbar.js` → 挂载外壳 + `ui/toolbar/history.js`（历史持久化/渲染）+ `ui/toolbar/events.js`（事件绑定/历史导航）
+  - `ui/results/host.js` 样式抽至 `ui/results/styles.js`（`_getResultsCss`）
+  - `utils/extract.js` 价格逻辑抽至 `utils/price.js`（`getProductPrice`/`OriginalPrice`/`BidCount`/`parsePrice`）
+  - `dom/extract.js` 拆 `dom/price-text.js`（`getProductPriceText`）+ `dom/native-list.js`（`_toggleNativeProducts`）
+  - `ui/products.js` 价格区块渲染抽至 `ui/price-render.js`（`_resolvePriceModel`/`_buildPriceRow`/`_renderPriceSection`）
+  - `api/interceptor.js` 列表打分/模板抽至 `api/template.js`（`_listScore`/`_captureRequestTemplate`/`_captureFirstPage`/`_isAuctionUrl` 等）
+- 国际化全覆盖：新增 13 个翻译键（countPrefix/countSuffix/priceStarting/bidCountSuffix/loadMore/loadMoreProgress 及各 ARIA 键），`getMessage` 支持 `$N` 占位符替换，`_locales` zh_CN/en 键完全一致；UI 渲染文件零硬编码中文字面量（smoke 校验排除 i18n 字典自身）
+- 安全加固：移除 `javascript:void(0)` 回退——无详情链接的卡片改 `role="button"` + `tabIndex="0"`；图片/链接 URL 白名单，源码无 `javascript:` 伪协议、无 `innerHTML` 拼接用户数据
+- 性能优化：结果面板 `scroll/resize` 定位改为 rAF 节流（`_cancelPositionRaf`）；批量插入 `DocumentFragment` 减少重排；XHR 解析前先按 URL 过滤
+- 修复挂载 bug（critical）：`_mountWithRetry` 调用 `target.insertBefore(wrapper, rightEl)` 时，`rightEl` 为深层子孙（非直接子节点）会抛 `NotFoundError`；现向上回溯到直接子节点作为锚点
+- 生命周期清理：`results.destroy()` 清除 `_mountTimer`/`_hideTimer`/`_clearDebounce`，移除 `focusout` 监听并置空引用，避免定时器/监听泄漏
+- 测试与构建：`scripts/smoke.js` 升级为 117 断言 jsdom 全链路冒烟（命名空间/i18n 覆盖与切换/价格解析/安全/URL/ XSS/DOM 提取/去重/拦截打分/UI 渲染编排/历史持久化/生命周期清理/代码规范与 >200 行/manifest 登记）；`build.js` 多行化（符合规范文档）并新增 `verifyManifestScripts()` 校验 manifest 脚本完整性；`package.json` 新增 `test`/`version:sync` 脚本、`clean` 移除临时产物
+- 文档同步：README/README_EN 版本徽标与打包文件名升至 1.5.5；openspec/spec.md 对齐目录树与功能清单
+
 ## v1.5.3
 - 恢复国际化功能：getMessage 优先 `chrome.i18n`（_locales 多语言），缺失时回退内置双语字典
 - 仅保留简体中文（zh_CN）与英文（en）两种语言，移除繁体中文（zh_TW）

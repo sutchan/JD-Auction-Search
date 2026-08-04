@@ -5,7 +5,7 @@
 # JD Auction Search Enhancer
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.3-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.5-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -150,7 +150,7 @@ npm install
 npm run build
 ```
 
-This produces `jd-auction-search-v1.5.3.zip` in the project root, ready to publish.
+This produces `jd-auction-search-v1.5.5.zip` in the project root, ready to publish.
 
 Optional build flags:
 - `node build.js --no-preview`: skip the build artifact preview
