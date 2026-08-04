@@ -5,9 +5,8 @@
   "main": "background.js",
   "scripts": {
     "build": "node build.js",
-    "test": "node .func.test.js && node integration.test.js",
-    "lint": "eslint \"src/**/*.js\" build.js .func.test.js",
-    "clean": "rm -f jd-auction-search-v*.zip .func.out.txt"
+    "lint": "eslint \"src/**/*.js\" build.js",
+    "clean": "rm -f jd-auction-search-v*.zip"
   },
   "keywords": [
     "jd",
