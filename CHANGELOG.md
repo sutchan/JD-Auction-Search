@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.5.5 (feat: 增强搜索深度，后台持续深搜更多页)
+- 实现「边搜边显 + 深度后台搜索」：进入搜索态立即渲染当前已聚合结果，后台持续翻页聚合，每翻完一页通过 `onPage` 回调把新命中增量合并并即时刷新结果面板（当前结果持续显示、命中数量实时增长）
+- 排序维度深搜（`src/api/paginator-deep.js`）：识别模板 URL/body 中的排序参数（sort/sortType/orderBy/rank 等），在翻完默认排序维度后，逐一尝试其它排序值重放，聚合「不同排序下暴露的不同商品」（如仅价格升序才会展示的尾页商品），进一步加深搜索深度；请求量由 `MAX_SORT_AXES`（默认 6）限制
+- 模块拆分（保持 ≤200 行）：`paginator.js` 的排序维度深搜抽至 `src/api/paginator-deep.js`；`content/search.js` 的合并/自动加载抽至 `src/content/deep-search.js`（均已在 manifest 登记，38 文件）
+- 测试增强：`scripts/smoke.js` 新增候选模板回退、排序维度深搜聚合（跨维度去重）、`onPage` 边搜边显回调断言；[4] 段改为 async 确保深搜断言在进程退出前完成（94/0 全绿）
+
 ## v1.5.5 (fix: 清除搜索后商品列表不恢复)
 - 根因：搜索态 `_applyFilterAndUpdate` 调用 `JDSDom.hideNativeProducts()` 把京东原生列表容器 `display:none`。京东为虚拟列表/懒加载，容器不可见期间会卸载卡片，恢复 `display:''` 后京东也常不自动重绘 → 清除搜索后原生列表空白、商品不恢复。
 - 修复：搜索态**不再** `display:none` 隐藏原生列表，改由结果面板（fixed 白底覆盖层）遮挡原生列表；原生列表始终存活、京东持续维护，清除搜索后面板隐藏即天然恢复。同步移除清除分支冗余的 `showNativeProducts()`。

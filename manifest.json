@@ -32,6 +32,7 @@
         "src/api/interceptor.js",
         "src/api/paginator-rules.js",
         "src/api/paginator.js",
+        "src/api/paginator-deep.js",
         "src/ui/index.js",
         "src/ui/tokens.js",
         "src/ui/components.js",
@@ -54,6 +55,7 @@
         "src/dom/filter.js",
         "src/content/enhancer.js",
         "src/content/search.js",
+        "src/content/deep-search.js",
         "src/content.js"
       ],
       "css": [],
