@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.5 (refactor: 调整 background.js 目录)
+- 将 `background.js`（MV3 service worker 后台）从项目根目录移入 `src/background.js`，与业务代码统一收拢在 `src/` 目录树
+- 同步更新：`manifest.json` 的 `background.service_worker` 路径、`build.js` 的 `ROOT_FILES`（移入 src 后由递归 copy 自动包含，不再单独列出）、`package.json` 的 `main` 字段、文件头注释路径；`openspec/spec.md` 目录树同步
+- 构建验证通过：`node build.js --no-preview` 产物 zip 内含 `src/background.js` 且 manifest 脚本校验通过（34 文件）
+
 ## v1.5.5 (hotfix: 搜索结果显示不了)
 - 修复搜索结果不显示（critical）：`_applyFilterAndUpdate` 在「全量分页未聚合完成」(`!_allLoaded`) 时无条件 `showLoading()` 并 `return`，阻塞渲染，必须等全量加载结束才显示结果；接口慢/失败时（如模板未就绪、分页重放超时）用户长时间看到骨架屏或空白，结果始终不渲染
 - 改为先立即用「当前已聚合商品」渲染结果（`showResults(filtered)`），全量加载在后台单飞继续，完成后重新进入本函数刷新为完整命中；即便全量加载失败，首屏数据也已正常展示
