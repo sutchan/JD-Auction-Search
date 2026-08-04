@@ -37,7 +37,6 @@ const OUTPUT_ZIP = path.join(ROOT, 'releases', `jd-auction-search-v${VERSION}.zi
 const ROOT_FILES = [
   'manifest.json',
   'metadata.json',
-  'background.js',
   'README.md',
   'README_EN.md',
   'LICENSE',

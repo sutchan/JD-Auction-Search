@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="./README_EN.md">English</a> · <a href="./CHANGELOG.md">更新日志</a> · <a href="./openspec/spec.md">项目规范</a>
+  <a href="./README_EN.md">English</a> · <a href="./CHANGELOG.md">更新日志</a> · <a href="./openspec/spec.md">项目规范</a> · <a href="./openspec/tasks.md">任务</a> · <a href="./openspec/check_list.md">验收清单</a>
 </p>
 
 ---

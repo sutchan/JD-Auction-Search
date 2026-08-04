@@ -12,6 +12,9 @@ scripts/
 .dedup-trash/
 .playwright-cli/
 *.code-workspace
+prototype/
+.eslintrc.json
+package-lock.json
 
 
 # Compiled class file
