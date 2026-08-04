@@ -38,6 +38,7 @@
         "src/ui/components.js",
         "src/ui/styles.js",
         "src/ui/toolbar/history.js",
+        "src/ui/toolbar/history-item.js",
         "src/ui/toolbar/events.js",
         "src/ui/toolbar.js",
         "src/ui/results/styles.js",

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.5.5 (fix: 代码审查修复)
+- 全面审查 src 全部源文件（安全/错误处理/逻辑/资源泄漏/i18n）：安全与资源清理整体良好，本次修复以下问题：
+  - `interceptor.js`：XHR 每次 `send()` 累加 `load` 监听器，同一对象重复 send 会重复触发 `handleResponse` → 改为先移除上次监听再绑定
+  - `enhancer.js`：`init()` 增加依赖方法（`_applyFilterAndUpdate`/`_handleApiResponse`/`_autoLoadProducts`）运行时判空，缺失时告警并安全退出，避免加载顺序错误导致交互崩溃；移除重复的 `_allLoaded=false` 赋值
+  - `paginator-deep.js`：`_collectSortAxes` 的 `decodeURIComponent` 对非法 `%` 编码会抛 URIError 中断排序轴收集 → 加 try/catch 保护
+  - `observer.js`：观察容器兜底改为 `document.body || document.documentElement`，避免 body 未就绪时 `observe(null)` 抛异常
+  - `products.js`/`results.js`：移除从未使用的死代码 `_renderAll`
+  - `history.js`：`_showHistory` 的 rAF 保存 id 供 destroy 取消；`_buildHistoryItem` 抽至新文件 `src/ui/toolbar/history-item.js`（保持 ≤200 行规范，39 文件）
+- 验证：ESLint 0 错；`scripts/smoke.js` 97/0 全绿；`node build.js --no-preview` 成功（38 文件、101.09KB）
+
 ## v1.5.5 (feat: 增强搜索深度，后台持续深搜更多页)
 - 实现「边搜边显 + 深度后台搜索」：进入搜索态立即渲染当前已聚合结果，后台持续翻页聚合，每翻完一页通过 `onPage` 回调把新命中增量合并并即时刷新结果面板（当前结果持续显示、命中数量实时增长）
 - 排序维度深搜（`src/api/paginator-deep.js`）：识别模板 URL/body 中的排序参数（sort/sortType/orderBy/rank 等），在翻完默认排序维度后，逐一尝试其它排序值重放，聚合「不同排序下暴露的不同商品」（如仅价格升序才会展示的尾页商品），进一步加深搜索深度；请求量由 `MAX_SORT_AXES`（默认 6）限制

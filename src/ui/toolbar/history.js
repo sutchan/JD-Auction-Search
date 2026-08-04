@@ -6,7 +6,6 @@
   'use strict';
 
   const JDSUI = global.JDSUI = global.JDSUI || {};
-  const getMessage = global.JDSUtils.getMessage;
 
   // 搜索历史持久化键（chrome.storage.local）
   JDSUI._STORAGE_KEY = 'jds_search_history';
@@ -97,54 +96,7 @@
     this._persistHistory();
   };
 
-  /**
-   * 构建单条历史项 <li>（文本 + 删除按钮 + 交互）
-   * @private
-   * @returns {HTMLElement}
-   */
-  JDSUI._buildHistoryItem = function _buildHistoryItem(kw, i, listEl, emptyEl, input) {
-    const li = document.createElement('li');
-    li.className = 'jds-history-item';
-    li.setAttribute('role', 'option');
-
-    const text = document.createElement('span');
-    text.className = 'jds-history-text';
-    text.textContent = kw;   // textContent 防 XSS
-    li.appendChild(text);
-
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.className = 'jds-history-del';
-    del.setAttribute('aria-label', getMessage('a11yHistoryDelete'));
-    del.textContent = '\u00D7';
-    // mousedown 阻止默认：避免点击按钮令 input 失焦触发 focusout 误关下拉
-    del.addEventListener('mousedown', (e) => e.preventDefault());
-    del.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this._removeSearchHistory(i);
-      this._renderHistory(listEl, emptyEl, input);
-    });
-    li.appendChild(del);
-
-    // mousedown 阻止默认：点击 li（非可聚焦）会令 input 失焦触发 focusout，
-    // 进而关闭下拉使 pointer-events:none 吞掉后续 click；preventDefault 保焦点、保下拉、保 click
-    li.addEventListener('mousedown', (e) => e.preventDefault());
-
-    // 点击历史项：填入并搜索
-    li.addEventListener('click', () => {
-      const ctx = this._historyCtx || {};
-      input.value = kw;
-      if (ctx.clearBtn) ctx.clearBtn.classList.add('is-visible');
-      if (ctx.state) ctx.state.keyword = kw;
-      this._hideHistory();
-      // 触发外层搜索（已在历史中，无需重复记录）；同步刷新过滤/计数
-      if (ctx.handlers) {
-        if (ctx.handlers.onInput) ctx.handlers.onInput();
-        ctx.handlers.onSearch();
-      }
-    });
-    return li;
-  };
+  // 历史单条项构建（_buildHistoryItem）见 ./history-item.js
 
   /**
    * 渲染历史下拉列表
@@ -178,8 +130,12 @@
     if (!el) return;
     if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null; }
     el.hidden = false;
-    // 触发入场过渡动画
-    requestAnimationFrame(() => el.classList.add('jds-history-open'));
+    // 触发入场过渡动画（保存 rafId 供 destroy 取消，避免销毁后仍加 class）
+    if (this._historyRaf) cancelAnimationFrame(this._historyRaf);
+    this._historyRaf = requestAnimationFrame(() => {
+      el.classList.add('jds-history-open');
+      this._historyRaf = null;
+    });
   };
 
   /**

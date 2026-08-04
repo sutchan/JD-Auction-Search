@@ -103,7 +103,12 @@
 
     XMLHttpRequest.prototype.send = function(...args) {
       const body = args.length ? args[0] : null;
-      this.addEventListener('load', function() {
+      // 先移除上次绑定的 load 监听，再绑定新的：同一 XHR 对象若被复用重复 send（重试场景），
+      // 避免监听器累加导致 handleResponse 被重复触发（模板/首页被重复捕获、重复解析）。
+      if (this._jdsLoadHandler) {
+        this.removeEventListener('load', this._jdsLoadHandler);
+      }
+      const handler = function() {
         // 先做 URL 过滤再解析 JSON，避免对无关响应做无谓的 JSON.parse（性能）
         if (!self._isAuctionUrl(self._jdsUrl) || !self._isListResponse(self._jdsUrl)) return;
         try {
@@ -118,7 +123,9 @@
         } catch (e) {
           // 非 JSON 响应属正常情况，静默忽略
         }
-      });
+      };
+      this._jdsLoadHandler = handler;
+      this.addEventListener('load', handler);
       return origXHRSend.apply(this, args);
     };
   };

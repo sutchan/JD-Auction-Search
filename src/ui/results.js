@@ -90,6 +90,7 @@
     // 清理定时器与监听，避免 destroy 后回调仍执行导致内存泄漏 / 空引用
     if (this._mountTimer) { clearTimeout(this._mountTimer); this._mountTimer = null; }
     if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null; }
+    if (this._historyRaf) { cancelAnimationFrame(this._historyRaf); this._historyRaf = null; }
     if (typeof this._clearDebounce === 'function') this._clearDebounce();
     this._clearDebounce = null;
     if (this.shadowRoot && this._onFocusOut) {
@@ -107,7 +108,6 @@
     this.resultsRoot = null;
     this.resultsHost = null;
     this.gridElement = null;
-    this._renderAll = null;
     this._renderPage = 0;
     if (this.emptyElement) {
       this.emptyElement.remove();

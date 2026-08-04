@@ -64,7 +64,9 @@
    * @returns {HTMLElement}
    */
   JDSDom._getObservedContainer = function _getObservedContainer() {
-    return this.queryFirst(this.SELECTORS.OBSERVE) || document.body;
+    // 兜底 document.documentElement 而非 document.body：脚本在 body 创建前执行时
+    // document.body 为 null，MutationObserver.observe(null) 会抛异常导致 init 中断
+    return this.queryFirst(this.SELECTORS.OBSERVE) || document.body || document.documentElement;
   };
 
   /**

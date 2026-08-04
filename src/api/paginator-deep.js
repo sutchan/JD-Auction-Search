@@ -56,7 +56,9 @@
         if (m) {
           // 已知该排序参数存在，则枚举若干常见排序值（升/降/热度/最新/价格），
           // 过滤掉与当前值相同者，避免重复重放
-          const cur = decodeURIComponent(m[1]);
+          // decodeURIComponent 对含非法 % 编码的参数值会抛 URIError，需保护以免中断整个排序轴收集
+          let cur = m[1];
+          try { cur = decodeURIComponent(cur); } catch (e) { /* 非法编码视为字面值 */ }
           for (const v of ['0', '1', '2', '3', '4', '5', 'desc', 'asc', 'price', 'new', 'hot', 'default']) {
             if (v !== cur) axes.push({ key, value: v });
           }

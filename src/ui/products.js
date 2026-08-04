@@ -37,7 +37,6 @@
     this.hideEmptyState();
 
     this._renderPage = 1;
-    this._renderAll = products;
     const grid = this._createGrid(panel);
     this.gridElement = grid;
     this._appendPage(grid, products);
