@@ -28,13 +28,10 @@
       const tplForAxis = axis ? this._applySortAxis(tpl, axis) : tpl;
       const pageResult = await this._replayTemplate(tplForAxis, maxPages, onPage, seen, fromPage);
       if (!pageResult) continue;
+      // 注意：_replayTemplate 内部已用共享 seen 去重并 add，返回的 items 即为本维度「无重复的新增项」，
+      // 此处直接累加即可，不能再用 seen 二次判断，否则本维度全部被误判为重复而丢空。
       if (pageResult.items && pageResult.items.length) {
-        for (const it of pageResult.items) {
-          const id = global.JDSUtils.getProductId(it);
-          if (id && seen.has(id)) continue;
-          if (id) seen.add(id);
-          all.push(it);
-        }
+        for (const it of pageResult.items) all.push(it);
       }
       // 任一排序维度触顶（未到末页）说明默认维度可能还有更多页，finished 取「所有维度均到末页」才为 true
       if (!pageResult.finished) finished = false;

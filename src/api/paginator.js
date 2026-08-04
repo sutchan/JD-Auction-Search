@@ -94,6 +94,9 @@
     const all = [];
     const localSeen = seen || new Set();
     const start = fromPage || 1;
+    // 分页重放须使用「未被拦截器包裹」的原始 fetch：否则分页请求会被自身拦截器二次捕获
+    // （覆盖模板/误把分页响应当首页缓存），且拦截器 clone 响应可能拖慢/报错。
+    const rawFetch = this._origFetch || window.fetch;
     let pageSize = 0; // 以首页实际条数作为页大小基准，避免硬编码阈值误判末页
     let total = 0;
     let finished = false;
@@ -101,7 +104,7 @@
       const req = this._buildPageRequest(absUrl, tpl, pageParam, page);
       let data;
       try {
-        const resp = await fetch(req.url, req.options);
+        const resp = await rawFetch(req.url, req.options);
         if (!resp.ok) {
           if (page === start) throw new Error(`API请求失败: ${resp.status}`);
           finished = true; // 后续页失败视为已到末页
