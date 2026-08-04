@@ -55,26 +55,26 @@
       // 跨页搜索模式：基于聚合全部分页数据渲染结果面板，隐藏原生列表
       this.state.searchMode = true;
       JDSDom.hideNativeProducts();
-      // 全量数据尚未就绪：触发一次全量加载（单飞，避免多次搜索并发重入），
+
+      // 先立即用「当前已聚合的商品」渲染结果（首屏数据即可搜），
+      // 避免卡在骨架屏等待全量分页加载完成才显示，导致接口慢/失败时结果长期不显示。
+      // 全量加载完成后会重新进入本函数刷新为完整命中结果。
+      if (this.state.products.length > 0) {
+        JDSUI.showResults(filtered);
+      } else {
+        JDSUI.showLoading();
+      }
+
+      // 后台继续全量加载（单飞，避免多次搜索并发重入）：
       // 完成后会重新进入本函数渲染，避免搜索只命中已加载的首页数据而漏掉后续页。
       // 仅在「尚未成功全量聚合」( !_allLoaded ) 且「无进行中加载」时触发；
       // 不依赖「成败都置位」的标志，否则首次全量加载失败（模板未就绪/接口慢）后
       // 后续捕获到模板或首页数据也不会重试 → 只渲染残缺的 state.products → 结果不全。
       // _loadRetries 限制真实重放次数上限（最多 3 次），防止模板永久缺失时无限重放。
       if (!this.state._allLoaded && !this._loadPromise && (this._loadRetries || 0) < 3) {
-        JDSUI.showLoading();
         this._loadPromise = this._autoLoadProducts()
           .catch(() => {})
           .then(() => { this._loadPromise = null; });
-        return;
-      }
-      // 正在加载中：等其完成后再渲染（由 _autoLoadProducts 终点分支重新进入本函数）
-      if (this._loadPromise) return;
-      if (filtered.length === 0 && this.state.isLoading) {
-        // 全局商品仍在加载（如详情页延时抓取），先展示骨架屏而非空态
-        JDSUI.showLoading();
-      } else {
-        JDSUI.showResults(filtered);
       }
     } else {
       // 浏览模式：恢复原生列表，隐藏结果面板
