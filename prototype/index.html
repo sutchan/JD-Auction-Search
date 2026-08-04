@@ -459,6 +459,24 @@
     }
     .ext-count strong { color: var(--primary); font-weight: 600; }
 
+    /* Search history dropdown — mirrors src/ui/toolbar/history.js */
+    .ext-history {
+      position: absolute; left: var(--space-4); right: var(--space-4); top: calc(100% + 4px); z-index: 20;
+      background: var(--popover); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); padding: var(--space-2); display: none;
+    }
+    .ext-history.is-open { display: block; animation: cardIn 0.2s var(--ease-out-expo); }
+    .ext-history-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-1) var(--space-2) var(--space-2); }
+    .ext-history-title { font-size: 12px; font-weight: 600; color: var(--muted-foreground); }
+    .ext-history-clear { font-size: 11px; color: var(--primary); background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: var(--radius-sm); }
+    .ext-history-clear:hover { background: var(--primary-subtle); }
+    .ext-history-list { list-style: none; display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+    .ext-history-item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); cursor: pointer; font-size: 13px; }
+    .ext-history-item:hover { background: var(--secondary); }
+    .ext-history-item .ext-history-del { width: 20px; height: 20px; display: grid; place-items: center; border: none; background: none; color: var(--subtle-foreground); cursor: pointer; border-radius: var(--radius-sm); opacity: 0; transition: opacity var(--dur-fast); }
+    .ext-history-item:hover .ext-history-del { opacity: 1; }
+    .ext-history-item .ext-history-del:hover { color: var(--destructive); background: var(--destructive-subtle); }
+
     /* Product grid */
     .product-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -524,7 +542,7 @@
     .empty-title { font-family: var(--font-display); font-size: 24px; font-weight: 400; margin-bottom: var(--space-2); }
     .empty-desc { font-size: 14px; color: var(--muted-foreground); max-width: 36ch; }
 
-    /* Render cap notice — 对齐扩展 products.renderProducts 的 200 条上限提示 */
+    /* Render cap notice — 对齐扩展 products：首屏 60 条 + 加载更多提示 */
     .result-notice {
       grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2);
       padding: var(--space-2) var(--space-3); font-size: 12px; color: var(--muted-foreground);
@@ -759,7 +777,7 @@
         <li><a href="#mobile">Mobile</a></li>
       </ul>
       <div class="nav-right">
-        <span class="nav-version">v1.5.3</span>
+        <span class="nav-version">v1.5.5</span>
         <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换深色模式">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
@@ -778,7 +796,7 @@
           Auction<br>search, <em>refined</em>.
         </h1>
         <p class="hero-lead reveal reveal-d2">
-          为京东夺宝岛页面注入实时搜索与数据缓存。Shadow DOM 隔离、简繁中文双语、无障碍优先——
+          为京东夺宝岛页面注入实时搜索与数据缓存。Shadow DOM 隔离、简体中文 / 英文界面、无障碍优先——
           以克制的视觉语言，承载高效的功能体验。
         </p>
         <div class="hero-actions reveal reveal-d3">
@@ -848,6 +866,13 @@
         <button class="ext-search-btn" id="searchBtn">搜索</button>
       </div>
       <div class="ext-count">共 <strong id="resultCount">0</strong> 件</div>
+          <div class="ext-history" id="extHistory">
+            <div class="ext-history-head">
+              <span class="ext-history-title">搜索历史</span>
+              <button class="ext-history-clear" id="historyClear">清空</button>
+            </div>
+            <ul class="ext-history-list" id="historyList"></ul>
+          </div>
         </div>
 
         <!-- Product grid -->
@@ -1201,7 +1226,7 @@
         <div class="footer-mark">JD<span>.</span>Auction<span>.</span>Search</div>
       </div>
       <div class="footer-meta">
-        Design System v1.5.3<br>
+        Design System v1.5.5<br>
         Refined Minimalism · shadcn-inspired<br>
         Light &amp; Dark · Container Queries<br>
         Built with precision · 2026
@@ -1253,8 +1278,8 @@
     ];
 
     const STATUS_LABELS = { ongoing: '进行中', upcoming: '即将开始', ending: '即将结束' };
-    const RENDER_CAP = 200; // 对齐扩展 products.renderProducts 单次渲染上限
-    const state = { keyword: '' };
+    const PAGE_SIZE = 60; // 对齐扩展 products：首屏 60 条 + 加载更多（不再硬截断 200）
+    const state = { keyword: '', history: ['iPhone', '华为', '显卡', '数码配件'] };
 
     // ============================================================
     // NAV SCROLL
@@ -1342,8 +1367,8 @@
         return;
       }
 
-      const capped = filtered.length > RENDER_CAP;
-      const visible = capped ? filtered.slice(0, RENDER_CAP) : filtered;
+      const capped = filtered.length > PAGE_SIZE;
+      const visible = capped ? filtered.slice(0, PAGE_SIZE) : filtered;
 
       grid.innerHTML = '';
       if (capped) {
@@ -1401,8 +1426,87 @@
       showToast('已清除搜索', 'info');
     });
 
+    // ============================================================
+    // SEARCH HISTORY — mirrors src/ui/toolbar/history.js
+    // 聚焦空搜索框显示历史下拉；单条删除 / 清空；点击回填搜索
+    // ============================================================
+    const historyEl = document.getElementById('extHistory');
+    const historyListEl = document.getElementById('historyList');
+    const historyClearBtn = document.getElementById('historyClear');
+
+    function renderHistory() {
+      historyListEl.innerHTML = '';
+      if (!state.history.length) {
+        historyEl.innerHTML = '<div class="empty-desc" style="padding: var(--space-4); text-align: center;">暂无搜索历史</div>';
+        return;
+      }
+      historyEl.innerHTML = `
+        <div class="ext-history-head">
+          <span class="ext-history-title">搜索历史</span>
+          <button class="ext-history-clear" id="historyClear">清空</button>
+        </div>`;
+      const ul = document.createElement('ul');
+      ul.className = 'ext-history-list';
+      state.history.forEach((kw, idx) => {
+        const li = document.createElement('li');
+        li.className = 'ext-history-item';
+        li.innerHTML = `<span>${kw}</span><button class="ext-history-del" aria-label="删除">✕</button>`;
+        li.querySelector('span').addEventListener('click', () => applyHistory(kw));
+        li.querySelector('.ext-history-del').addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.history.splice(idx, 1);
+          renderHistory();
+          showToast('已删除历史记录', 'info');
+        });
+        ul.appendChild(li);
+      });
+      historyEl.appendChild(ul);
+      historyEl.querySelector('#historyClear').addEventListener('click', () => {
+        state.history = [];
+        historyEl.classList.remove('is-open');
+        showToast('已清空搜索历史', 'info');
+      });
+    }
+
+    function applyHistory(kw) {
+      searchInput.value = kw;
+      state.keyword = kw;
+      clearBtn.classList.add('is-visible');
+      historyEl.classList.remove('is-open');
+      renderProducts();
+      showToast(`搜索 "${kw}"`, 'success');
+    }
+
+    function addHistory(kw) {
+      kw = kw.trim();
+      if (!kw) return;
+      const i = state.history.indexOf(kw);
+      if (i >= 0) state.history.splice(i, 1);
+      state.history.unshift(kw);
+      if (state.history.length > 10) state.history.length = 10;
+    }
+
+    searchInput.addEventListener('focus', () => {
+      if (!searchInput.value.trim()) historyEl.classList.add('is-open');
+    });
+    searchInput.addEventListener('blur', (e) => {
+      if (!e.relatedTarget || !historyEl.contains(e.relatedTarget)) {
+        setTimeout(() => historyEl.classList.remove('is-open'), 120);
+      }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && state.keyword) {
+        addHistory(state.keyword);
+        historyEl.classList.remove('is-open');
+        showToast(`搜索 "${state.keyword}" · 找到 ${document.getElementById('resultCount').textContent} 件`, 'success');
+      }
+    });
+
     document.getElementById('searchBtn').addEventListener('click', () => {
       if (state.keyword) {
+        addHistory(state.keyword);
+        historyEl.classList.remove('is-open');
         showToast(`搜索 "${state.keyword}" · 找到 ${document.getElementById('resultCount').textContent} 件`, 'success');
       } else {
         showToast('请输入搜索关键词', 'error');
@@ -1414,6 +1518,7 @@
     // INIT
     // ============================================================
     renderSkeletons();
+    renderHistory();
     setTimeout(() => {
       renderProducts();
       setTimeout(() => showToast('设计系统已加载 · 试试搜索 "iPhone"', 'success'), 400);
