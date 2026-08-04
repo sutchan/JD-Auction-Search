@@ -8,7 +8,7 @@
     "lint": "eslint \"src/**/*.js\" build.js \"scripts/*.js\"",
     "test": "node scripts/smoke.js",
     "version:sync": "node scripts/bump-version.js",
-    "clean": "rm -f jd-auction-search-v*.zip smoke.out.txt"
+    "clean": "rm -rf releases smoke.out.txt"
   },
   "keywords": [
     "jd",

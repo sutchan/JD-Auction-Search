@@ -31,7 +31,7 @@ function syncHeader(raw) {
 const args = process.argv.slice(2);
 const PREVIEW = !args.includes('--no-preview');
 
-const OUTPUT_ZIP = path.join(ROOT, `jd-auction-search-v${VERSION}.zip`);
+const OUTPUT_ZIP = path.join(ROOT, 'releases', `jd-auction-search-v${VERSION}.zip`);
 
 // 打包根目录文件（排除开发与构建产物）
 const ROOT_FILES = [
@@ -138,7 +138,8 @@ function build() {
   // Chrome 拒绝加载扩展（硬校验），必须随包发布
   copyDir(path.join(ROOT, '_locales'), path.join(DIST_DIR, '_locales'));
 
-  // 3. 打包 zip
+  // 3. 打包 zip（输出到 releases/ 目录，构建前确保目录存在）
+  fs.mkdirSync(path.dirname(OUTPUT_ZIP), { recursive: true });
   const output = fs.createWriteStream(OUTPUT_ZIP);
   const archive = archiver('zip', { zlib: { level: 9 } });
   output.on('close', () => {

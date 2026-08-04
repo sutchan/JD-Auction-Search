@@ -150,7 +150,7 @@ npm install
 npm run build
 ```
 
-This produces `jd-auction-search-v1.5.5.zip` in the project root, ready to publish.
+This produces `jd-auction-search-v1.5.5.zip` in the `releases/` directory, ready to publish.
 
 Optional build flags:
 - `node build.js --no-preview`: skip the build artifact preview

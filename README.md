@@ -140,7 +140,7 @@ npm install
 npm run build
 ```
 
-将在项目根目录生成 `jd-auction-search-v1.5.5.zip`，可直接发布。
+将在 `releases/` 目录生成 `jd-auction-search-v1.5.5.zip`，可直接发布。
 
 可选构建参数：
 - `node build.js --no-preview`：跳过构建产物预览
