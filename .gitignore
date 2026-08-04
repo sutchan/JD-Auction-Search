@@ -2,7 +2,9 @@
 /.workbuddy
 /node_modules
 /openspec
+openspec/
 /srcipts
+scripts/
 *_test*.js
 .codebuddy/
 /.codebuddy
