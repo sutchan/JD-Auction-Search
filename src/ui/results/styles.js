@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.6.1
+// JD-Auction-Search/src/ui/results/styles.js v1.6.3
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 
@@ -141,6 +141,21 @@
       display: inline-flex; align-items: center; padding: 2px 9px;
       background: var(--secondary); color: var(--muted-foreground);
       font-size: 12px; border-radius: var(--radius-full);
+    }
+    /* 拍卖时间（对齐京东原生 .p-time）：置于价格区顶部，靠下间距与名称区分 */
+    #jds-results-host .p-time { display: flex; align-items: center; }
+    #jds-results-host .jds-product-time {
+      display: inline-flex; align-items: center; padding: 2px 9px; gap: 4px;
+      font-size: 12px; border-radius: var(--radius-full); font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    /* 结束倒计时：红底白字，催促感 */
+    #jds-results-host .p-time.is-ending .jds-product-time {
+      background: #e1251b; color: #fff;
+    }
+    /* 开始倒计时：黄底深字，预告感 */
+    #jds-results-host .p-time.is-starting .jds-product-time {
+      background: #ffb400; color: #3a2c00;
     }
     #jds-results-host .jds-load-more {
       grid-column: 1 / -1; justify-self: center; margin: 8px auto 24px;

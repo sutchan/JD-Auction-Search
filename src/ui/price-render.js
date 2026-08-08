@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/price-render.js v1.6.1
+// JD-Auction-Search/src/ui/price-render.js v1.6.3
 // 商品卡价格区渲染：主价格行（起拍标签/货币符号/整数.小数）与划线原价行
 // 卡片整体构建见 ./products.js
 
@@ -114,6 +114,31 @@
   };
 
   /**
+   * 渲染拍卖时间行（.p-time 倒计时/结束时间），置于价格区顶部
+   * @private
+   * @param {HTMLElement} body - 卡片正文容器
+   * @param {Object} p - 商品对象
+   */
+  JDSUI._renderTimeSection = function _renderTimeSection(body, p) {
+    const timeText = (p.timeText != null && String(p.timeText).trim()) ? String(p.timeText).trim()
+      : (p.endTime != null ? String(p.endTime) : '');
+    if (!timeText) return;
+    // 判断倒计时类型：结束倒计时（红）/ 开始倒计时（黄）
+    const t = timeText.toLowerCase();
+    let typeCls = 'is-ending'; // 默认按结束倒计时（红）呈现
+    if (/(开始|开拍|距开|start)/.test(t)) typeCls = 'is-starting';
+    else if (/(结束|截标|距结|end|close)/.test(t)) typeCls = 'is-ending';
+    const timeEl = document.createElement('div');
+    // 拍卖时间：对齐京东原生语义 class .p-time
+    timeEl.className = 'p-time ' + typeCls;
+    const inner = document.createElement('span');
+    inner.className = 'jds-product-time';
+    inner.textContent = timeText;
+    timeEl.appendChild(inner);
+    body.appendChild(timeEl);
+  };
+
+  /**
    * 渲染商品卡的完整价格区（主价格行 + 划线原价行）到卡片正文
    * @private
    * @param {HTMLElement} body - 卡片正文容器
@@ -123,6 +148,9 @@
   JDSUI._renderPriceSection = function _renderPriceSection(body, p, name) {
     const U = global.JDSUtils;
     const model = this._resolvePriceModel(p, name);
+
+    // 拍卖时间（.p-time）置于价格区顶部，优先于价格与出价人数展示
+    this._renderTimeSection(body, p);
 
     // 现价行容器：将 .p-price（现价/起拍价）与 .origin-price（划线原价）放在同一行。
     // 不依赖 priceEqualsOrig——夺宝岛商品当前价常等于封顶价，若跳过会导致扩展卡片不显示 .p-price。

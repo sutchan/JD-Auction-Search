@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.3 (chore: 规范与版本号统一对齐)
+- 全量代码审查：ESLint 0 错、`scripts/smoke.js` 97/0 全绿、无超 200 行文件；安全（textContent/escapeHtml/SAFE_URL_RE + 接口白名单）与性能（缓存/节流/资源清理/幂等）均达规范，无需语法/安全/性能修复
+- openspec 三文档（spec/tasks/check_list）版本号与 v1.6.3 对齐，补 v1.6.3 与 v1.6.2 小节
+- prototype 设计系统版本号对齐至 v1.6.3
+- `scripts/bump-version.js` 文件头版本对齐至 v1.6.3
+
+## v1.6.2 (feat: 卡片显示拍卖时间并调整信息层级)
+- 商品卡片新增 `.p-time` 拍卖时间展示：从京东原生卡片 `.p-time`（倒计时/结束时间）提取文本，接口数据回退 `timeText`/`endTime`，置于价格区顶部
+- 卡片信息层级调整：价格区（现价/起拍价 + 划线原价 + 出价人数 + 拍卖时间）上移至商品名称上方，名称置于卡片底部
+- 选择器集中维护：新增 `selectors.js` 的 `TIME`（含 `p-time`/`countdown`/`remain`/`deadline` 兜底匹配）
+- 验证：ESLint 0 错；`scripts/smoke.js` 97/0 全绿
+
 ## v1.6.1 (style: 卡片价格与名称显示微调)
 - 修复搜索结果卡片底部边距过高：`.jds-product-body` 加 `flex:1` 撑满卡片剩余高度，移除 `.note` 多余 `margin-top`，消除部分卡片底部空白不一致
 - `.jds-price-yen`（¥符号）颜色改为 `var(--primary)`，与 `.jds-price-int` 现价整数同色

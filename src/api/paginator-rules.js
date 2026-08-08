@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/paginator-rules.js v1.6.1
+// JD-Auction-Search/src/api/paginator-rules.js v1.6.3
 // 分页重放规则：URL 绝对化、分页参数识别、单页请求构建
 // 主编排见 ./paginator.js（loadAllProducts / _replayTemplate）
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/selectors.js v1.6.1
+// JD-Auction-Search/src/dom/selectors.js v1.6.3
 // 京东页面 DOM 选择器集中配置：所有依赖京东结构的class匹配都在此维护，
 // 改版时只需在此一处调整，避免散落在 toolbar/filter/observer/extract 多处。
 
@@ -51,6 +51,8 @@
     PRICE: '.p-price, [class*="p-price" i], [class*="price-current" i], [class*="current-price" i], [class*="price" i]',
     ORIGIN: '[class*="old" i], [class*="original" i], [class*="origin" i], [class*="market" i], [class*="ref" i]',
     BID: '[class*="bid" i], [class*="apply" i], [class*="join" i], [class*="count" i], [class*="报名" i], [class*="出价" i]',
+    // 拍卖时间元素：京东原生卡片用 .p-time 展示倒计时/结束时间（如「距结束 02:13:45」）
+    TIME: '[class*="p-time" i], [class*="time" i]:not([class*="timeline" i]):not([class*="timeout" i]), [class*="countdown" i], [class*="remain" i], [class*="deadline" i]',
     IMG: 'img'
   };
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.6.1
+// JD-Auction-Search/src/dom/extract.js v1.6.3
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url）
 // 价格文本回查见 ./price-text.js，原生列表显隐见 ./native-list.js
 
@@ -75,7 +75,12 @@
       const bRaw = bidEl.textContent.replace(/[^\d]/g, '');
       if (bRaw) bidCount = Number(bRaw);
     }
-    return { price, priceText, originalPrice, bidCount };
+
+    // 拍卖时间：京东原生卡片用 .p-time 展示倒计时/结束时间（如「距结束 02:13:45」）
+    let timeText = '';
+    const timeEl = card.querySelector(this.SELECTORS.TIME);
+    if (timeEl) timeText = timeEl.textContent.replace(/\s+/g, ' ').trim();
+    return { price, priceText, originalPrice, bidCount, timeText };
   };
 
   /**
@@ -88,7 +93,7 @@
     const nameRaw = this._extractName(card);
     if (!nameRaw) return null;
 
-    const { price, priceText, originalPrice, bidCount } = this._extractPrices(card);
+    const { price, priceText, originalPrice, bidCount, timeText } = this._extractPrices(card);
 
     const imgEl = card.querySelector(this.SELECTORS.IMG);
     const img = imgEl
@@ -120,7 +125,8 @@
       originalPrice,
       bidCount,
       image: hasImg ? img : '',
-      url: SAFE_URL_RE.test(url) ? url : ''
+      url: SAFE_URL_RE.test(url) ? url : '',
+      timeText: timeText || ''
     };
     // 映射到接口路径的规范字段，使统一渲染层（utils/price.js / ui/products.js）正确识别：
     // - 有出价(bidCount>0) → 现价 currentPrice；无出价 → 起拍价 startPrice（currentPrice 留空）

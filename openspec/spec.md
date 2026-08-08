@@ -1,7 +1,7 @@
 # 京东夺宝岛搜索增强 — 项目规范（Spec）
 
 **项目名称**: JD-Auction-Search
-**版本**: 1.6.1
+**版本**: 1.6.3
 **类型**: 浏览器扩展插件（Manifest V3）
 **适用浏览器**: Chrome / Edge / Firefox
 **目标站点**: 京东夺宝岛 / 拍拍列表页（`*.jd.com` 下含 auction/paimai/paipai 路径的接口均可被捕获）
@@ -159,6 +159,13 @@ JD-Auction-Search/
 ---
 
 ## 6. 版本历史
+
+### v1.6.3
+- 规范与版本号统一：openspec 三文档（spec/tasks/check_list）、prototype 设计系统、版本同步脚本文件头统一对齐至 v1.6.3
+- 代码审查结论：全量源码通过 ESLint（0 错误）、冒烟测试 97/0 全绿、无超 200 行文件、XSS 防护（textContent/escapeHtml/SAFE_URL_RE）与接口白名单（`JD_HOST_RE`/`SAFE_URL_RE`）到位、资源清理与幂等守卫完善，无需语法/安全/性能修复
+
+### v1.6.2
+- 卡片新增拍卖时间展示（`.p-time`），信息层级调整（价格区上移、名称置底），选择器集中维护 `TIME`
 
 ### v1.6.1
 - 卡片价格与名称显示微调：修复搜索结果卡片底部边距过高（`.jds-product-body` 加 `flex:1` 撑满卡片剩余高度，移除 `.note` 多余 `margin-top`）
