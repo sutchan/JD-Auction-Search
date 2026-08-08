@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/template.js v1.5.5
+// JD-Auction-Search/src/api/template.js v1.6.0
 // 列表请求模板管理：URL 打分选优、模板捕获/锁定、首页数据缓存与拍卖 URL 判定
 // 网络拦截见 ./interceptor.js，分页重放见 ./paginator.js
 

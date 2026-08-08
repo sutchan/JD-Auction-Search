@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/price-text.js v1.5.5
+// JD-Auction-Search/src/dom/price-text.js v1.6.0
 // 原生卡片价格文本回查：按商品名从页面 .p-price 取实际显示价（带缓存）
 // 商品字段提取见 ./extract.js
 
@@ -33,7 +33,11 @@
     const priceEl = pEl || (Array.from(card.querySelectorAll(this.SELECTORS.PRICE))
       .find(e => !/origin/i.test(e.className))) || null;
     if (!priceEl) return '';
-    return priceEl.textContent.replace(/\s+/g, ' ').trim();
+    // 现价金额实际在 .p-price 内的 <i> 标签；直接取全文会混入「起拍/封顶」等杂文，
+    // 故优先取 .p-price i 文本，无 <i> 时回退元素全文。
+    const amountEl = (pEl && pEl.querySelector('i')) || null;
+    const src = amountEl || priceEl;
+    return src.textContent.replace(/\s+/g, ' ').trim();
   };
 
   /**

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.0 (fix: 结果卡片价格渲染与兜底健壮性)
+- 现价取数修复：京东现价实际位于 `div.p-price > i`，提取层（`extract.js`/`price-text.js`）改为优先取 `.p-price i` 文本，避免混入「起拍/封顶」等杂文导致价格解析错位；搜索/排序与展示一致
+- 结果卡片价格 class 对齐京东原生语义：起拍价/现价 `.p-price`、原价 `.origin-price`、出价人数 `.note`（作用域隔离 `#jds-results-host`，不污染页面）
+- 修复 `.p-price` 不显示：移除 `priceEqualsOrig` 对主价行的跳过（夺宝岛商品当前价常等于封顶价导致扩展卡片不渲染现价），`.p-price` 与 `.note` 始终显示
+- 原价与现价同行：新增 `.jds-product-price-row` 横向 flex 容器，`.origin-price` 与 `.p-price` 基线对齐同行，`.note` 在下行
+- 出价人数兜底：出价人数渲染移出 `priceEqualsOrig` 分支，与价格分支平级，避免「当前价=封顶价」时连坐吞掉
+- 卡片下边距优化：`.jds-product-body` 底部内边距 14→12px，结果网格容器 `padding-bottom` 40→28px
+- 验证：ESLint 0 错；`scripts/smoke.js` 97/0 全绿；`node build.js --no-preview` 成功
+
 ## v1.5.5 (fix: 代码审查修复)
 - 全面审查 src 全部源文件（安全/错误处理/逻辑/资源泄漏/i18n）：安全与资源清理整体良好，本次修复以下问题：
   - `interceptor.js`：XHR 每次 `send()` 累加 `load` 监听器，同一对象重复 send 会重复触发 `handleResponse` → 改为先移除上次监听再绑定

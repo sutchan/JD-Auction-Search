@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/price-render.js v1.5.5
+// JD-Auction-Search/src/ui/price-render.js v1.6.0
 // 商品卡价格区渲染：主价格行（起拍标签/货币符号/整数.小数）与划线原价行
 // 卡片整体构建见 ./products.js
 
@@ -55,7 +55,8 @@
   JDSUI._buildPriceRow = function _buildPriceRow(model) {
     const U = global.JDSUtils;
     const priceEl = document.createElement('div');
-    priceEl.className = 'jds-product-price';
+    // 起拍价/现价：对齐京东原生语义 class .p-price（作用域隔离在 #jds-results-host 内，不污染页面）
+    priceEl.className = 'p-price';
 
     const labelEl = document.createElement('span');
     labelEl.className = 'jds-price-label';
@@ -102,7 +103,8 @@
   JDSUI._buildOrigPriceRow = function _buildOrigPriceRow(model) {
     const U = global.JDSUtils;
     const sub = document.createElement('div');
-    sub.className = 'jds-product-subprice';
+    // 原价（封顶/参考价）：对齐京东原生语义 class .origin-price
+    sub.className = 'origin-price';
     const origEl = document.createElement('span');
     // 仅显示 orig（无主价行）时去划线，作为唯一实际价格正常呈现；否则保留划线对比样式
     origEl.className = 'jds-product-orig' + (model.priceEqualsOrig ? ' jds-product-orig-only' : '');
@@ -119,16 +121,38 @@
    * @param {string} name - 商品名称
    */
   JDSUI._renderPriceSection = function _renderPriceSection(body, p, name) {
+    const U = global.JDSUtils;
     const model = this._resolvePriceModel(p, name);
 
-    if (!model.priceEqualsOrig) {
-      body.appendChild(this._buildPriceRow(model));
-    }
+    // 现价行容器：将 .p-price（现价/起拍价）与 .origin-price（划线原价）放在同一行。
+    // 不依赖 priceEqualsOrig——夺宝岛商品当前价常等于封顶价，若跳过会导致扩展卡片不显示 .p-price。
+    const priceRow = document.createElement('div');
+    priceRow.className = 'jds-product-price-row';
+    const row = this._buildPriceRow(model);
+    priceRow.appendChild(row);
 
-    // 有封顶/原价且主价不同时展示划线原价
+    // 有封顶/原价且「不等于现价」时才额外展示划线原价 .origin-price（与主价同行），
+    // priceEqualsOrig（原价==现价）时不再重复渲染，避免原价与主价冗余。
     if (model.origPrice != null && isFinite(model.origPrice) && model.origPrice > 0 &&
         (!model.hasCurrent || model.origPrice > model.rawCurrent)) {
-      body.appendChild(this._buildOrigPriceRow(model));
+      priceRow.appendChild(this._buildOrigPriceRow(model));
+    }
+    body.appendChild(priceRow);
+
+
+    // 出价人数：与主价格行平级（独立于 priceEqualsOrig 分支之外），
+    // 避免夺宝岛商品「当前价=封顶价」走仅划线原价分支时把出价人数一并吞掉。
+    // .jds-price-int 严格承载现价整数，.jds-price-dec 严格承载现价小数，互不串味。
+    const bidCount = U.getProductBidCount(p);
+    if (bidCount > 0) {
+      const meta = document.createElement('div');
+      // 出价人数：对齐京东原生语义 class .note
+      meta.className = 'note';
+      const bidEl = document.createElement('span');
+      bidEl.className = 'jds-product-bid';
+      bidEl.textContent = bidCount + getMessage('bidCountSuffix');
+      meta.appendChild(bidEl);
+      body.appendChild(meta);
     }
   };
 })(window);

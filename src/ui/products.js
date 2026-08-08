@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/products.js v1.5.5
+// JD-Auction-Search/src/ui/products.js v1.6.0
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
 // 保证跨页搜索结果在任意京东页面都稳定可见。
 // 价格区渲染见 ./price-render.js，面板生命周期见 ./results.js，骨架屏见 ./skeleton.js
@@ -148,20 +148,8 @@
     titleEl.textContent = name;
     body.appendChild(titleEl);
 
-    // 价格区（主价格行 + 划线原价行）见 price-render.js
+    // 价格区（主价格行 + 划线原价行 + 出价人数，见 price-render.js）
     this._renderPriceSection(body, p, name);
-
-    // 出价人数：独立 badge 行，较小灰色字，与价格数字明显区分
-    const bidCount = U.getProductBidCount(p);
-    if (bidCount > 0) {
-      const meta = document.createElement('div');
-      meta.className = 'jds-product-meta';
-      const bidEl = document.createElement('span');
-      bidEl.className = 'jds-product-bid';
-      bidEl.textContent = bidCount + getMessage('bidCountSuffix');
-      meta.appendChild(bidEl);
-      body.appendChild(meta);
-    }
 
     card.appendChild(body);
     return card;

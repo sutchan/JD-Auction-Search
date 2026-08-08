@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/components.js v1.5.5
+// JD-Auction-Search/src/ui/components.js v1.6.0
 // 组件样式：仅包含 Shadow DOM 工具栏所需的 SearchBar 与响应式
 // 商品卡片 / 骨架屏 / 空状态 / 网格等组件样式已迁至 results/host.js 的 RESULTS_COMPONENT_CSS（注入浅 DOM 结果面板）
 // 由 ui/styles.js 的 _getInlineStyles 组合注入 Shadow DOM（工具栏样式由 _getInlineStyles 动态拼入）

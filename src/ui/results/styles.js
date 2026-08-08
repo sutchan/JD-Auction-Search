@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.5.5
+// JD-Auction-Search/src/ui/results/styles.js v1.6.0
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 
@@ -110,30 +110,33 @@
     #jds-results-host .jds-product-img-el { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: var(--secondary); }
     /* 图片悬停轻微放大（复刻原型 product-card 交互） */
     #jds-results-host .jds-product-card:hover .jds-product-img-el { transform: scale(1.06); transition: transform var(--dur-base) var(--ease-out); }
-    #jds-results-host .jds-product-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    #jds-results-host .jds-product-body { padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
     #jds-results-host .jds-product-name {
       font-size: 14px; font-weight: 500; color: var(--foreground); line-height: 1.45;
       min-height: 38px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    #jds-results-host .jds-product-price {
+    #jds-results-host .jds-product-price-row {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px;
+    }
+    #jds-results-host .p-price {
       display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px;
       font-family: var(--font-display); font-size: 16px; font-weight: 400;
       color: var(--primary); letter-spacing: -0.01em; line-height: 1.1;
       font-variant-numeric: tabular-nums;
     }
-    #jds-results-host .jds-product-price .jds-price-label { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: center; }
-    #jds-results-host .jds-product-price .jds-price-yen { font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: baseline; }
-    #jds-results-host .jds-product-price .jds-price-amount { font-variant-numeric: tabular-nums; }
-    #jds-results-host .jds-product-price .jds-price-int { font-variant-numeric: tabular-nums; }
-    #jds-results-host .jds-product-price .jds-price-dec-sep { font-variant-numeric: tabular-nums; }
-    #jds-results-host .jds-product-price .jds-price-dec { font-size: 0.7em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
-    #jds-results-host .jds-product-subprice { display: flex; align-items: center; }
-    #jds-results-host .jds-product-subprice .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
+    #jds-results-host .p-price .jds-price-label { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: center; }
+    #jds-results-host .p-price .jds-price-yen { font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: baseline; }
+    #jds-results-host .p-price .jds-price-amount { font-variant-numeric: tabular-nums; }
+    #jds-results-host .p-price .jds-price-int { font-variant-numeric: tabular-nums; }
+    #jds-results-host .p-price .jds-price-dec-sep { font-variant-numeric: tabular-nums; }
+    #jds-results-host .p-price .jds-price-dec { font-size: 0.7em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+    #jds-results-host .origin-price { display: flex; align-items: baseline; }
+    #jds-results-host .origin-price .jds-product-orig { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; }
     /* 仅显示划线原价（无主价行，主价与之重复）时去划线，作为唯一实际价格正常呈现 */
-    #jds-results-host .jds-product-subprice .jds-product-orig-only { text-decoration: none; color: var(--foreground); }
-    #jds-results-host .jds-product-subprice .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
-    #jds-results-host .jds-product-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    #jds-results-host .origin-price .jds-product-orig-only { text-decoration: none; color: var(--foreground); }
+    #jds-results-host .origin-price .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
+    #jds-results-host .note { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
     #jds-results-host .jds-product-bid {
       display: inline-flex; align-items: center; padding: 2px 9px;
       background: var(--secondary); color: var(--muted-foreground);
@@ -148,7 +151,7 @@
     #jds-results-host .jds-load-more:hover { border-color: var(--primary); color: var(--primary); }
 
     /* Grid 网格（每行固定 5 个结果） */
-    #jds-results-host .jds-product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding: 16px 24px 40px; min-height: 420px; }
+    #jds-results-host .jds-product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding: 16px 24px 28px; min-height: 420px; }
 
     @media (prefers-reduced-motion: reduce) {
       #jds-results-host .jds-product-card,

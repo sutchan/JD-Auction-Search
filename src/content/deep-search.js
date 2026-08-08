@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/deep-search.js v1.5.5
+// JD-Auction-Search/src/content/deep-search.js v1.6.0
 // 深度后台搜索：合并新商品、自动加载（分页重放 + 排序维度深搜 + 边搜边显）
 // 搜索编排（过滤/渲染/状态切换）见 ./search.js
 

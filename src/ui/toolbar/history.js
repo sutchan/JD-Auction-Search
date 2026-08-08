@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar/history.js v1.5.5
+// JD-Auction-Search/src/ui/toolbar/history.js v1.6.0
 // 搜索历史：chrome.storage.local 持久化、增删改查与下拉列表渲染/显隐
 // 工具栏外壳与事件绑定见 ../toolbar.js
 

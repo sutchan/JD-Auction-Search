@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/extract.js v1.5.5
+// JD-Auction-Search/src/utils/extract.js v1.6.0
 // 商品基础字段提取：从多态 API 对象中兼容取 id / name / 主图 / 详情链接
 // 价格与出价人数相关提取见 ./price.js
 

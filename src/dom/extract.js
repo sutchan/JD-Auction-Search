@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.5.5
+// JD-Auction-Search/src/dom/extract.js v1.6.0
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url）
 // 价格文本回查见 ./price-text.js，原生列表显隐见 ./native-list.js
 
@@ -49,9 +49,16 @@
     const priceEl = (pPriceEl && !/origin/i.test(pPriceEl.className) ? pPriceEl
       : Array.from(priceEls).find(e => !/origin/i.test(e.className)))
       || priceEls[0] || null;
-    // 保留 p-price 原始文本（如 "¥1,288.00"），供渲染层直接显示，避免单位/千分位/分单位误差
-    const priceText = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '';
-    const price = priceEl ? global.JDSUtils.parsePrice(priceEl.textContent) : 0;
+    // 现价金额实际在 .p-price 内的 <i> 标签（如 <div class="p-price"><i>¥1,288.00</i></div>），
+    // 直接取 .p-price 全文会混入「起拍/封顶」等杂文；故金额优先取 .p-price i 文本，
+    // 无 <i> 时回退 .p-price 全文。保留原始文本供渲染层直接显示，避免单位/千分位误差。
+    const priceAmountEl = (pPriceEl && pPriceEl.querySelector('i')) || null;
+    const priceText = priceAmountEl
+      ? priceAmountEl.textContent.replace(/\s+/g, ' ').trim()
+      : (priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim() : '');
+    const price = priceAmountEl
+      ? global.JDSUtils.parsePrice(priceAmountEl.textContent)
+      : (priceEl ? global.JDSUtils.parsePrice(priceEl.textContent) : 0);
 
     // 原价：优先取 class 含 old/original/origin/market/ref 的划线价片段（避免与现价同元素）
     let originalPrice = 0;
