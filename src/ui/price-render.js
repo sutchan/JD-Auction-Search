@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/price-render.js v1.6.3
+// JD-Auction-Search/src/ui/price-render.js v1.6.4
 // 商品卡价格区渲染：主价格行（起拍标签/货币符号/整数.小数）与划线原价行
 // 卡片整体构建见 ./products.js
 
@@ -115,6 +115,7 @@
 
   /**
    * 渲染拍卖时间行（.p-time 倒计时/结束时间），置于价格区顶部
+   * 若文案含可解析的剩余时间，注册到全局倒计时计时器实现「跳动」（见 ./countdown.js）
    * @private
    * @param {HTMLElement} body - 卡片正文容器
    * @param {Object} p - 商品对象
@@ -128,6 +129,7 @@
     let typeCls = 'is-ending'; // 默认按结束倒计时（红）呈现
     if (/(开始|开拍|距开|start)/.test(t)) typeCls = 'is-starting';
     else if (/(结束|截标|距结|end|close)/.test(t)) typeCls = 'is-ending';
+
     const timeEl = document.createElement('div');
     // 拍卖时间：对齐京东原生语义 class .p-time
     timeEl.className = 'p-time ' + typeCls;
@@ -135,6 +137,11 @@
     inner.className = 'jds-product-time';
     inner.textContent = timeText;
     timeEl.appendChild(inner);
+
+    // 客户端倒计时：解析剩余秒数并注册到单例计时器，实现每秒跳动
+    if (global.JDSUI.Countdown) {
+      global.JDSUI.Countdown.register(timeEl, timeText, typeCls);
+    }
     body.appendChild(timeEl);
   };
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/extract.js v1.6.3
+// JD-Auction-Search/src/dom/extract.js v1.6.4
 // DOM 提取：从真实商品卡片提取完整字段（id/name/price/image/url）
 // 价格文本回查见 ./price-text.js，原生列表显隐见 ./native-list.js
 

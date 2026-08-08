@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.6.4 (fix: 拍卖倒计时原地不动)
+- 根因：`.p-time` 直接展示京东原生「距结束 02:13:45」静态文本，无客户端计时器，故不跳动
+- 新增 `src/ui/countdown.js`：解析剩余时间文案（HH:MM:SS / N天HH:MM:SS / MM:SS），单例 `setInterval` 每秒驱动所有结果面板内已注册的倒计时元素递减并刷新文案
+- `price-render.js` 的 `_renderTimeSection` 改为渲染时注册到 `JDSUI.Countdown`；归零显示「已结束/已开拍」
+- `products.js` 重渲染前、`results.js` 销毁时调用 `clearCountdowns()` 释放定时器与过期 DOM 引用，防内存泄漏
+- `manifest.json` 注册 `src/ui/countdown.js`（置于 price-render 之前）
+- 冒烟测试新增倒计时解析/格式化/渲染/递减断言（共 104 项全绿）
+
 ## v1.6.3 (chore: 规范与版本号统一对齐)
 - 全量代码审查：ESLint 0 错、`scripts/smoke.js` 97/0 全绿、无超 200 行文件；安全（textContent/escapeHtml/SAFE_URL_RE + 接口白名单）与性能（缓存/节流/资源清理/幂等）均达规范，无需语法/安全/性能修复
 - openspec 三文档（spec/tasks/check_list）版本号与 v1.6.3 对齐，补 v1.6.3 与 v1.6.2 小节

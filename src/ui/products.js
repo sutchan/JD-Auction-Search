@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/products.js v1.6.3
+// JD-Auction-Search/src/ui/products.js v1.6.4
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
 // 保证跨页搜索结果在任意京东页面都稳定可见。
 // 价格区渲染见 ./price-render.js，面板生命周期见 ./results.js，骨架屏见 ./skeleton.js
@@ -28,6 +28,8 @@
     const panel = this.resultsRoot && this.resultsRoot.querySelector('.jds-results-panel');
     if (!panel) return;
     this.gridElement = null;
+    // 重渲染前清理上一轮倒计时注册，避免过期 DOM 引用导致内存泄漏与误更新
+    this.clearCountdowns();
     panel.innerHTML = '';
 
     if (!products || products.length === 0) {

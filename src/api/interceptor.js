@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/interceptor.js v1.6.3
+// JD-Auction-Search/src/api/interceptor.js v1.6.4
 // API 拦截器：包裹 fetch / XHR 捕获页面真实列表请求与响应
 // 模板打分与首页缓存见 ./template.js，分页重放见 ./paginator.js
 

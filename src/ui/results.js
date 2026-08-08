@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.6.3
+// JD-Auction-Search/src/ui/results.js v1.6.4
 // 结果面板公开 API：展示/隐藏、骨架屏、空状态、销毁
 // 面板宿主逻辑见 results/host.js
 
@@ -99,6 +99,8 @@
     this._onFocusOut = null;
     this._historyCtx = null;
     this.clearSearch = null;
+    // 释放倒计时单例计时器，避免 destroy 后 interval 仍持有 DOM 引用
+    if (typeof this.clearCountdowns === 'function') this.clearCountdowns();
 
     const wrapper = document.getElementById('jds-search-wrapper');
     if (wrapper) wrapper.remove();
