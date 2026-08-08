@@ -1,10 +1,6 @@
 .workbuddy/
 /.workbuddy
 /node_modules
-/openspec
-openspec/
-/scripts
-scripts/
 *_test*.js
 .codebuddy/
 /.codebuddy
@@ -12,7 +8,6 @@ scripts/
 .dedup-trash/
 .playwright-cli/
 *.code-workspace
-prototype/
 .eslintrc.json
 package-lock.json
 
