@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/selectors.js v1.6.0
+// JD-Auction-Search/src/dom/selectors.js v1.6.1
 // 京东页面 DOM 选择器集中配置：所有依赖京东结构的class匹配都在此维护，
 // 改版时只需在此一处调整，避免散落在 toolbar/filter/observer/extract 多处。
 

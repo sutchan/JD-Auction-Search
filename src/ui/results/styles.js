@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.6.0
+// JD-Auction-Search/src/ui/results/styles.js v1.6.1
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 
@@ -110,10 +110,10 @@
     #jds-results-host .jds-product-img-el { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: var(--secondary); }
     /* 图片悬停轻微放大（复刻原型 product-card 交互） */
     #jds-results-host .jds-product-card:hover .jds-product-img-el { transform: scale(1.06); transition: transform var(--dur-base) var(--ease-out); }
-    #jds-results-host .jds-product-body { padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+    #jds-results-host .jds-product-body { flex: 1 1 auto; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
     #jds-results-host .jds-product-name {
-      font-size: 14px; font-weight: 500; color: var(--foreground); line-height: 1.45;
-      min-height: 38px;
+      font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
+      min-height: 35px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     #jds-results-host .jds-product-price-row {
@@ -126,9 +126,9 @@
       font-variant-numeric: tabular-nums;
     }
     #jds-results-host .p-price .jds-price-label { margin-right: 4px; font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: center; }
-    #jds-results-host .p-price .jds-price-yen { font-size: 13px; color: var(--muted-foreground); font-weight: 400; align-self: baseline; }
+    #jds-results-host .p-price .jds-price-yen { font-size: 13px; color: var(--primary); font-weight: 400; align-self: baseline; }
     #jds-results-host .p-price .jds-price-amount { font-variant-numeric: tabular-nums; }
-    #jds-results-host .p-price .jds-price-int { font-variant-numeric: tabular-nums; }
+    #jds-results-host .p-price .jds-price-int { font-size: 20px; font-variant-numeric: tabular-nums; }
     #jds-results-host .p-price .jds-price-dec-sep { font-variant-numeric: tabular-nums; }
     #jds-results-host .p-price .jds-price-dec { font-size: 0.7em; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
     #jds-results-host .origin-price { display: flex; align-items: baseline; }
@@ -136,7 +136,7 @@
     /* 仅显示划线原价（无主价行，主价与之重复）时去划线，作为唯一实际价格正常呈现 */
     #jds-results-host .origin-price .jds-product-orig-only { text-decoration: none; color: var(--foreground); }
     #jds-results-host .origin-price .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
-    #jds-results-host .note { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    #jds-results-host .note { display: flex; align-items: center; gap: 8px; }
     #jds-results-host .jds-product-bid {
       display: inline-flex; align-items: center; padding: 2px 9px;
       background: var(--secondary); color: var(--muted-foreground);

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.6.1 (style: 卡片价格与名称显示微调)
+- 修复搜索结果卡片底部边距过高：`.jds-product-body` 加 `flex:1` 撑满卡片剩余高度，移除 `.note` 多余 `margin-top`，消除部分卡片底部空白不一致
+- `.jds-price-yen`（¥符号）颜色改为 `var(--primary)`，与 `.jds-price-int` 现价整数同色
+- `.jds-price-int` 字号 16→20px，现价数字更突出
+- `.jds-product-name` 字号 14→12px，`min-height` 同步 38→35px，名称区更紧凑
+- 验证：ESLint 0 错；`node build.js` 成功
+
 ## v1.6.0 (fix: 结果卡片价格渲染与兜底健壮性)
 - 现价取数修复：京东现价实际位于 `div.p-price > i`，提取层（`extract.js`/`price-text.js`）改为优先取 `.p-price i` 文本，避免混入「起拍/封顶」等杂文导致价格解析错位；搜索/排序与展示一致
 - 结果卡片价格 class 对齐京东原生语义：起拍价/现价 `.p-price`、原价 `.origin-price`、出价人数 `.note`（作用域隔离 `#jds-results-host`，不污染页面）
