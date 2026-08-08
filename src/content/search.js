@@ -18,6 +18,8 @@
     const products = JDSUtils.extractProductsFromResponse(data);
 
     if (products.length > 0) {
+      // 拦截器增量捕获到数据：清除先前的「加载失败」标记，恢复正常展示
+      this.state._apiFailed = false;
       this.state.products = JDSUtils.deduplicateProducts([
         ...this.state.products,
         ...products
@@ -39,6 +41,8 @@
       const domProducts = JDSDom.extractProductsFromDOM();
       if (domProducts.length) {
         this.state.products = JDSUtils.deduplicateProducts(domProducts);
+        // DOM 兜底成功拿到数据：清除先前的「加载失败」标记，恢复正常展示
+        this.state._apiFailed = false;
       }
     }
 
@@ -72,7 +76,13 @@
           JDSUI.setLoadingHint(false);
         }
       } else {
-        JDSUI.showLoading();
+        // 无商品数据可渲染：若此前接口已彻底失败（重试耗尽且无任何数据），
+        // 展示失败空态而非一直挂骨架屏；否则展示骨架屏等待后续接口恢复。
+        if (this.state._apiFailed) {
+          JDSUI.showEmptyState();
+        } else {
+          JDSUI.showLoading();
+        }
       }
 
       // 后台继续全量加载（单飞，避免多次搜索并发重入）：

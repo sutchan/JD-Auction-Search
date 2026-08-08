@@ -65,6 +65,8 @@
       }
 
       if (items && items.length > 0) {
+        // 接口成功聚合到数据：清除先前的「加载失败」标记，恢复正常展示
+        this.state._apiFailed = false;
         this.state.products = JDSUtils.deduplicateProducts(items);
         // 真正到达末页才标记全量就绪（finished）；否则保留「加载中」提示由外层刷新
         if (finished) {
@@ -101,13 +103,41 @@
         return;
       }
 
-      // 列表页降级：拦截器已捕获到首页数据则直接用；否则从当前 DOM 提取
-      JDSUtils.showToast('toastApiFailed');
+      // 列表页降级：API 全量分页失败后的兜底。
+      // 关键：京东夺宝岛列表由 AJAX 渲染，API 失败时「页面 DOM 往往也为空」，
+      // 故绝不能把「依赖页面内容」当作唯一退路并就此放弃重试。
+      // - 优先保留拦截器已增量捕获到的任何商品（state.products 已有则不覆盖）；
+      // - DOM 提取结果作为「补充合并」而非「覆盖替换」；
+      // - DOM 也为空且尚无任何数据时：只要未达重试上限，保持加载态等待后续接口恢复
+      //   （_handleApiResponse 会在模板/首页数据抵达时重新触发全量重放），而非永久白屏。
       const domProducts = JDSDom.extractProductsFromDOM();
       if (domProducts.length > 0) {
-        this.state.products = JDSUtils.deduplicateProducts(domProducts);
+        // 合并 DOM 提取结果（含拦截器已捕获数据），去重避免重复计数
+        this.state.products = JDSUtils.deduplicateProducts([
+          ...this.state.products,
+          ...domProducts
+        ]);
       }
-      this.state.isLoading = false;
+
+      if (this.state.products.length > 0) {
+        // 已有可展示数据（接口增量或 DOM 兜底命中其一）：复位加载态并渲染
+        this.state.isLoading = false;
+        this._applyFilterAndUpdate();
+        return;
+      }
+
+      // 接口与 DOM 双双无数据：勿过早放弃。若仍可能拿到接口数据（未耗尽重试），
+      // 保持 isLoading=true 让面板显示骨架/加载态，等待后续 _handleApiResponse 恢复；
+      // 仅当重试已耗尽且仍无数据时，明确告知用户接口加载失败，由 _applyFilterAndUpdate
+      // 在搜索态展示空态（而非白屏）。无论哪种，都不在这里强行结束重试链路。
+      if ((this._loadRetries || 0) >= 3) {
+        // 重试已耗尽且仍无任何数据：明确标记接口加载失败（不再期待恢复），
+        // 由 _applyFilterAndUpdate 在搜索态展示失败空态，而非一直挂骨架屏白等。
+        JDSUtils.showToast('toastApiFailed');
+        this.state._apiFailed = true;
+        this.state.isLoading = false;
+      }
+      // 未达上限：保持 isLoading=true，交给 finally 的 _loadRetries++ 与后续接口恢复
       this._applyFilterAndUpdate();
     } catch (e) {
       // 跨页API加载失败：复位标志并刷新（降级由上方 DOM 提取兜底）
