@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/native-list.js v1.6.6
+// JD-Auction-Search/src/dom/native-list.js v.
 // 原生列表显隐：搜索态隐藏京东原生商品列表，退出搜索态恢复
 // 商品提取见 ./extract.js
 

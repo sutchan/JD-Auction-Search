@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.7 (refactor: 重构构建脚本 build.js)
+- 拆分 build.js 为职责单一函数：syncHeaderVersion / copyDirWithVersion / verifyManifestScripts / assembleDist / buildZip(Promise 化) / previewBuild / run
+- 主流程改为 `run().catch()` 异步控制，构建失败时设置 `process.exitCode=1`（CI 可感知）
+- 清理临时 dist 目录移至主流程末尾统一处理；zip 打包回调改为 Promise 返回产物信息
+- 版本号全量同步至 v1.6.7
+
 ## v1.6.6 (docs: 去除 PNG 图标说明)
 - 删除 README/README_EN「准备图标（可选）」小节：manifest 未引用任何 `icons`，说明与实际不符
 - 版本号全量同步至 v1.6.6（文件头 + openspec 三文档 + prototype + README 徽章）

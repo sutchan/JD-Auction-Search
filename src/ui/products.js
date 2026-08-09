@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/products.js v1.6.6
+// JD-Auction-Search/src/ui/products.js v.
 // 商品渲染：统一使用扩展自带的内联样式卡片（图片+标题+价格），彻底摆脱对京东原生 DOM/CSS 的依赖，
 // 保证跨页搜索结果在任意京东页面都稳定可见。
 // 价格区渲染见 ./price-render.js，面板生命周期见 ./results.js，骨架屏见 ./skeleton.js
