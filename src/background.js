@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/background.js v1.6.4
+// JD-Auction-Search/src/background.js v1.6.5
 // MV3 后台服务（service worker）：扩展生命周期管理与消息中枢
 // 本扩展以 content script 直接驱动页面增强（挂载搜索 UI、拦截拍拍列表接口），
 // 后台脚本保持轻量：负责安装/激活事件与 content script 的消息中转。

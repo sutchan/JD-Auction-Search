@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/filter.js v1.6.4
+// JD-Auction-Search/src/dom/filter.js v1.6.5
 // 原生列表过滤：根据关键词更新页面商品显隐（浏览态）；产品容器精确定位
 
 (function(global) {

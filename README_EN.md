@@ -5,7 +5,7 @@
 # JD Auction Search Enhancer
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.5.5-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.5-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -109,6 +109,7 @@ This extension fills the native gap of "search" on the JD auction (Paipai) list 
 - **🕘 Search history**: persists the last 10 keywords locally, kept across reloads; supports per-item delete and clear-all.
 - **➕ Loading hint**: while aggregation is incomplete, a "(N aggregated, still loading)" hint appears after the toolbar count.
 - **🌐 Multi-language**: Simplified Chinese / English UI, auto-switched by browser language.
+- **🕒 Auction countdown**: the auction time shows at the top of each card; a client-side singleton timer ticks down every second, with red/yellow highlights for ending/starting countdowns and "Ended"/"Started" at zero.
 - **🔒 Style isolation**: the search bar uses a Shadow DOM and the result panel uses design tokens, immune to JD's page CSS.
 
 ---
@@ -184,7 +185,7 @@ graph LR
 Issues and PRs are welcome. Development conventions:
 
 - Code style follows ESLint (`.eslintrc.json`); run `npm run lint` before committing.
-- Tests: `npm test` (i.e. `node scripts/smoke.js`, a jsdom full-flow smoke test with ~97 assertions covering interception / i18n / price / security / DOM / deep-search, see `scripts/smoke.js`).
+- Tests: `npm test` (i.e. `node scripts/smoke.js`, a jsdom full-flow smoke test with 108 assertions covering interception / i18n / price / security / DOM / deep-search / countdown, see `scripts/smoke.js`).
 - Before releasing, sync all file-header versions with `node scripts/bump-version.js <new-version>`.
 
 ---

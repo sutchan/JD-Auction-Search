@@ -10,7 +10,9 @@
 *.code-workspace
 .eslintrc.json
 package-lock.json
-
+build.js
+*.log
+*.txt
 
 # Compiled class file
 *.class
@@ -39,4 +41,7 @@ replay_pid*
 # Build output (intermediate, not source)
 /dist/
 smoke.out.txt
+
+# 临时版本诊断残留（非源码，不入库）
+/miss.txt
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/scripts/bump-version.js v1.6.3
+// JD-Auction-Search/scripts/bump-version.js v1.6.5
 // 同步项目各文件头版本号（package.json / manifest.json / metadata.json / src/*.js 首行）
 // 用法: node scripts/bump-version.js [newVersion]
 //   - 不传参：仅校验当前版本一致性

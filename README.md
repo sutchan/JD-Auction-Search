@@ -5,7 +5,7 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.4-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.5-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -104,6 +104,7 @@
 - **🕘 搜索历史**：本地持久化最近 10 条关键词，刷新不丢失；支持单条删除与一键清空。
 - **➕ 加载进度提示**：全量未聚合完时，工具栏计数后显示「（已聚合 N 条，继续加载中）」。
 - **🌐 多语言**：简体中文 / 英文界面，跟随浏览器语言自动切换。
+- **🕒 拍卖倒计时**：卡片顶部展示拍卖时间，客户端单例计时器每秒递减刷新，结束/开拍倒计时分别以红/黄高亮，归零显示「已结束/已开拍」。
 - **🔒 样式隔离**：搜索栏使用 Shadow DOM，结果面板用设计令牌，不被京东页面 CSS 干扰。
 
 ---
@@ -175,7 +176,7 @@ graph LR
 欢迎提交 Issue 与 PR。开发约定：
 
 - 代码风格遵循 ESLint（`.eslintrc.json`），提交前运行 `npm run lint`。
-- 测试：`npm test`（即 `node scripts/smoke.js`，jsdom 全链路冒烟测试，约 97 项断言覆盖拦截/i18n/价格/安全/DOM/深搜等，见 `scripts/smoke.js`）。
+- 测试：`npm test`（即 `node scripts/smoke.js`，jsdom 全链路冒烟测试，108 项断言覆盖拦截/i18n/价格/安全/DOM/深搜/倒计时等，见 `scripts/smoke.js`）。
 - 版本发布前同步各文件头版本号，运行 `node scripts/bump-version.js <新版本>`。
 
 ---

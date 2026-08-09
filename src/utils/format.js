@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/format.js v1.6.4
+// JD-Auction-Search/src/utils/format.js v1.6.5
 // 文本格式化工具：HTML 转义与价格格式化
 
 (function(global) {
