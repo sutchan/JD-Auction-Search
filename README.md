@@ -5,7 +5,7 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.5-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.6-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -129,10 +129,7 @@
 
 ## 安装
 
-### 1. 准备图标（可选）
-在 `icons/` 目录放入 3 个 PNG 图标：`icon16.png`、`icon48.png`、`icon128.png`。缺少图标也不影响加载。
-
-### 2. 加载到浏览器
+### 1. 加载到浏览器
 - **Chrome / Edge**：打开 `chrome://extensions/` → 开启「开发者模式」→ 点击「加载已解压的扩展程序」→ 选择本项目文件夹。
 - **Firefox**：打开 `about:debugging#/runtime/this-firefox` → 点击「临时加载附加组件」→ 选择 `manifest.json`。
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/price-render.js v1.6.5
+// JD-Auction-Search/src/ui/price-render.js v1.6.6
 // 商品卡价格区渲染：主价格行（起拍标签/货币符号/整数.小数）与划线原价行
 // 卡片整体构建见 ./products.js
 

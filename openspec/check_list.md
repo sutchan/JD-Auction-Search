@@ -17,7 +17,7 @@
 
 ## 质量验收
 
-- [x] `npm run build` 成功输出 `releases/jd-auction-search-v1.6.5.zip`
+- [x] `npm run build` 成功输出 `releases/jd-auction-search-v1.6.6.zip`
 - [x] 测试（`npm test` 即 `node scripts/smoke.js` jsdom 全链路冒烟，约 97 断言）全部通过
 - [x] ESLint（`npm run lint`）无错误
 - [x] 版本号一致：manifest / metadata / package / 各文件头 / 文档
@@ -29,7 +29,7 @@
 
 - [x] README 含三步上手、核心功能、使用说明、安装、工作原理、贡献
 - [x] README 顶部 badges 与效果预览截图展示正常
-- [x] CHANGELOG 记录至 v1.6.5
+- [x] CHANGELOG 记录至 v1.6.6
 - [x] openspec 三文档（spec/tasks/check_list）与代码一致
 - [x] _locales 含 zh_CN 与 en，manifest 含 `default_locale`
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results.js v1.6.5
+// JD-Auction-Search/src/ui/results.js v1.6.6
 // 结果面板公开 API：展示/隐藏、骨架屏、空状态、销毁
 // 面板宿主逻辑见 results/host.js
 

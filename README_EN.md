@@ -5,7 +5,7 @@
 # JD Auction Search Enhancer
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.5-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.6-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -135,11 +135,7 @@ Once the JD auction list page is open, the extension takes over the search exper
 
 ## Installation
 
-### 1. Prepare icons (optional)
-Place 3 PNG icons in `icons/`: `icon16.png`, `icon48.png`, `icon128.png`.
-Missing icons do not block loading.
-
-### 2. Load into the browser
+### 1. Load into the browser
 - **Chrome / Edge**: open `chrome://extensions/` → enable "Developer mode" →
   click "Load unpacked" → select this project folder.
 - **Firefox**: open `about:debugging#/runtime/this-firefox` → click

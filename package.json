@@ -1,6 +1,6 @@
 {
   "name": "jd-auction-search",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "京东夺宝岛搜索增强插件 - 为京东夺宝岛页面增加商品关键词搜索功能（API 拦截缓存 + DOM 提取兜底）",
   "main": "src/background.js",
   "scripts": {

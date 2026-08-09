@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.6.6 (docs: 去除 PNG 图标说明)
+- 删除 README/README_EN「准备图标（可选）」小节：manifest 未引用任何 `icons`，说明与实际不符
+- 版本号全量同步至 v1.6.6（文件头 + openspec 三文档 + prototype + README 徽章）
+
 ## v1.6.5 (docs: 更新项目文档对齐当前功能与版本)
 - 修正 README_EN 版本徽章（1.5.5→1.6.5）、测试断言数（~97→108），并补充「拍卖倒计时」核心功能说明
 - README 与 README_EN 同步补充「🕒 拍卖倒计时」功能条目；README 测试断言数（97→108）
