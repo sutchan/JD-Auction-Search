@@ -1,4 +1,4 @@
-// JD-Auction-Search/scripts/smoke.js v1.6.1
+// JD-Auction-Search/scripts/smoke.js v1.6.8
 // 全链路测试：轻量冒烟（版本/文件/语法）+ jsdom 功能流程（i18n/价格/安全/DOM/去重/拦截/渲染/历史/生命周期）
 // 用法：node scripts/smoke.js
 const fs = require('fs');

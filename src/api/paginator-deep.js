@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/paginator-deep.js v.
+// JD-Auction-Search/src/api/paginator-deep.js v1.6.8
 // 深度分页重放：排序维度识别/应用与「单维度翻页 + 排序维度深搜」编排
 // 基础分页重放见 ./paginator.js（loadAllProducts / _replayTemplate）
 

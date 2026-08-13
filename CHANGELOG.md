@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.6.8 (docs: 完善项目文档)
+- 修正 `openspec/spec.md` 目录树：移除实际不存在的 `icons/` 目录、补充遗漏的 `src/ui/countdown.js` 条目、补全版本历史缺失的 v1.6.6/v1.6.7
+- 修正 `openspec/check_list.md`：测试断言数（约 97→108）、构建产物版本（1.6.7→1.6.8）、补充「拍卖倒计时」功能验收项
+- 修正 README/README_EN 贡献章节版本同步命令（`node scripts/bump-version.js <新版本>` → `npm run version:sync`，从 manifest.json 读取目标版本）
+- 更新 `docs/README.md` 截图说明：`search.png`/`empty.png`/`history.png` 已为真实扩展运行截图
+- 版本号全量同步至 v1.6.8
+
 ## v1.6.7 (refactor: 重构构建脚本 build.js)
 - 拆分 build.js 为职责单一函数：syncHeaderVersion / copyDirWithVersion / verifyManifestScripts / assembleDist / buildZip(Promise 化) / previewBuild / run
 - 主流程改为 `run().catch()` 异步控制，构建失败时设置 `process.exitCode=1`（CI 可感知）

@@ -5,7 +5,7 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.7-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.8-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -174,7 +174,7 @@ graph LR
 
 - 代码风格遵循 ESLint（`.eslintrc.json`），提交前运行 `npm run lint`。
 - 测试：`npm test`（即 `node scripts/smoke.js`，jsdom 全链路冒烟测试，108 项断言覆盖拦截/i18n/价格/安全/DOM/深搜/倒计时等，见 `scripts/smoke.js`）。
-- 版本发布前同步各文件头版本号，运行 `node scripts/bump-version.js <新版本>`。
+- 版本发布前同步各文件头版本号，运行 `npm run version:sync`（即 `node scripts/bump-version.js`，从 `manifest.json` 读取目标版本并全量同步）；如需改版本号先改 `manifest.json` 的 `version` 字段再运行。
 
 ---
 

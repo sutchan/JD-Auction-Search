@@ -1,4 +1,4 @@
-﻿// JD-Auction-Search/build.js v1.6.7
+﻿// JD-Auction-Search/build.js v1.6.8
 // 构建脚本：校验 manifest → 同步版本号 → 复制资源 → 打包 zip
 // 用法：
 //   node build.js              默认构建并预览产物
@@ -23,6 +23,11 @@ const ROOT_FILES = [
   'README_EN.md',
   'LICENSE',
   'CHANGELOG.md'
+];
+
+// 根目录随包发布的目录（整体复制，如图标）
+const ROOT_DIRS = [
+  'icons'
 ];
 
 // 命令行参数：当前仅 --no-preview 生效
@@ -112,6 +117,12 @@ function assembleDist() {
   for (const f of ROOT_FILES) {
     const src = path.join(ROOT, f);
     if (fs.existsSync(src)) fs.copyFileSync(src, path.join(DIST_DIR, f));
+  }
+
+  // 复制根目录下的发布目录（如图标），icons 无 .js，原样拷贝
+  for (const d of ROOT_DIRS) {
+    const srcDir = path.join(ROOT, d);
+    if (fs.existsSync(srcDir)) copyDirWithVersion(srcDir, path.join(DIST_DIR, d));
   }
 
   // 复制 src（排除 node_modules）与 _locales（manifest 声明 default_locale，缺则 Chrome 拒绝加载）

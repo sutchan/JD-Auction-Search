@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar/history-item.js v.
+// JD-Auction-Search/src/ui/toolbar/history-item.js v1.6.8
 // 搜索历史单条项构建：文本 + 删除按钮 + 交互事件
 // 历史列表渲染/显隐与持久化见 ./history.js
 

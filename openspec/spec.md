@@ -1,7 +1,7 @@
 # 京东夺宝岛搜索增强 — 项目规范（Spec）
 
 **项目名称**: JD-Auction-Search
-**版本**: 1.6.7
+**版本**: 1.6.8
 **类型**: 浏览器扩展插件（Manifest V3）
 **适用浏览器**: Chrome / Edge / Firefox
 **目标站点**: 京东夺宝岛 / 拍拍列表页（`*.jd.com` 下含 auction/paimai/paipai 路径的接口均可被捕获）
@@ -38,8 +38,8 @@ JD-Auction-Search/
 ├── README.md / README_EN.md # 使用文档
 ├── prototype/               # 设计原型（index.html 设计系统）
 ├── docs/                    # 仓库展示素材（banner.png / screenshots/）
+├── icons/                   # 扩展图标（16/48/128 PNG，manifest 引用）
 ├── _locales/                # 国际化资源（zh_CN / en）
-├── icons/                   # 扩展图标（16/48/128）
 ├── src/
 │   ├── background.js        # Service Worker 后台（MV3 service_worker）
 │   ├── content.js           # 主入口：引导增强器初始化
@@ -79,6 +79,7 @@ JD-Auction-Search/
 │   │   │   └── styles.js    #   面板与浅 DOM 组件样式
 │   │   ├── products.js      #   商品卡渲染（内联样式，脱离原生 DOM）
 │   │   ├── price-render.js  #   价格区渲染（主价/划线原价）
+│   │   ├── countdown.js     #   拍卖倒计时单例计时器（每秒递减刷新剩余时间）
 │   │   └── skeleton.js      #   骨架屏 fallback
 │   └── utils/               # 工具层
 │       ├── index.js         #   命名空间引导
@@ -159,6 +160,12 @@ JD-Auction-Search/
 ---
 
 ## 6. 版本历史
+
+### v1.6.7
+- 重构构建脚本 build.js：模块化拆分、zip 打包 Promise 化、构建失败设置退出码；版本号全量同步至 v1.6.7
+
+### v1.6.6
+- 补充项目文档：修正 spec.md 目录树与版本历史、check_list.md 断言数（97→108）与拍卖倒计时验收项、README 贡献章节版本同步命令描述、docs/README 截图说明
 
 ### v1.6.5
 - 文档更新：README/README_EN 补充「拍卖倒计时」功能说明、修正测试断言数（108）与 README_EN 版本徽章（1.5.5→1.6.5）；版本号全量同步至 v1.6.5

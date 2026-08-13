@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/api/paginator.js v.
+// JD-Auction-Search/src/api/paginator.js v1.6.8
 // 分页重放编排：基于候选请求模板逐页重放，聚合全部分页商品（多页面搜索的数据基础）
 // 辅助函数（URL 绝对化/分页参数识别/单页请求构建）见 ./paginator-rules.js
 

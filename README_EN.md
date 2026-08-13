@@ -5,7 +5,7 @@
 # JD Auction Search Enhancer
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.7-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.8-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -182,7 +182,7 @@ Issues and PRs are welcome. Development conventions:
 
 - Code style follows ESLint (`.eslintrc.json`); run `npm run lint` before committing.
 - Tests: `npm test` (i.e. `node scripts/smoke.js`, a jsdom full-flow smoke test with 108 assertions covering interception / i18n / price / security / DOM / deep-search / countdown, see `scripts/smoke.js`).
-- Before releasing, sync all file-header versions with `node scripts/bump-version.js <new-version>`.
+- Before releasing, sync all file-header versions with `npm run version:sync` (i.e. `node scripts/bump-version.js`, which reads the target version from `manifest.json`). Update the `version` field in `manifest.json` first if you need to bump the version.
 
 ---
 
