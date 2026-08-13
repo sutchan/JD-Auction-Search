@@ -14,11 +14,12 @@
 - [x] 聚焦空搜索框显示历史下拉，点击外部/失焦正常收起
 - [x] 结果面板含骨架屏、空状态、加载更多
 - [x] 多语言切换（zh_CN / en）正常
+- [x] 拍卖倒计时生效：结果卡片显示剩余时间且每秒递减刷新（接口失效兜底时同生效）
 
 ## 质量验收
 
-- [x] `npm run build` 成功输出 `releases/jd-auction-search-v1.6.7.zip`
-- [x] 测试（`npm test` 即 `node scripts/smoke.js` jsdom 全链路冒烟，约 97 断言）全部通过
+- [x] `npm run build` 成功输出 `releases/jd-auction-search-v1.6.8.zip`
+- [x] 测试（`npm test` 即 `node scripts/smoke.js` jsdom 全链路冒烟，108 断言）全部通过
 - [x] ESLint（`npm run lint`）无错误
 - [x] 版本号一致：manifest / metadata / package / 各文件头 / 文档
 - [x] 名称统一为「京东夺宝岛」（无「京东夺宝」旧称残留）
@@ -29,7 +30,7 @@
 
 - [x] README 含三步上手、核心功能、使用说明、安装、工作原理、贡献
 - [x] README 顶部 badges 与效果预览截图展示正常
-- [x] CHANGELOG 记录至 v1.6.7
+- [x] CHANGELOG 记录至 v1.6.8
 - [x] openspec 三文档（spec/tasks/check_list）与代码一致
 - [x] _locales 含 zh_CN 与 en，manifest 含 `default_locale`
 
@@ -37,5 +38,5 @@
 
 - [ ] 仓库 About 描述与 Topics 设置（jd-auction-search / 浏览器扩展 / 京东夺宝岛）
 - [ ] Social Preview 封面图上传（Settings → General）
-- [ ] 真实运行截图替换 AI 演示图（可选）
+- [ ] 真实运行截图替换 AI 演示图（docs/screenshots 下 screenshot-*.png 已为真实截图）
 - [ ] Chrome / Firefox 商店上架或内部分发
