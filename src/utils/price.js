@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/price.js v1.6.10
+// JD-Auction-Search/src/utils/price.js v1.6.11
 // 价格解析与提取：现价/原价/出价人数的多态字段兼容、分单位归一与文本解析
 // 商品基础字段（id/name/image/url）提取见 ./extract.js
 

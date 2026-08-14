@@ -45,7 +45,7 @@ smoke.out.txt
 
 # 发布包：默认不入库，避免每次构建膨胀 git 历史；仅保留最新版受控
 releases/*.zip
-!releases/jd-auction-search-v1.6.10.zip
+!releases/jd-auction-search-v1.6.11.zip
 
 # AI 生成中间图 / 未引用素材（非源码，不入库）
 docs/*histo*.png

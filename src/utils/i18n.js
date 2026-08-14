@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/i18n.js v1.6.10
+// JD-Auction-Search/src/utils/i18n.js v1.6.11
 // 国际化：优先 chrome.i18n（_locales 多语言），回退内置 zh-CN/en 字典
 
 (function(global) {

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/tokens.js v1.6.10
+// JD-Auction-Search/src/ui/tokens.js v1.6.11
 // 设计令牌：shadcn 语义令牌（zinc 中性灰阶 + 京东红强调）
 // 与 prototype/index.html 设计系统（浅色令牌）保持一致；支持按 scope 注入：
 //   - Shadow DOM 工具栏：_getTokensCss(':host')
@@ -56,9 +56,14 @@
         --shadow-md: 0 4px 6px -1px rgb(24 24 27 / 0.07), 0 2px 4px -2px rgb(24 24 27 / 0.05);
         --shadow-lg: 0 10px 24px -4px rgb(24 24 27 / 0.10), 0 4px 8px -4px rgb(24 24 27 / 0.06);
         --shadow-ring: 0 0 0 3px rgb(225 37 27 / 0.12);
-        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-        --font-mono: 'SF Mono', ui-monospace, 'Cascadia Code', monospace;
+        --font-sans: 'Hanken Grotesk', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, 'Cascadia Code', monospace;
         --font-display: 'Instrument Serif', 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+
+        /* Spacing scale (4px base) — 对齐 prototype/index.html 设计系统 */
+        --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+        --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+        --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
         --dur-fast: 0.18s;
         --dur-base: 0.3s;
         --dur-slow: 0.6s;

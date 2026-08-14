@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.11 (style: 对齐 prototype 设计令牌系统)
+- `src/ui/tokens.js` 补充 `--space-*` 间距标尺（4px base，对齐 prototype/index.html 设计系统）并同步字体栈（Hanken Grotesk / JetBrains Mono / Instrument Serif）
+- `components.js`/`results/styles.js`/`styles.js` 工具栏、历史、结果网格、卡片、骨架、tag 等硬编码 px 间距统一改用 `--space-*` CSS 变量，间距由原型 4px 标尺驱动
+- 视觉与交互细节对齐 prototype 扩展演示区块（`.ext-search`/`.ext-history`/`.product-grid` 等）
+- 版本号全量同步至 v1.6.11，重建 releases v1.6.11.zip
+
 ## v1.6.10 (fix: 修复版本同步脚本与强化语义化 id)
 - 修复 `scripts/bump-version.js` 正则缺陷：原 `/v\.?(\d+\.\d+\.\d+)?/` 会误匹配路径中含 v 的片段
   （如 native-list.js / observer.js），导致文件头路径被插入版本号损坏；改为仅匹配 `.js` 之后的文件头版本

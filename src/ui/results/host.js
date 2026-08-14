@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/host.js v1.6.10
+// JD-Auction-Search/src/ui/results/host.js v1.6.11
 // 结果面板宿主：覆盖层外壳、面板定位、显隐前置与网格容器
 // 面板样式见 ./styles.js，商品渲染见 ../products.js，骨架屏见 ../skeleton.js
 

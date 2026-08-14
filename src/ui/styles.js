@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/styles.js v1.6.10
+// JD-Auction-Search/src/ui/styles.js v1.6.11
 // 内联样式聚合：组合 设计令牌(_getTokensCss) + 工具栏(动态) + 组件样式(_getComponentsCss)
 // 全部注入 Shadow DOM（:host）确保样式隔离
 
@@ -24,9 +24,9 @@
         ${inline ? 'width: auto; flex: 0 1 auto; align-self: center;' : 'width: 100%;'}
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: var(--space-3);
         flex-wrap: wrap;
-        padding: 12px 18px;
+        padding: var(--space-3) var(--space-4);
         background: var(--card);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-xs);
@@ -39,9 +39,9 @@
         z-index: 999999;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: var(--space-3);
         flex-wrap: wrap;
-        padding: 14px 24px;
+        padding: var(--space-3) var(--space-6);
         background: var(--card);
         box-shadow: var(--shadow-sm);
         transition: opacity var(--dur-base) var(--ease-out), filter var(--dur-base) var(--ease-out);

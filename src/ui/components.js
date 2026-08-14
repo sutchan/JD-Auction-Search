@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/components.js v1.6.10
+// JD-Auction-Search/src/ui/components.js v1.6.11
 // 组件样式：仅包含 Shadow DOM 工具栏所需的 SearchBar 与响应式
 // 商品卡片 / 骨架屏 / 空状态 / 网格等组件样式已迁至 results/host.js 的 RESULTS_COMPONENT_CSS（注入浅 DOM 结果面板）
 // 由 ui/styles.js 的 _getInlineStyles 组合注入 Shadow DOM（工具栏样式由 _getInlineStyles 动态拼入）
@@ -17,8 +17,8 @@
       /* Search bar */
       .jds-search {
         flex: 1; min-width: 220px; max-width: 440px;
-        display: flex; align-items: center; gap: 8px;
-        padding: 6px 6px 6px 14px;
+        display: flex; align-items: center; gap: var(--space-2);
+        padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
         background: var(--background);
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
@@ -30,7 +30,7 @@
       .jds-search-input {
         flex: 1; min-width: 0; border: none; outline: none;
         background: transparent; font-family: var(--font-sans);
-        font-size: 15px; color: var(--foreground); padding: 9px 0;
+        font-size: 15px; color: var(--foreground); padding: var(--space-2) 0;
       }
       .jds-search-input::placeholder { color: var(--subtle-foreground); }
       .jds-clear {
@@ -46,7 +46,7 @@
       .jds-clear svg { width: 14px; height: 14px; }
       .jds-search-btn {
         border: none; background: var(--primary); color: var(--primary-foreground);
-        padding: 10px 20px; border-radius: var(--radius-sm);
+        padding: var(--space-2) var(--space-5); border-radius: var(--radius-sm);
         font-family: var(--font-sans); font-size: 14px; font-weight: 600;
         cursor: pointer; flex-shrink: 0;
         transition: background var(--dur-fast) var(--ease-out);
@@ -74,18 +74,18 @@
       .jds-history[hidden] { display: none; }
       .jds-history-head {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 8px 12px; border-bottom: 1px solid var(--border);
+        padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border);
       }
       .jds-history-title { color: var(--muted-foreground); font-size: 12px; }
       .jds-history-clear {
         border: none; background: transparent; color: var(--muted-foreground);
-        font-size: 12px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm);
+        font-size: 12px; cursor: pointer; padding: 2px var(--space-1); border-radius: var(--radius-sm);
         transition: all var(--dur-fast) var(--ease-out);
       }
       .jds-history-clear:hover { color: var(--primary); background: var(--secondary); }
-      .jds-history-list { list-style: none; margin: 0; padding: 4px; max-height: 280px; overflow-y: auto; }
+      .jds-history-list { list-style: none; margin: 0; padding: var(--space-1); max-height: 280px; overflow-y: auto; }
       .jds-history-item {
-        display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+        display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2);
         border-radius: var(--radius-sm); cursor: pointer; color: var(--foreground);
         transition: background var(--dur-fast) var(--ease-out);
       }
@@ -101,12 +101,12 @@
       .jds-history-item:hover .jds-history-del,
       .jds-history-item.is-active .jds-history-del { opacity: 1; }
       .jds-history-del:hover { color: var(--destructive); }
-      .jds-history-empty { padding: 14px 12px; color: var(--muted-foreground); font-size: 13px; text-align: center; }
+      .jds-history-empty { padding: var(--space-3) var(--space-3); color: var(--muted-foreground); font-size: 13px; text-align: center; }
       .jds-history-empty[hidden] { display: none; }
 
       /* ===== RESPONSIVE (仅工具栏，Shadow 内) ===== */
       @media (max-width: 768px) {
-        .jds-toolbar { padding: 10px 12px; gap: 10px; }
+        .jds-toolbar { padding: var(--space-2) var(--space-3); gap: var(--space-2); }
         .jds-search { order: 1; max-width: none; width: 100%; }
       }
 

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.6.10
+// JD-Auction-Search/src/ui/results/styles.js v1.6.11
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 
@@ -44,16 +44,16 @@
     }
     @keyframes jds-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     #jds-results-host .jds-skel-img { height: 140px; }
-    #jds-results-host .jds-skel-line { height: 11px; margin: 14px; border-radius: var(--radius-sm); }
+    #jds-results-host .jds-skel-line { height: 11px; margin: var(--space-3); border-radius: var(--radius-sm); }
     #jds-results-host .jds-skel-line:last-child { width: 50%; margin-bottom: 18px; }
 
     /* Empty 空状态（对齐原型：居中浮层） */
     #jds-results-host .jds-empty-overlay {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
       color: var(--muted-foreground); text-align: center;
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 48px 64px; box-shadow: var(--shadow-md);
+      padding: var(--space-12) var(--space-16); box-shadow: var(--shadow-md);
       animation: jds-fadeIn 0.3s var(--ease-out);
       pointer-events: auto;
     }
@@ -70,7 +70,7 @@
     #jds-results-host .jds-empty-title { font-size: 20px; font-weight: 600; color: var(--foreground); margin-bottom: 8px; }
     #jds-results-host .jds-empty-desc { font-size: 14px; color: var(--muted-foreground); max-width: 32ch; line-height: 1.6; }
     #jds-results-host .jds-empty-action {
-      margin-top: 8px; padding: 9px 22px; border: 1px solid var(--border);
+      margin-top: var(--space-2); padding: var(--space-2) var(--space-5); border: 1px solid var(--border);
       border-radius: var(--radius-md); background: var(--card); color: var(--primary);
       font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans);
       transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
@@ -110,14 +110,14 @@
     #jds-results-host .jds-product-img-el { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: var(--secondary); }
     /* 图片悬停轻微放大（复刻原型 product-card 交互） */
     #jds-results-host .jds-product-card:hover .jds-product-img-el { transform: scale(1.06); transition: transform var(--dur-base) var(--ease-out); }
-    #jds-results-host .jds-product-body { flex: 1 1 auto; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+    #jds-results-host .jds-product-body { flex: 1 1 auto; padding: var(--space-3) var(--space-3) var(--space-3); padding-bottom: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); }
     #jds-results-host .jds-product-name {
       font-size: 12px; font-weight: 500; color: var(--foreground); line-height: 1.45;
       min-height: 35px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
     #jds-results-host .jds-product-price-row {
-      display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px;
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2);
     }
     #jds-results-host .p-price {
       display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px;
@@ -136,16 +136,16 @@
     /* 仅显示划线原价（无主价行，主价与之重复）时去划线，作为唯一实际价格正常呈现 */
     #jds-results-host .origin-price .jds-product-orig-only { text-decoration: none; color: var(--foreground); }
     #jds-results-host .origin-price .jds-product-cap { font-size: 12px; color: var(--muted-foreground); }
-    #jds-results-host .note { display: flex; align-items: center; gap: 8px; }
+    #jds-results-host .note { display: flex; align-items: center; gap: var(--space-2); }
     #jds-results-host .jds-product-bid {
-      display: inline-flex; align-items: center; padding: 2px 9px;
+      display: inline-flex; align-items: center; padding: 2px var(--space-2);
       background: var(--secondary); color: var(--muted-foreground);
       font-size: 12px; border-radius: var(--radius-full);
     }
     /* 拍卖时间（对齐京东原生 .p-time）：置于价格区顶部，靠下间距与名称区分 */
     #jds-results-host .p-time { display: flex; align-items: center; }
     #jds-results-host .jds-product-time {
-      display: inline-flex; align-items: center; padding: 2px 9px; gap: 4px;
+      display: inline-flex; align-items: center; padding: 2px var(--space-2); gap: var(--space-1);
       font-size: 12px; border-radius: var(--radius-full); font-variant-numeric: tabular-nums;
       font-weight: 600;
     }
@@ -158,15 +158,15 @@
       background: #ffb400; color: #3a2c00;
     }
     #jds-results-host .jds-load-more {
-      grid-column: 1 / -1; justify-self: center; margin: 8px auto 24px;
-      padding: 10px 24px; border: 1px solid var(--border); border-radius: var(--radius-md);
+      grid-column: 1 / -1; justify-self: center; margin: var(--space-2) auto var(--space-6);
+      padding: var(--space-2) var(--space-6); border: 1px solid var(--border); border-radius: var(--radius-md);
       background: var(--card); color: var(--foreground); font-size: 14px; cursor: pointer;
       font-family: var(--font-sans); transition: border-color var(--dur-fast) var(--ease-out);
     }
     #jds-results-host .jds-load-more:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* Grid 网格（每行固定 5 个结果） */
-    #jds-results-host .jds-product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding: 16px 24px 28px; min-height: 420px; }
+    /* Grid 网格（每行固定 5 个结果，间距对齐 prototype 4px 标尺） */
+    #jds-results-host .jds-product-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); padding: var(--space-4) var(--space-6) var(--space-6); min-height: 420px; }
 
     @media (prefers-reduced-motion: reduce) {
       #jds-results-host .jds-product-card,

@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/utils/transform.js v1.6.10
+// JD-Auction-Search/src/utils/transform.js v1.6.11
 // 响应转换：从多态 API 响应中提取商品数组并去重
 
 (function(global) {
