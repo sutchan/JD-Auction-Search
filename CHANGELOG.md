@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.6.9 (docs: 添加 Community Health Files)
+- 新增 `.github/` 社区健康文件：
+  - `CODE_OF_CONDUCT.md`：基于 Contributor Covenant 2.1 的中文行为准则
+  - `CONTRIBUTING.md`：开发环境、分支策略、提交规范、版本号规则、PR 流程
+  - `SECURITY.md`：漏洞报告流程与受支持版本
+  - `PULL_REQUEST_TEMPLATE.md`：PR 描述与审查清单模板
+  - `ISSUE_TEMPLATE/`：缺陷报告、功能建议模板 + `config.yml`（禁用空白 Issue）
+  - `SUPPORT.md`：支持渠道与自助排查指南
+- 清理冗余文件：删除过期日志（lint.log/build.log/smoke.log）、临时诊断（miss.txt/smoke.out.txt）与未引用 AI 中间图（docs/*histo*.png），修正 .gitignore 误忽略核心文件（build.js/.eslintrc.json）
+- 版本号全量同步至 v1.6.9（package/manifest/metadata + 40 个 src 文件头），重建 releases v1.6.9.zip
+
 ## v1.6.8 (docs: 完善项目文档)
 - 修正 `openspec/spec.md` 目录树：移除实际不存在的 `icons/` 目录、补充遗漏的 `src/ui/countdown.js` 条目、补全版本历史缺失的 v1.6.6/v1.6.7
 - 修正 `openspec/check_list.md`：测试断言数（约 97→108）、构建产物版本（1.6.7→1.6.8）、补充「拍卖倒计时」功能验收项

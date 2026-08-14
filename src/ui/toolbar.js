@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.6.8
+// JD-Auction-Search/src/ui/toolbar.js v1.6.9
 // 工具栏外壳：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）与挂载重试
 // 事件绑定见 toolbar/events.js，搜索历史见 toolbar/history.js
 

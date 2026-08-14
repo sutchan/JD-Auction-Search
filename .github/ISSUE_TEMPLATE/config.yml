@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞报告
+    url: https://github.com/Sut/JD-Auction-Search/security/advisories/new
+    about: 请勿公开披露安全漏洞，请通过私密封存的 Advisory 报告。
+  - name: 文档与讨论
+    url: https://github.com/Sut/JD-Auction-Search/discussions
+    about: 提问、使用经验交流、想法探讨请到 Discussions。

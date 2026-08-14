@@ -5,7 +5,7 @@
 # JD Auction Search Enhancer
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.8-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.9-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="./README.md">中文</a> · <a href="./CHANGELOG.md">Changelog</a> · <a href="./openspec/spec.md">Spec</a>
+  <a href="./README.md">中文</a> · <a href="./CHANGELOG.md">Changelog</a> · <a href="./openspec/spec.md">Spec</a> · <a href="./openspec/tasks.md">Tasks</a> · <a href="./openspec/check_list.md">Checklist</a> · <a href="./.github/CONTRIBUTING.md">Contributing</a> · <a href="./.github/SECURITY.md">Security</a>
 </p>
 
 ---

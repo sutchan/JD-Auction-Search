@@ -5,7 +5,7 @@
 # 京东夺宝岛搜索增强（JD Auction Search）
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.8-blue.svg" alt="version"></a>
+  <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/version-1.6.9-blue.svg" alt="version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="license"></a>
   <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="build">
   <img src="https://img.shields.io/badge/manifest%20v3-FF9800.svg" alt="manifest">
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="./README_EN.md">English</a> · <a href="./CHANGELOG.md">更新日志</a> · <a href="./openspec/spec.md">项目规范</a> · <a href="./openspec/tasks.md">任务</a> · <a href="./openspec/check_list.md">验收清单</a>
+  <a href="./README_EN.md">English</a> · <a href="./CHANGELOG.md">更新日志</a> · <a href="./openspec/spec.md">项目规范</a> · <a href="./openspec/tasks.md">任务</a> · <a href="./openspec/check_list.md">验收清单</a> · <a href="./.github/CONTRIBUTING.md">贡献指南</a> · <a href="./.github/SECURITY.md">安全</a>
 </p>
 
 ---

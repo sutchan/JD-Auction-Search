@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/countdown.js v1.6.8
+// JD-Auction-Search/src/ui/countdown.js v1.6.9
 // 客户端拍卖倒计时：解析京东时间文案（距结束 HH:MM:SS / N天HH:MM:SS），
 // 以单例 setInterval 每秒驱动所有结果面板内已注册的倒计时元素递减，实现「跳动」。
 // 时间行渲染见 ./price-render.js

@@ -1,6 +1,6 @@
 {
   "appName": "JD-Auction-Search",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "description": "京东夺宝岛（拍拍）列表页商品搜索增强插件：关键词实时过滤、跨页聚合、分类筛选，接口失效自动兜底。",
   "author": "Developer",
   "license": "MIT",
