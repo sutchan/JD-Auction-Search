@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/dom/price-text.js v1.6.9
+// JD-Auction-Search/src/dom/price-text.js v1.6.10
 // 原生卡片价格文本回查：按商品名从页面 .p-price 取实际显示价（带缓存）
 // 商品字段提取见 ./extract.js
 

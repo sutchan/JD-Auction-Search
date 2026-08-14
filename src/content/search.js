@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/content/search.js v1.6.9
+// JD-Auction-Search/src/content/search.js v1.6.10
 // 搜索编排：API 响应处理、过滤与跨页自动加载
 
 (function (global) {

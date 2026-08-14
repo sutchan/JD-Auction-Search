@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/index.js v1.6.9
+// JD-Auction-Search/src/ui/index.js v1.6.10
 // UI 模块命名空间引导：聚合 styles（内联样式）/ toolbar（工具栏）/ results（结果面板）
 
 (function(global) {

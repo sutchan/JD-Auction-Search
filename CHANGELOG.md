@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.10 (fix: 修复版本同步脚本与强化语义化 id)
+- 修复 `scripts/bump-version.js` 正则缺陷：原 `/v\.?(\d+\.\d+\.\d+)?/` 会误匹配路径中含 v 的片段
+  （如 native-list.js / observer.js），导致文件头路径被插入版本号损坏；改为仅匹配 `.js` 之后的文件头版本
+- 修正被污染的 `src/dom/native-list.js`、`src/dom/observer.js` 文件头路径
+- 工具栏 Shadow DOM 关键元素补充语义化 id：`#jds-search-input`、`#jds-search-btn`、`#jds-history`、`#jds-count`
+- 结果卡片倒计时元素补充语义化 id：`#jds-countdown-N`（基于自增序列，避免重复 id）
+- 版本号全量同步至 v1.6.10（package/manifest/metadata + 40 个 src 文件头 + 脚本），重建 releases v1.6.10.zip
+- 同步 openspec 文档（spec 顶部 / check_list 锚点）与 README 徽章至 v1.6.10
+
 ## v1.6.9 (docs: 添加 Community Health Files)
 - 新增 `.github/` 社区健康文件：
   - `CODE_OF_CONDUCT.md`：基于 Contributor Covenant 2.1 的中文行为准则

@@ -1,4 +1,4 @@
-// JD-Auction-Search/scripts/bump-version.js v1.6.8
+// JD-Auction-Search/scripts/bump-version.js v1.6.10
 // 同步项目各文件头版本号（package.json / manifest.json / metadata.json / src/*.js 首行）
 // 用法: node scripts/bump-version.js [newVersion]
 //   - 不传参：仅校验当前版本一致性
@@ -56,8 +56,9 @@ const srcFiles = [];
 walkSrc(path.join(ROOT, 'src'), srcFiles);
 for (const f of srcFiles) {
   const lines = fs.readFileSync(f, 'utf8').split('\n');
-  // 首行形如 `// path v.` 或 `// path v1.6.7`：空版本号(从未同步)与已带版本号均统一替换
-  lines[0] = lines[0].replace(/v\.?(\d+\.\d+\.\d+)?/, `v${target}`);
+  // 首行形如 `// path v.` 或 `// path v1.6.7`：仅匹配「.js 之后空格 v」的文件头版本，
+  // 要求版本号前为「.js + 空白」，避免误伤路径中含 v 的片段（如 native-list.js / observer.js）
+  lines[0] = lines[0].replace(/\.js\s+v\.?(\d+\.\d+\.\d+)?/, `.js v${target}`);
   fs.writeFileSync(f, lines.join('\n'), 'utf8');
 }
 console.log(`✅ 版本已同步为 ${target}（package/manifest/metadata + ${srcFiles.length} 个 src 文件头）`);

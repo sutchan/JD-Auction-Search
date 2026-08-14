@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar.js v1.6.9
+// JD-Auction-Search/src/ui/toolbar.js v1.6.10
 // 工具栏外壳：Shadow DOM 注入、嵌入页头（auction_head_right 左侧）与挂载重试
 // 事件绑定见 toolbar/events.js，搜索历史见 toolbar/history.js
 
@@ -116,7 +116,7 @@
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input type="text" class="jds-search-input"
+          <input type="text" id="jds-search-input" class="jds-search-input"
             placeholder="${getMessage('searchPlaceholder')}" aria-label="${getMessage('a11ySearchInput')}" />
           <button class="jds-clear" aria-label="${getMessage('a11yClearSearch')}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -124,8 +124,8 @@
               <path d="M18 6 6 18M6 6l12 12"/>
             </svg>
           </button>
-          <button class="jds-search-btn">${getMessage('searchButton')}</button>
-          <div class="jds-history" role="listbox" aria-label="${getMessage('historyTitle')}" hidden>
+          <button id="jds-search-btn" class="jds-search-btn">${getMessage('searchButton')}</button>
+          <div id="jds-history" class="jds-history" role="listbox" aria-label="${getMessage('historyTitle')}" hidden>
             <div class="jds-history-head">
               <span class="jds-history-title">${getMessage('historyTitle')}</span>
               <button type="button" class="jds-history-clear"
@@ -135,7 +135,7 @@
             <div class="jds-history-empty" hidden>${getMessage('historyEmpty')}</div>
           </div>
         </div>
-        <span class="jds-count" aria-live="polite">${getMessage('countPrefix')}<strong class="jds-count-num">0</strong>${getMessage('countSuffix')}<span class="jds-loading-hint" hidden></span></span>
+        <span id="jds-count" class="jds-count" aria-live="polite">${getMessage('countPrefix')}<strong class="jds-count-num">0</strong>${getMessage('countSuffix')}<span class="jds-loading-hint" hidden></span></span>
       </div>
     `;
   };

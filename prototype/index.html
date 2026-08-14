@@ -484,11 +484,12 @@
     }
     .product-card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      overflow: hidden; cursor: pointer;
+      overflow: hidden; cursor: pointer; text-decoration: none; color: inherit; display: block;
       transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
       animation: cardIn 0.5s var(--ease-out-expo) backwards;
     }
     .product-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    .product-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-color: var(--primary); }
     @keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .product-img {
       height: 140px; display: grid; place-items: center; font-size: 44px;
@@ -503,13 +504,24 @@
       margin-bottom: var(--space-2); min-height: 38px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .product-price {
-      font-family: var(--font-display); font-size: 22px; font-weight: 400;
-      color: var(--primary); letter-spacing: -0.01em; margin-bottom: var(--space-2);
-      font-variant-numeric: tabular-nums;
-    }
+    .product-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+    /* 价格区：对齐真实扩展，价格优先于名称 */
+    .product-price-row { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+    .product-price { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--primary); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; line-height: 1.1; }
     .product-price small { font-size: 13px; color: var(--muted-foreground); }
-    .product-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .product-label { font-size: 12px; color: var(--muted-foreground); font-weight: 600; }
+    .product-subprice { font-size: 12px; color: var(--muted-foreground); text-decoration: line-through; font-variant-numeric: tabular-nums; }
+    .product-bid { font-size: 11px; font-weight: 600; color: var(--success); background: var(--success-subtle); padding: 1px 6px; border-radius: var(--radius-sm); margin-left: auto; }
+
+    /* 加载更多 —— 对齐扩展 products：分页加载入口 */
+    .load-more {
+      grid-column: 1 / -1; justify-self: center; margin-top: var(--space-4);
+      padding: var(--space-3) var(--space-8); font-size: 14px; font-weight: 600; cursor: pointer;
+      color: var(--primary); background: var(--primary-subtle); border: 1px solid var(--border); border-radius: var(--radius-md);
+      transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+    }
+    .load-more:hover { background: var(--primary-subtle); border-color: var(--primary); }
+    .load-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
     /* Badge */
     .badge {
@@ -777,7 +789,7 @@
         <li><a href="#mobile">Mobile</a></li>
       </ul>
       <div class="nav-right">
-        <span class="nav-version">v1.6.7</span>
+        <span class="nav-version">v1.6.9</span>
         <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换深色模式">
           <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
@@ -1226,7 +1238,7 @@
         <div class="footer-mark">JD<span>.</span>Auction<span>.</span>Search</div>
       </div>
       <div class="footer-meta">
-        Design System v1.6.7<br>
+        Design System v1.6.9<br>
         Refined Minimalism · shadcn-inspired<br>
         Light &amp; Dark · Container Queries<br>
         Built with precision · 2026
@@ -1262,24 +1274,95 @@
     // ============================================================
     // MOCK PRODUCT DATA — realistic auction items
     // ============================================================
-    const PRODUCTS = [
-      { id: 1, name: 'iPhone 15 Pro Max 256GB 原色钛金属', price: 8999, icon: '📱', status: 'ongoing', countdown: '02:35:18' },
-      { id: 2, name: 'MacBook Pro 14寸 M3 Pro 18GB 512GB', price: 17999, icon: '💻', status: 'upcoming', countdown: '12:48:33' },
-      { id: 3, name: 'AirPods Pro 2代 USB-C 主动降噪', price: 1899, icon: '🎧', status: 'ongoing', countdown: '05:12:09' },
-      { id: 4, name: 'Apple Watch Series 9 GPS 45mm', price: 3199, icon: '⌚', status: 'ongoing', countdown: '00:45:22' },
-      { id: 5, name: 'PlayStation 5 Slim 轻薄版 1TB', price: 3899, icon: '🎮', status: 'ongoing', countdown: '08:22:15' },
-      { id: 6, name: '三星 Neo QLED 55英寸 4K智能电视', price: 7999, icon: '📺', status: 'upcoming', countdown: '23:55:40' },
-      { id: 7, name: 'Dyson V15 Detect 无线吸尘器', price: 4990, icon: '🌀', status: 'ongoing', countdown: '01:18:44' },
-      { id: 8, name: 'Nintendo Switch OLED 白色主机', price: 2099, icon: '🕹️', status: 'ongoing', countdown: '00:22:08' },
-      { id: 9, name: 'iPad Pro 12.9寸 M2芯片 256GB WiFi', price: 8499, icon: '📟', status: 'upcoming', countdown: '15:30:00' },
-      { id: 10, name: 'Bose QuietComfort 45 降噪耳机', price: 2299, icon: '🎧', status: 'ongoing', countdown: '03:44:52' },
-      { id: 11, name: '大疆 DJI Mini 4 Pro 航拍无人机', price: 4788, icon: '🚁', status: 'ongoing', countdown: '00:58:33' },
-      { id: 12, name: '小米 14 Ultra 16GB 512GB 黑色', price: 6499, icon: '📱', status: 'upcoming', countdown: '18:20:15' },
+    // 真实扩展商品字段对齐：现价(currentPrice)、起拍价(startPrice)、封顶价(cappedPrice)、
+    // 出价人数(recordCount)、拍卖倒计时(remainSec)。以下生成 >60 条以真实演示分页「加载更多」。
+    const SEED_ITEMS = [
+      ['iPhone 15 Pro Max 256GB 原色钛金属', 8999, 7999, 10999, 23, '📱', 'ongoing'],
+      ['MacBook Pro 14寸 M3 Pro 18GB 512GB', 17999, 15999, 19999, 12, '💻', 'upcoming'],
+      ['AirPods Pro 2代 USB-C 主动降噪', 1899, 1699, 2099, 56, '🎧', 'ongoing'],
+      ['Apple Watch Series 9 GPS 45mm', 3199, 2899, 3599, 31, '⌚', 'ongoing'],
+      ['PlayStation 5 Slim 轻薄版 1TB', 3899, 3499, 4299, 18, '🎮', 'ongoing'],
+      ['三星 Neo QLED 55英寸 4K智能电视', 7999, 6999, 8999, 7, '📺', 'upcoming'],
+      ['Dyson V15 Detect 无线吸尘器', 4990, 4490, 5490, 41, '🌀', 'ongoing'],
+      ['Nintendo Switch OLED 白色主机', 2099, 1899, 2299, 64, '🕹️', 'ongoing'],
+      ['iPad Pro 12.9寸 M2芯片 256GB WiFi', 8499, 7699, 9299, 9, '📟', 'upcoming'],
+      ['Bose QuietComfort 45 降噪耳机', 2299, 2099, 2499, 27, '🎧', 'ongoing'],
+      ['大疆 DJI Mini 4 Pro 航拍无人机', 4788, 4298, 5198, 15, '🚁', 'ongoing'],
+      ['小米 14 Ultra 16GB 512GB 黑色', 6499, 5799, 6999, 33, '📱', 'upcoming'],
+      ['华为 Mate 60 Pro 12GB 512GB', 6999, 6299, 7499, 48, '📱', 'ongoing'],
+      ['索尼 WH-1000XM5 头戴降噪耳机', 2599, 2299, 2799, 52, '🎧', 'ongoing'],
+      ['LG C3 65英寸 OLED 4K电视', 10999, 9999, 11999, 6, '📺', 'upcoming'],
+      ['罗技 MX Master 3S 无线鼠标', 699, 599, 799, 88, '🖱️', 'ongoing'],
+      ['机械键盘 Cherry 红轴 87键', 459, 399, 529, 73, '⌨️', 'ongoing'],
+      ['英伟达 RTX 4070 Ti 显卡 12G', 5499, 4999, 5999, 21, '🎮', 'ongoing'],
+      ['AMD Ryzen 7 7800X3D 处理器', 2899, 2599, 3199, 36, '🔧', 'upcoming'],
+      ['西部数据 2TB NVMe 固态硬盘', 899, 799, 999, 61, '💾', 'ongoing'],
+      ['佳能 EOS R6 II 微单机身', 15999, 14999, 16999, 4, '📷', 'upcoming'],
+      ['GoPro HERO12 运动相机', 2999, 2699, 3299, 29, '📹', 'ongoing'],
+      ['飞利浦 电动牙刷 钻石系列', 799, 699, 899, 95, '🪥', 'ongoing'],
+      ['戴森 吹风机 HD15 礼盒', 3299, 2999, 3599, 19, '💨', 'upcoming'],
+      ['Kindle Paperwhite 电子书', 1099, 999, 1199, 44, '📚', 'ongoing'],
+      ['任天堂 游戏卡带 塞尔达', 399, 349, 449, 77, '🎮', 'ongoing'],
+      ['罗技 C920 高清摄像头', 499, 429, 569, 58, '📹', 'ongoing'],
+      ['小米 空气净化器 4 Pro', 1299, 1149, 1399, 39, '🌬️', 'upcoming'],
+      ['九阳 破壁料理机', 599, 519, 699, 83, '🥤', 'ongoing'],
+      ['美的 变频空调 1.5匹', 2199, 1999, 2399, 25, '❄️', 'ongoing'],
+      ['海尔 对开门冰箱 540L', 3299, 2999, 3599, 11, '🧊', 'upcoming'],
+      ['西门子 洗烘一体机 10kg', 4599, 4199, 4999, 14, '🌀', 'ongoing'],
+      ['松下 电饭煲 4L 智能', 899, 799, 999, 67, '🍚', 'upcoming'],
+      ['联想 ThinkPad X1 Carbon', 12999, 11999, 13999, 8, '💻', 'upcoming'],
+      ['华硕 ROG 枪神 游戏本', 15999, 14999, 16999, 13, '💻', 'ongoing'],
+      ['雷蛇 黑寡妇 V3 机械键盘', 799, 699, 899, 49, '⌨️', 'ongoing'],
+      ['森海塞尔 Momentum 4 耳机', 1999, 1799, 2199, 35, '🎧', 'upcoming'],
+      ['JBL Charge 5 蓝牙音箱', 1099, 999, 1199, 57, '🔊', 'ongoing'],
+      ['Anker 充电宝 25600mAh', 399, 349, 449, 91, '🔋', 'ongoing'],
+      ['倍思 65W 氮化镓充电器', 199, 169, 249, 102, '🔌', 'upcoming'],
+      ['绿联 雷电 4 扩展坞', 1299, 1149, 1399, 22, '🔗', 'ongoing'],
+      ['大疆 Osmo Pocket 3 口袋云台', 3499, 3199, 3799, 17, '🎥', 'upcoming'],
+      ['萤石 监控摄像头 C8', 549, 479, 629, 63, '📷', 'ongoing'],
+      ['科沃斯 扫地机器人 T20', 2999, 2699, 3299, 28, '🤖', 'ongoing'],
+      ['石头 洗地机 A10', 2499, 2249, 2699, 33, '🧹', 'upcoming'],
+      ['添可 智能拖把芙万', 1899, 1699, 2099, 46, '🧽', 'ongoing'],
+      ['极米 H6 投影仪 4K', 5499, 4999, 5999, 9, '📽️', 'upcoming'],
+      ['坚果 N1S Ultra 激光投影', 6499, 5999, 6999, 12, '📽️', 'ongoing'],
+      ['小猿 学练机 10.3寸', 2899, 2599, 3199, 41, '📝', 'upcoming'],
+      ['步步高 学习机 S7', 3999, 3599, 4399, 18, '📘', 'ongoing'],
+      ['科大讯飞 翻译机 4.0', 2999, 2699, 3299, 24, '🗣️', 'upcoming'],
+      ['华为 MatePad Pro 13.2', 5199, 4699, 5699, 15, '📱', 'ongoing'],
+      ['OPPO Find N3 折叠屏', 8999, 8299, 9499, 7, '📱', 'upcoming'],
+      ['vivo X100 Pro 影像旗舰', 5499, 4999, 5999, 38, '📱', 'ongoing'],
+      ['一加 12 16GB 1TB', 4799, 4399, 5199, 26, '📱', 'upcoming'],
+      ['Redmi K70 至尊版', 2599, 2299, 2899, 71, '📱', 'ongoing'],
+      ['真我 GT5 Pro 性能旗舰', 3299, 2999, 3599, 43, '📱', 'upcoming'],
+      ['iQOO 12 电竞手机', 3999, 3699, 4299, 19, '📱', 'ongoing'],
+      ['荣耀 Magic6 Pro', 5699, 5199, 6199, 22, '📱', 'upcoming'],
+      ['三星 Galaxy S24 Ultra', 9699, 8999, 10299, 11, '📱', 'ongoing'],
+      ['摩托罗拉 razr 40 折叠', 3999, 3599, 4399, 16, '📱', 'upcoming'],
+      ['魅族 21 Pro 旗舰', 4399, 3999, 4799, 29, '📱', 'ongoing'],
     ];
+
+    const PRODUCTS = SEED_ITEMS.map((it, i) => {
+      const [name, price, start, cap, bids, icon, status] = it;
+      // 真实扩展倒计时：有出价=即将结束(随机 0~4h)，无出价=即将开始(随机 4~24h)
+      const span = status === 'ongoing' ? (bids > 0 ? 4 : 0) : 24;
+      const remainSec = Math.floor((span * 3600) * (0.2 + 0.8 * ((i % 7) / 7))) + (i * 37 % 60);
+      return { id: i + 1, name, price, startPrice: start, cappedPrice: cap, bidCount: bids, icon, status, remainSec };
+    });
 
     const STATUS_LABELS = { ongoing: '进行中', upcoming: '即将开始', ending: '即将结束' };
     const PAGE_SIZE = 60; // 对齐扩展 products：首屏 60 条 + 加载更多（不再硬截断 200）
-    const state = { keyword: '', history: ['iPhone', '华为', '显卡', '数码配件'] };
+    const HISTORY_KEY = 'jds-prototype-history';
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return ['iPhone', '华为', '显卡', '数码配件'];
+    }
+    function saveHistory(h) {
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch (e) {}
+    }
+    const state = { keyword: '', history: loadHistory(), renderPage: 1, filtered: PRODUCTS };
 
     // ============================================================
     // NAV SCROLL
@@ -1347,17 +1430,68 @@
       }
     }
 
+    function fmtPrice(n) { return '¥' + Number(n).toLocaleString(); }
+
+    function fmtCountdown(sec) {
+      if (sec <= 0) return '已结束';
+      const d = Math.floor(sec / 86400);
+      const h = Math.floor((sec % 86400) / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      const pad = (x) => String(x).padStart(2, '0');
+      return d > 0 ? `${d}天 ${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    // 卡片价格区：对齐真实扩展（价格优先于名称）
+    // 有出价：现价 + 划线封顶价 + 出价人数；无出价：起拍标签 + 起拍价 + 封顶价
+    function buildPriceSection(p) {
+      const hasBid = (p.bidCount || 0) > 0;
+      const cappedAbove = p.cappedPrice > p.price;
+      const bidBadge = hasBid ? `<span class="product-bid">${p.bidCount} 人出价</span>` : '';
+      let main, sub;
+      if (hasBid) {
+        main = `<span class="product-price"><small>¥ </small>${p.price.toLocaleString()}</span>`;
+        sub = cappedAbove ? `<span class="product-subprice">封顶 ${fmtPrice(p.cappedPrice)}</span>` : '';
+      } else {
+        main = `<span class="product-label">起拍</span><span class="product-price"><small>¥ </small>${p.startPrice.toLocaleString()}</span>`;
+        sub = `<span class="product-subprice">封顶 ${fmtPrice(p.cappedPrice)}</span>`;
+      }
+      return `<div class="product-price-row">${main}${bidBadge}</div>${sub ? `<div class="product-price-row">${sub}</div>` : ''}`;
+    }
+
+    function buildCard(p, i) {
+      const card = document.createElement('a');
+      card.className = 'product-card';
+      card.href = '#';
+      card.style.animationDelay = `${Math.min(i * 0.03, 0.4)}s`;
+      card.setAttribute('aria-label', `${p.name}，价格 ${fmtPrice(p.price)}`);
+      card.innerHTML = `
+        <div class="product-img"><span>${p.icon}</span></div>
+        <div class="product-body">
+          <div class="product-meta">
+            <span class="badge badge-${p.status === 'ongoing' ? 'primary' : 'warning'} ${p.status === 'ongoing' ? 'badge-ongoing' : ''}">${STATUS_LABELS[p.status]}</span>
+            <span class="countdown" data-remain="${p.remainSec}">${fmtCountdown(p.remainSec)}</span>
+          </div>
+          ${buildPriceSection(p)}
+          <div class="product-name">${p.name}</div>
+        </div>`;
+      card.addEventListener('click', (e) => { e.preventDefault(); showToast(`查看：${p.name.slice(0, 18)}…`, 'success'); });
+      return card;
+    }
+
     function renderProducts() {
-      let filtered = PRODUCTS;
       if (state.keyword) {
         const kw = state.keyword.toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(kw));
+        state.filtered = PRODUCTS.filter(p => p.name.toLowerCase().includes(kw));
+      } else {
+        state.filtered = PRODUCTS;
       }
+      state.renderPage = 1;
 
-      document.getElementById('resultCount').textContent = filtered.length;
+      document.getElementById('resultCount').textContent = state.filtered.length;
       grid.setAttribute('aria-busy', 'false');
 
-      if (filtered.length === 0) {
+      if (state.filtered.length === 0) {
         grid.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
@@ -1366,34 +1500,31 @@
           </div>`;
         return;
       }
+      appendPage();
+    }
 
-      const capped = filtered.length > PAGE_SIZE;
-      const visible = capped ? filtered.slice(0, PAGE_SIZE) : filtered;
+    // 分页渲染核心：对齐扩展 products._appendPage（首屏 60 + 加载更多）
+    function appendPage() {
+      const total = state.filtered.length;
+      const start = (state.renderPage - 1) * PAGE_SIZE;
+      const slice = state.filtered.slice(start, start + PAGE_SIZE);
+      const rendered = start + slice.length;
 
-      grid.innerHTML = '';
-      if (capped) {
-        const notice = document.createElement('div');
-        notice.className = 'result-notice';
-        notice.innerHTML = `已显示前 <strong>${visible.length}</strong> 条，共 <strong>${filtered.length}</strong> 条`;
-        grid.appendChild(notice);
+      if (state.renderPage === 1) grid.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      slice.forEach((p, i) => frag.appendChild(buildCard(p, i)));
+      grid.appendChild(frag);
+
+      const oldBtn = grid.parentNode.querySelector('.load-more');
+      if (oldBtn) oldBtn.remove();
+      if (rendered < total) {
+        const btn = document.createElement('button');
+        btn.className = 'load-more';
+        btn.type = 'button';
+        btn.textContent = `加载更多 · 已显示 ${rendered}/${total}`;
+        btn.addEventListener('click', () => { state.renderPage++; appendPage(); });
+        grid.parentNode.appendChild(btn);
       }
-      visible.forEach((p, i) => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.style.animationDelay = `${i * 0.03}s`;
-        card.innerHTML = `
-          <div class="product-img"><span>${p.icon}</span></div>
-          <div class="product-body">
-            <div class="product-name">${p.name}</div>
-            <div class="product-price"><small>¥ </small>${p.price.toLocaleString()}</div>
-            <div class="product-meta">
-              <span class="badge badge-${p.status === 'ongoing' ? 'primary' : 'warning'} ${p.status === 'ongoing' ? 'badge-ongoing' : ''}">${STATUS_LABELS[p.status]}</span>
-              <span class="countdown">${p.countdown}</span>
-            </div>
-          </div>`;
-        card.addEventListener('click', () => showToast(`查看：${p.name.slice(0, 18)}…`, 'success'));
-        grid.appendChild(card);
-      });
     }
 
     // ============================================================
@@ -1455,6 +1586,7 @@
         li.querySelector('.ext-history-del').addEventListener('click', (e) => {
           e.stopPropagation();
           state.history.splice(idx, 1);
+          saveHistory(state.history);
           renderHistory();
           showToast('已删除历史记录', 'info');
         });
@@ -1463,6 +1595,7 @@
       historyEl.appendChild(ul);
       historyEl.querySelector('#historyClear').addEventListener('click', () => {
         state.history = [];
+        saveHistory(state.history);
         historyEl.classList.remove('is-open');
         showToast('已清空搜索历史', 'info');
       });
@@ -1484,15 +1617,15 @@
       if (i >= 0) state.history.splice(i, 1);
       state.history.unshift(kw);
       if (state.history.length > 10) state.history.length = 10;
+      saveHistory(state.history);
     }
 
     searchInput.addEventListener('focus', () => {
       if (!searchInput.value.trim()) historyEl.classList.add('is-open');
     });
-    searchInput.addEventListener('blur', (e) => {
-      if (!e.relatedTarget || !historyEl.contains(e.relatedTarget)) {
-        setTimeout(() => historyEl.classList.remove('is-open'), 120);
-      }
+    // 改用 focusout 判断（与真实扩展一致），点击删除/清空按钮不误关
+    historyEl.addEventListener('focusout', (e) => {
+      if (!historyEl.contains(e.relatedTarget)) historyEl.classList.remove('is-open');
     });
 
     searchInput.addEventListener('keydown', (e) => {
@@ -1513,6 +1646,16 @@
         searchInput.focus();
       }
     });
+
+    // 真实扩展 countdown：每秒递减所有卡片倒计时
+    setInterval(() => {
+      document.querySelectorAll('.countdown[data-remain]').forEach((el) => {
+        let s = Number(el.dataset.remain) - 1;
+        if (s < 0) s = 0;
+        el.dataset.remain = s;
+        el.textContent = fmtCountdown(s);
+      });
+    }, 1000);
 
     // ============================================================
     // INIT

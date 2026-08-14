@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/toolbar/ev1.6.9ents.js v.
+// JD-Auction-Search/src/ui/toolbar/ev1.6.9ents.js v1.6.10
 // 工具栏事件绑定：输入防抖、回车提交、历史键盘导航、清除与失焦收起
 // 工具栏外壳见 ../toolbar.js，历史逻辑见 ./history.js
 

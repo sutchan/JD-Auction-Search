@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/countdown.js v1.6.9
+// JD-Auction-Search/src/ui/countdown.js v1.6.10
 // 客户端拍卖倒计时：解析京东时间文案（距结束 HH:MM:SS / N天HH:MM:SS），
 // 以单例 setInterval 每秒驱动所有结果面板内已注册的倒计时元素递减，实现「跳动」。
 // 时间行渲染见 ./price-render.js
@@ -11,6 +11,11 @@
   // 活跃倒计时元素集合与单例计时器：批量驱动，避免每卡各自 setInterval 造成大量定时器
   let _els = [];
   let _timer = null;
+  // 倒计时元素自增序号：为每个 .p-time 生成唯一语义化 id（jds-countdown-N），避免重复 id 冲突
+  let _seq = 0;
+  JDSUI._countdownSeq = function _countdownSeq() {
+    return ++_seq;
+  };
 
   /**
    * 从京东时间文案中解析剩余秒数（支持 距结束 HH:MM:SS / N天HH:MM:SS / MM:SS）

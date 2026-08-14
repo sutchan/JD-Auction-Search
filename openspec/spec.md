@@ -1,7 +1,7 @@
 # 京东夺宝岛搜索增强 — 项目规范（Spec）
 
 **项目名称**: JD-Auction-Search
-**版本**: 1.6.8
+**版本**: 1.6.10
 **类型**: 浏览器扩展插件（Manifest V3）
 **适用浏览器**: Chrome / Edge / Firefox
 **目标站点**: 京东夺宝岛 / 拍拍列表页（`*.jd.com` 下含 auction/paimai/paipai 路径的接口均可被捕获）

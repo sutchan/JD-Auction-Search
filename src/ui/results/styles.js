@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.6.9
+// JD-Auction-Search/src/ui/results/styles.js v1.6.10
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 

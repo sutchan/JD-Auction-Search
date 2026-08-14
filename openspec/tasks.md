@@ -8,6 +8,9 @@ _（当前无进行中任务）_
 
 ## 已完成任务
 
+### v1.6.10
+- [x] 修复版本同步脚本：bump-version.js 正则仅匹配 `.js` 之后文件头版本，避免污染路径（native-list.js/observer.js）；修正已损坏文件头；工具栏/倒计时元素补充语义化 id；版本号全量同步 v1.6.10
+
 ### v1.6.8
 - [x] 完善项目文档：修正 spec.md 目录树（移除 icons/、补 countdown.js、补 v1.6.6/v1.6.7 版本历史）、check_list.md（断言数 108/拍卖倒计时验收）、README 版本同步命令、docs/README 截图说明；版本号全量同步 v1.6.8
 - [x] 补全扩展图标：生成 icons/（icon16/48/128.png，红底白锤搜索风格）、manifest 增加 icons 与 action.default_icon、build.js 打包 icons/ 目录、spec.md 目录树补回 icons/

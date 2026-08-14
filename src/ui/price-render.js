@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/price-render.js v1.6.9
+// JD-Auction-Search/src/ui/price-render.js v1.6.10
 // 商品卡价格区渲染：主价格行（起拍标签/货币符号/整数.小数）与划线原价行
 // 卡片整体构建见 ./products.js
 
@@ -133,6 +133,7 @@
     const timeEl = document.createElement('div');
     // 拍卖时间：对齐京东原生语义 class .p-time
     timeEl.className = 'p-time ' + typeCls;
+    timeEl.id = 'jds-countdown-' + JDSUI._countdownSeq();
     const inner = document.createElement('span');
     inner.className = 'jds-product-time';
     inner.textContent = timeText;
