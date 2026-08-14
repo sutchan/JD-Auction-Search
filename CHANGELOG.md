@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.13 (chore: 完善工作区配置)
+- 补充 `JD-Auction-Search.code-workspace`：`launch` 扩展调试配置（Chrome 加载已解压的 src/）、`files.associations` 将 `.code-workspace` 关联为 jsonc、`files.exclude` 增加 `smoke.out.txt`
+- 版本号全量同步至 v1.6.13
+
+## v1.6.12 (chore: 完善 VS Code 工作区配置)
+- 完善 `JD-Auction-Search.code-workspace`：编辑器格式/ESLint 自动修复、搜索与文件排除（releases/zip/node_modules/测试输出）、manifest.json JSON Schema 校验
+- 添加推荐扩展（ESLint / Live Server / Chrome 调试 / Zip 预览）与 npm 任务（build/test/lint/clean）
+- 版本号全量同步至 v1.6.12
+
 ## v1.6.11 (style: 对齐 prototype 设计令牌系统)
 - `src/ui/tokens.js` 补充 `--space-*` 间距标尺（4px base，对齐 prototype/index.html 设计系统）并同步字体栈（Hanken Grotesk / JetBrains Mono / Instrument Serif）
 - `components.js`/`results/styles.js`/`styles.js` 工具栏、历史、结果网格、卡片、骨架、tag 等硬编码 px 间距统一改用 `--space-*` CSS 变量，间距由原型 4px 标尺驱动

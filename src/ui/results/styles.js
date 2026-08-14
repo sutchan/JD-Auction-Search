@@ -1,4 +1,4 @@
-// JD-Auction-Search/src/ui/results/styles.js v1.6.11
+清理根目录下的冗余/重复/无效/临时文件，让根目录保持整洁。// JD-Auction-Search/src/ui/results/styles.js v1.6.10
 // 结果面板样式：覆盖层外壳 CSS 与浅 DOM 组件 CSS（骨架屏/空状态/商品卡/网格）
 // 面板宿主与定位逻辑见 ./host.js
 

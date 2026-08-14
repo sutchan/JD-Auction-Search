@@ -1,0 +1,119 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		// 编辑器基础
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		},
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true,
+		"files.eol": "\n",
+		"files.trimTrailingWhitespace": true,
+		"files.insertFinalNewline": true,
+
+		// 语言与 ESLint（与 .eslintrc.json 保持一致）
+		"eslint.enable": true,
+		"eslint.run": "onSave",
+		"eslint.validate": ["javascript"],
+		"javascript.suggest.autoImports": false,
+		"javascript.preferences.quoteStyle": "single",
+
+		// 搜索与文件排除（构建产物、依赖、测试输出）
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/releases": true,
+			"**/*.zip": true,
+			"smoke.out.txt": true
+		},
+		"files.exclude": {
+			"**/node_modules": true,
+			"**/.git": true,
+			"smoke.out.txt": true
+		},
+		"files.associations": {
+			"*.code-workspace": "jsonc"
+		},
+		"files.watcherExclude": {
+			"**/node_modules/**": true,
+			"**/releases/**": true
+		},
+
+		// JSON 校验（manifest.json / metadata.json / project 配置）
+		"json.schemaValidation": "error",
+		"json.schemas": [
+			{
+				"fileMatch": ["manifest.json"],
+				"url": "https://json.schemastore.org/chrome-manifest.json"
+			}
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"dbaeumer.vscode-eslint",
+			"ritwickdey.liveserver",
+			"msjsdiag.debugger-for-chrome",
+			"tomoki1207.zipviewer"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "build",
+				"type": "npm",
+				"script": "build",
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "test",
+				"type": "npm",
+				"script": "test",
+				"group": {
+					"kind": "test",
+					"isDefault": true
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "lint",
+				"type": "npm",
+				"script": "lint",
+				"problemMatcher": ["$eslint-stylish"]
+			},
+			{
+				"label": "clean",
+				"type": "npm",
+				"script": "clean",
+				"problemMatcher": []
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "调试扩展（Chrome 加载已解压）",
+				"type": "chrome",
+				"request": "launch",
+				"runtimeArgs": [
+					"--load-extension=${workspaceFolder}/src",
+					"--disable-web-security"
+				],
+				"url": "https://1paipai.jd.com",
+				"webRoot": "${workspaceFolder}/src",
+				"sourceMaps": false,
+				"userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile"
+			}
+		]
+	}
+}

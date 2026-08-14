@@ -7,7 +7,6 @@
 *report.md
 .dedup-trash/
 .playwright-cli/
-*.code-workspace
 package-lock.json
 *.log
 *.txt
