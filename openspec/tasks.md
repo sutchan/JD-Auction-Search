@@ -8,6 +8,15 @@ _（当前无进行中任务）_
 
 ## 已完成任务
 
+### v1.6.13
+- [x] 完善工作区配置：补充 `JD-Auction-Search.code-workspace`（Chrome 调试 launch、`files.associations` 关联 jsonc、`files.exclude` 增加 `smoke.out.txt`）；版本号全量同步 v1.6.13
+
+### v1.6.12
+- [x] 完善 VS Code 工作区配置：编辑器格式/ESLint 自动修复、搜索与文件排除、`manifest.json` JSON Schema 校验；添加推荐扩展与 npm 任务；版本号全量同步 v1.6.12
+
+### v1.6.11
+- [x] 对齐 prototype 设计令牌系统：`ui/tokens.js` 补充 `--space-*` 间距标尺（4px base，对齐 prototype/index.html）并同步字体栈；`components.js`/`results/styles.js`/`styles.js` 硬编码 px 间距统一改用 `--space-*` 变量；视觉与交互细节对齐 prototype 扩展演示区块；版本号全量同步 v1.6.11，重建 releases v1.6.11.zip
+
 ### v1.6.10
 - [x] 修复版本同步脚本：bump-version.js 正则仅匹配 `.js` 之后文件头版本，避免污染路径（native-list.js/observer.js）；修正已损坏文件头；工具栏/倒计时元素补充语义化 id；版本号全量同步 v1.6.10
 

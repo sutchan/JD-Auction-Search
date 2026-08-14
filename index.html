@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>京东夺宝岛搜索增强 · JD-Auction-Search</title>
+  <meta name="description" content="京东夺宝岛搜索增强（JD-Auction-Search）是一个浏览器扩展，为京东夺宝岛列表页注入实时搜索、跨页聚合、分类筛选与拍卖倒计时，性能优先、隐私友好、零依赖。">
+  <link rel="icon" type="image/png" href="icons/icon128.png">
+  <script>document.documentElement.classList.add('js');</script>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('jd-landing-theme');
+        var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', saved || (dark ? 'dark' : 'light'));
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+  <style>
+    :root {
+      --background: #ffffff;
+      --foreground: #18181b;
+      --card: #ffffff;
+      --muted: #fafafa;
+      --subtle: #f4f4f5;
+      --muted-foreground: #71717a;
+      --subtle-foreground: #a1a1aa;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --primary: #e1251b;
+      --primary-hover: #c1170f;
+      --primary-foreground: #ffffff;
+      --primary-subtle: #fef2f2;
+      --success: #16a34a;
+      --info: #2563eb;
+      --font-sans: 'Hanken Grotesk', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+      --radius: 0.625rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.25rem;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px 0 rgb(24 24 27 / 0.06), 0 1px 2px -1px rgb(24 24 27 / 0.05);
+      --shadow-lg: 0 10px 30px -6px rgb(24 24 27 / 0.12);
+      --maxw: 1080px;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --background: #09090b;
+      --foreground: #fafafa;
+      --card: #18181b;
+      --muted: #131316;
+      --subtle: #27272a;
+      --muted-foreground: #a1a1aa;
+      --subtle-foreground: #71717a;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --primary: #ef4b3f;
+      --primary-hover: #f46358;
+      --primary-subtle: #2a1414;
+      --success: #4ade80;
+      --info: #60a5fa;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+      --shadow-lg: 0 18px 40px -8px rgb(0 0 0 / 0.7);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-sans); background: var(--background); color: var(--foreground);
+      line-height: 1.65; overflow-x: hidden;
+      transition: background .3s ease, color .3s ease;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+    ::selection { background: var(--primary); color: #fff; }
+
+    .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+    .section { padding: 88px 0; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--primary);
+    }
+    .eyebrow::before { content: ''; width: 22px; height: 1px; background: var(--primary); }
+    .h2 { font-size: clamp(28px, 2vw + 22px, 40px); font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
+    .lead { font-size: 17px; color: var(--muted-foreground); max-width: 60ch; }
+    .muted { color: var(--muted-foreground); }
+
+    /* Nav */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--background) 75%, transparent);
+      border-bottom: 1px solid transparent; transition: border-color .3s ease; }
+    .nav.scrolled { border-bottom-color: var(--border); }
+    .nav-inner { max-width: var(--maxw); margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 30px; height: 30px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgb(225 37 27 / .3); }
+    .brand-name { font-weight: 800; font-size: 15px; letter-spacing: -.01em; }
+    .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+    .nav-links a { font-size: 13px; font-weight: 500; color: var(--muted-foreground); padding: 6px 12px; border-radius: 8px; transition: all .18s ease; }
+    .nav-links a:hover { color: var(--foreground); background: var(--subtle); }
+    .theme-toggle { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--muted-foreground); cursor: pointer; transition: all .18s ease; }
+    .theme-toggle:hover { color: var(--foreground); border-color: var(--border-strong); }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    /* Hero */
+    .hero { padding: 140px 0 96px; position: relative; text-align: center; overflow: hidden; }
+    .hero-glow { position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 720px; height: 420px; background: radial-gradient(circle at center, rgb(225 37 27 / .12), transparent 70%); pointer-events: none; z-index: -1; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-foreground); padding: 5px 14px; border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--background); }
+    .hero-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgb(22 163 74 / .15); }
+    .hero h1 { font-size: clamp(38px, 4vw + 24px, 68px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; margin: 22px 0 0; }
+    .hero h1 em { font-style: normal; color: var(--primary); }
+    .hero .lead { margin: 22px auto 0; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; font-size: 14px; font-weight: 600; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all .18s ease; white-space: nowrap; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); box-shadow: var(--shadow-sm); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-outline { background: transparent; border-color: var(--border); color: var(--foreground); }
+    .btn-outline:hover { background: var(--subtle); border-color: var(--border-strong); }
+
+    .hero-banner { margin: 56px auto 0; max-width: 920px; border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg); }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .stat { background: var(--background); padding: 28px 20px; text-align: center; }
+    .stat-value { font-family: var(--font-mono); font-size: 30px; font-weight: 700; letter-spacing: -.02em; color: var(--primary); }
+    .stat-label { font-size: 12px; color: var(--muted-foreground); margin-top: 6px; }
+
+    /* Features */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 36px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+    .card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+    .card-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--primary-subtle); color: var(--primary); display: grid; place-items: center; margin-bottom: 14px; }
+    .card-icon svg { width: 20px; height: 20px; }
+    .card h3 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 8px; }
+    .card p { font-size: 13.5px; color: var(--muted-foreground); line-height: 1.6; }
+
+    /* Screenshots */
+    .shots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+    .shot { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--card); transition: transform .2s ease, box-shadow .2s ease; }
+    .shot:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .shot img { aspect-ratio: 16 / 10; object-fit: cover; width: 100%; }
+    .shot figcaption { padding: 12px 14px; font-size: 13px; font-weight: 600; }
+
+    /* Architecture */
+    .arch { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px; }
+    .arch-col { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; }
+    .arch-col h4 { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 12px; font-family: var(--font-mono); letter-spacing: .04em; }
+    .arch-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .arch-col li { font-size: 12.5px; color: var(--muted-foreground); padding-left: 14px; position: relative; }
+    .arch-col li::before { content: ''; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--border-strong); }
+    .arch-arrow { display: none; }
+
+    /* Steps (install) */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 36px; counter-reset: step; }
+    .step { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; position: relative; }
+    .step::before { counter-increment: step; content: counter(step); position: absolute; top: 18px; right: 18px; font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: var(--border-strong); }
+    .step h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; padding-right: 36px; }
+    .step p { font-size: 13px; color: var(--muted-foreground); line-height: 1.6; }
+    .step code { font-family: var(--font-mono); font-size: 11.5px; background: var(--subtle); padding: 2px 6px; border-radius: 5px; color: var(--primary); }
+
+    /* Docs / links */
+    .links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 36px; }
+    .link-card { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; transition: all .18s ease; }
+    .link-card:hover { border-color: var(--primary); background: var(--primary-subtle); }
+    .link-card .ic { width: 38px; height: 38px; border-radius: 9px; background: var(--subtle); color: var(--primary); display: grid; place-items: center; flex-shrink: 0; }
+    .link-card .ic svg { width: 18px; height: 18px; }
+    .link-card .txt h4 { font-size: 14px; font-weight: 700; }
+    .link-card .txt p { font-size: 12.5px; color: var(--muted-foreground); }
+
+    /* FAQ */
+    .faq { margin-top: 32px; display: flex; flex-direction: column; gap: 10px; }
+    details { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 4px 20px; }
+    summary { cursor: pointer; font-weight: 600; font-size: 14.5px; padding: 16px 0; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-size: 20px; color: var(--muted-foreground); transition: transform .2s ease; }
+    details[open] summary::after { transform: rotate(45deg); }
+    details p { font-size: 13.5px; color: var(--muted-foreground); padding: 0 0 18px; line-height: 1.7; }
+
+    /* Footer */
+    .footer { border-top: 1px solid var(--border); padding: 56px 0 40px; margin-top: 40px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .footer-mark { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -.02em; }
+    .footer-mark span { color: var(--primary); }
+    .footer-meta { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted-foreground); text-align: right; line-height: 1.8; }
+
+    /* Reveal */
+    html.js .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+    html.js .reveal.is-visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { html.js .reveal { opacity: 1; transform: none; transition: none; } }
+
+    @media (max-width: 860px) {
+      .grid-3, .arch, .steps { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .grid-2, .grid-3, .arch, .steps, .shots, .links { grid-template-columns: 1fr; }
+      .hero { padding-top: 110px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .footer-meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand" aria-label="JD-Auction-Search 首页">
+        <img class="brand-logo" src="icons/icon128.png" alt="扩展图标" width="30" height="30">
+        <span class="brand-name">京东夺宝岛搜索增强</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">功能</a></li>
+        <li><a href="#screenshots">界面</a></li>
+        <li><a href="#architecture">架构</a></li>
+        <li><a href="#install">安装</a></li>
+        <li><a href="#docs">文档</a></li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换深色模式">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="top">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container">
+      <span class="hero-tag reveal"><span class="dot"></span>Chrome 扩展 · Manifest V3 · 零依赖</span>
+      <h1 class="reveal reveal-d1">京东夺宝岛<br><em>搜索增强</em></h1>
+      <p class="lead reveal reveal-d2">为京东夺宝岛列表页注入实时搜索、跨页聚合、分类筛选与拍卖倒计时。性能优先、隐私友好，纯原生 JS 实现，全程 Shadow DOM 隔离。</p>
+      <div class="hero-actions reveal reveal-d3">
+        <a href="#install" class="btn btn-primary">
+          开始使用
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="https://github.com/Sut/JD-Auction-Search" class="btn btn-outline">查看源码</a>
+      </div>
+      <div class="hero-banner reveal">
+        <img src="docs/banner.png" alt="京东夺宝岛搜索增强横幅" loading="lazy">
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="section section-tight">
+    <div class="container">
+      <div class="stats reveal">
+        <div class="stat"><div class="stat-value">7+</div><div class="stat-label">夺宝岛分类筛选</div></div>
+        <div class="stat"><div class="stat-value">≤120ms</div><div class="stat-label">搜索防抖延迟</div></div>
+        <div class="stat"><div class="stat-value">26KB</div><div class="stat-label">注入脚本体积</div></div>
+        <div class="stat"><div class="stat-value">0</div><div class="stat-label">运行时依赖</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="container">
+      <span class="eyebrow reveal">核心功能</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">把夺宝岛列表页，变成可检索的数据库</h2>
+      <div class="grid-3">
+        <div class="card reveal">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3>实时搜索</h3>
+          <p>在已加载列表中即时过滤商品，关键词高亮，120ms 防抖，无需重新请求。</p>
+        </div>
+        <div class="card reveal reveal-d1">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
+          <h3>跨页聚合</h3>
+          <p>将夺宝岛分散在多个分页的商品聚合到单一结果面板，统一排序、统一检索。</p>
+        </div>
+        <div class="card reveal reveal-d2">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
+          <h3>分类筛选</h3>
+          <p>覆盖手机数码、电脑办公、家电、服饰、奢侈品、乐器、文玩 7 大类，一键收窄结果。</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg></div>
+          <h3>拍卖倒计时</h3>
+          <p>每个商品卡显示实时剩余时间，每秒递减刷新，接口失效时自动兜底仍可见。</p>
+        </div>
+        <div class="card reveal reveal-d1">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>搜索历史</h3>
+          <p>记忆最近 10 条关键词，支持单条删除与一键清空，下次检索更顺手。</p>
+        </div>
+        <div class="card reveal reveal-d2">
+          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/></svg></div>
+          <h3>接口失效兜底</h3>
+          <p>官方接口变动时自动降级为页面 DOM 提取，并以轻提示通知，核心功能不中断。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section class="section" id="screenshots" style="background: var(--muted);">
+    <div class="container">
+      <span class="eyebrow reveal">界面预览</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">克制的视觉，清晰的信息层级</h2>
+      <div class="shots">
+        <figure class="shot reveal"><img src="docs/screenshots/search.png" alt="搜索结果界面" loading="lazy"><figcaption>实时搜索结果</figcaption></figure>
+        <figure class="shot reveal reveal-d1"><img src="docs/screenshots/empty.png" alt="空状态界面" loading="lazy"><figcaption>空状态反馈</figcaption></figure>
+        <figure class="shot reveal reveal-d2"><img src="docs/screenshots/history.png" alt="搜索历史界面" loading="lazy"><figcaption>搜索历史下拉</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="section" id="architecture">
+    <div class="container">
+      <span class="eyebrow reveal">技术架构</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">浅 DOM 注入，零侵入页面</h2>
+      <p class="lead reveal reveal-d2" style="margin-top:14px;">扩展以 Manifest V3 后台脚本驱动，内容脚本将独立 Shadow DOM 注入夺宝岛页面，所有样式与逻辑彼此隔离，避免与站点冲突。</p>
+      <div class="arch">
+        <div class="arch-col reveal">
+          <h4>Background</h4>
+          <ul><li>消息路由</li><li>跨页数据缓存</li><li>生命周期管理</li></ul>
+        </div>
+        <div class="arch-col reveal reveal-d1">
+          <h4>Content</h4>
+          <ul><li>页面探测</li><li>Shadow DOM 挂载</li><li>滚动/分页捕获</li></ul>
+        </div>
+        <div class="arch-col reveal reveal-d2">
+          <h4>UI</h4>
+          <ul><li>工具栏 / 搜索</li><li>结果面板 / 卡片</li><li>倒计时 / 骨架屏</li></ul>
+        </div>
+        <div class="arch-col reveal reveal-d3">
+          <h4>Utils / API</h4>
+          <ul><li>商品数据聚合</li><li>分类映射</li><li>i18n 双语</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section class="section" id="install" style="background: var(--muted);">
+    <div class="container">
+      <span class="eyebrow reveal">本地安装</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">三步加载到浏览器</h2>
+      <div class="steps">
+        <div class="step reveal"><h4>构建产物</h4><p>运行 <code>npm run build</code>，产物输出至 <code>releases/jd-auction-search-vX.Y.Z.zip</code>，解压得到扩展目录。</p></div>
+        <div class="step reveal reveal-d1"><h4>开启开发者模式</h4><p>浏览器地址栏访问 <code>chrome://extensions</code>，右上角开启「开发者模式」。</p></div>
+        <div class="step reveal reveal-d2"><h4>加载解压的扩展</h4><p>点击「加载已解压的扩展程序」，选择解压后的目录即可启用。</p></div>
+        <div class="step reveal reveal-d3"><h4>开始使用</h4><p>打开京东夺宝岛列表页，顶部即出现搜索工具栏，开始检索。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Docs / links -->
+  <section class="section" id="docs">
+    <div class="container">
+      <span class="eyebrow reveal">文档与资源</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">了解更多</h2>
+      <div class="links">
+        <a class="link-card reveal" href="README.md">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+          <span class="txt"><h4>README</h4><p>功能介绍、安装与构建说明</p></span>
+        </a>
+        <a class="link-card reveal reveal-d1" href="openspec/spec.md">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M9 9h6M9 13h6"/></svg></span>
+          <span class="txt"><h4>项目规范 spec</h4><p>目录结构、模块职责与设计决策</p></span>
+        </a>
+        <a class="link-card reveal" href="CHANGELOG.md">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></span>
+          <span class="txt"><h4>更新日志</h4><p>版本迭代与变更记录</p></span>
+        </a>
+        <a class="link-card reveal reveal-d1" href=".github/CONTRIBUTING.md">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6z"/></svg></span>
+          <span class="txt"><h4>贡献指南</h4><p>开发环境、提交规范与 PR 流程</p></span>
+        </a>
+        <a class="link-card reveal" href="docs/README.md">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg></span>
+          <span class="txt"><h4>预览素材</h4><p>横幅与界面截图说明</p></span>
+        </a>
+        <a class="link-card reveal reveal-d1" href="prototype/index.html">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg></span>
+          <span class="txt"><h4>交互原型</h4><p>设计系统与可交互演示</p></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq" style="background: var(--muted);">
+    <div class="container">
+      <span class="eyebrow reveal">常见问题</span>
+      <h2 class="h2 reveal reveal-d1" style="margin-top:14px;">FAQ</h2>
+      <div class="faq">
+        <details class="reveal" open>
+          <summary>支持哪些浏览器？</summary>
+          <p>基于 Manifest V3，支持 Chrome 及兼容 Chromium 内核的浏览器（Edge、Brave 等）。Firefox 需做少量适配，暂未官方验证。</p>
+        </details>
+        <details class="reveal">
+          <summary>会收集我的数据吗？</summary>
+          <p>不会。扩展仅在本地处理夺宝岛页面内容，搜索历史保存在浏览器本地，不上传任何个人信息。隐私数据默认关闭。</p>
+        </details>
+        <details class="reveal">
+          <summary>官方接口失效会怎样？</summary>
+          <p>扩展已内置兜底逻辑：当官方接口不可用或变更时，自动降级为解析页面 DOM 提取商品信息，并通过轻提示告知，核心搜索体验不中断。</p>
+        </details>
+        <details class="reveal">
+          <summary>为什么是零依赖？</summary>
+          <p>为控制注入脚本体积（约 26KB）与启动性能，所有逻辑以原生 JS + CSS 实现，并通过 Shadow DOM 隔离样式，避免引入第三方库带来的开销与冲突。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-mark">京东<span>夺宝岛</span>搜索增强</div>
+      <div class="footer-meta">
+        v1.6.13 · MIT License<br>
+        原生 JS · Shadow DOM · 隐私友好<br>
+        © 2026 Sut · 非京东官方产品
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      const dark = t === 'dark';
+      themeToggle.setAttribute('aria-pressed', dark);
+      themeToggle.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+    }
+    applyTheme(root.getAttribute('data-theme') || 'light');
+    themeToggle.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('jd-landing-theme', next); } catch (e) {}
+      applyTheme(next);
+    });
+
+    // Nav scroll border
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  </script>
+</body>
+</html>

@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.14 (docs: 新增项目介绍页)
+- 新增 `index.html`：项目介绍着陆页（深/浅色主题、响应式、引用 docs/banner.png 与 screenshots 真实截图，承接 README 内容）
+- README 导航栏补充「项目主页」链接
+- 版本号全量同步至 v1.6.14
+
 ## v1.6.13 (chore: 完善工作区配置)
 - 补充 `JD-Auction-Search.code-workspace`：`launch` 扩展调试配置（Chrome 加载已解压的 src/）、`files.associations` 将 `.code-workspace` 关联为 jsonc、`files.exclude` 增加 `smoke.out.txt`
 - 版本号全量同步至 v1.6.13
